@@ -1,0 +1,24 @@
+query TestQuery {
+  i {
+    name
+  }
+  version
+  me {
+    name
+    age
+  }
+  you {
+    name
+    friends {
+      id
+      age
+    }
+  }
+  them {
+    age
+    name
+  }
+  maybeThem {
+    age
+  }
+}

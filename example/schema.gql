@@ -1,0 +1,34 @@
+# Schema
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# Query
+
+type Query {
+  version: Int!
+  i: User!
+  me: User!
+  you: User
+  them: [User!]!
+  maybeThem: [User]
+}
+
+type User {
+  id: ID!
+  name: String!
+  age: Int
+  friends: [User!]
+}
+
+# Mutation
+
+type Mutation {
+  test(value: String): Response
+}
+
+type Response {
+  status: Int
+}

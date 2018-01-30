@@ -21,6 +21,8 @@ type User {
   name: String!
   age: Int
   friends: [User!]
+  relatives: [User!]!
+  others: [User]
 }
 
 # Mutation

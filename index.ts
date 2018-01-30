@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "fs";
 import {
   GraphQLSchema,
+  GraphQLOutputType,
+  GraphQLNonNull,
   buildSchema,
   validate,
   parse,
@@ -10,9 +12,9 @@ import {
   Kind,
   isCompositeType,
   isListType,
+  isScalarType,
   isLeafType,
   isNullableType,
-  instanceOf,
   getNamedType,
   getNullableType
 } from "graphql";
@@ -43,24 +45,58 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
 
   visit(query, visitWithTypeInfo(typeInfo, visitor));
 
-  writeFileSync(`${queryPath}.elm`, visitor.output(), "utf-8");
+  const queryIntel = visitor.queryIntel();
+  const elmIntel = queryToElmIntell(visitor.queryIntel());
+  const elm = generateElm(elmIntel);
+
+  writeFileSync(
+    `${queryPath}.queryIntell.json`,
+    JSON.stringify(queryIntel, null, "\t"),
+    "utf-8"
+  );
+  writeFileSync(
+    `${queryPath}.elmIntell.json`,
+    JSON.stringify(elmIntel, null, "\t"),
+    "utf-8"
+  );
+  writeFileSync(`${queryPath}.elm`, elm, "utf-8");
 };
 
+interface QueryIntel {
+  id: number;
+  type: GraphQLOutputType;
+  name: string;
+  depth: number;
+  children: number[];
+}
+
 const queryVisitor = (typeInfo: TypeInfo) => {
-  const intel: any[] = [];
-  const parentRecordStack: any[] = [];
+  const queryIntel: QueryIntel[] = [];
+  const parentRecordStack: QueryIntel[] = [];
   const getParentRecord = () => {
     if (parentRecordStack.length > 0) {
       return parentRecordStack[parentRecordStack.length - 1];
     }
+  };
+  const isItemNode = node => {
+    const { kind } = node;
+    const type = typeInfo.getType();
+    const nullableType = getNullableType(type);
+    const namedType = getNamedType(type);
+    return (
+      (kind == Kind.OPERATION_DEFINITION || kind == Kind.FIELD) &&
+      (isListType(nullableType) ||
+        isCompositeType(namedType) ||
+        isLeafType(namedType))
+    );
   };
 
   let indent = 0;
   let pad = "";
 
   return {
-    output() {
-      return "module ToDo\n\n" + JSON.stringify(intel, null, "\t");
+    queryIntel() {
+      return queryIntel;
     },
     enter(node) {
       pad += "  ";
@@ -75,71 +111,108 @@ const queryVisitor = (typeInfo: TypeInfo) => {
       // console.log("selections", node.selections && node.selections.length);
       // console.log("node", node);
 
-      switch (node.kind) {
-        case Kind.OPERATION_DEFINITION:
-        case Kind.FIELD:
-          const id = intel.length;
-          const type = typeInfo.getType();
-          const namedType = getNamedType(type);
-          const nullableType = getNullableType(type);
-          const nullable = isNullableType(type);
-          const list = isListType(nullableType);
-          const depth = parentRecordStack.length;
-          const name = node.name && node.name.value;
+      if (isItemNode(node)) {
+        const item = {
+          id: queryIntel.length,
+          type: typeInfo.getType(),
+          name: node.name && node.name.value,
+          depth: parentRecordStack.length,
+          children: []
+        };
 
-          if (isCompositeType(namedType)) {
-            const item = {
-              id,
-              type,
-              namedType,
-              nullableType,
-              nullable,
-              list,
-              name,
-              depth,
-              children: []
-            };
-            intel.push(item);
-            parentRecordStack.push(item);
-          } else if (isLeafType(namedType)) {
-            const item = {
-              id,
-              type,
-              namedType,
-              nullableType,
-              nullable,
-              list,
-              name,
-              depth,
-              children: null
-            };
-            const parent = getParentRecord();
-            if (parent) {
-              parent.children.push(item.id);
-            }
-            intel.push(item);
-          }
+        const parent = getParentRecord();
+        if (parent) {
+          parent.children.push(item.id);
+        }
 
-          break;
+        queryIntel.push(item);
+        parentRecordStack.push(item);
       }
     },
     leave(node) {
       console.log(pad, "leave", node.kind);
 
-      const type = typeInfo.getType();
-      const namedType = getNamedType(type);
-
-      switch (node.kind) {
-        case Kind.OPERATION_DEFINITION:
-        case Kind.FIELD:
-          const type = typeInfo.getType();
-          const namedType = getNamedType(type);
-          if (isCompositeType(namedType)) {
-            parentRecordStack.pop();
-          }
+      if (isItemNode(node)) {
+        parentRecordStack.pop();
       }
 
       pad = pad.slice(0, -2);
     }
   };
 };
+
+const queryToElmIntell = queryIntel => {
+  const itemsById = queryIntel.reduce(
+    (acc, item) => ({ ...acc, [item.id]: item }),
+    {}
+  );
+
+  const getItemById = (id: number): any => {
+    const item = itemsById[id];
+    if (!item) {
+      throw new Error(`Could not find item with id: ${id}`);
+    }
+    return item;
+  };
+
+  const items = queryIntel
+    .sort((a, b) => b.depth - a.depth)
+    .map(a => ({ ...a, signature: a.children }))
+    .map(item => ({
+      ...item,
+      signature: toElmType(item.type, item, getItemById)
+    }));
+
+  // .filter(a => a.children && a.children.length);
+
+  // const recordsByName = records.reduce((acc, record) => {
+  //   const recordType
+  //   return acc;s
+  // }, {});
+
+  return items;
+};
+
+const toElmType = (type, item, getItemById) => {
+  const nullableType = getNullableType(type);
+
+  if (isNullableType(type)) {
+    return `Maybe (${toElmType(
+      GraphQLNonNull(nullableType),
+      item,
+      getItemById
+    )})`;
+  }
+
+  if (isListType(nullableType)) {
+    return `List (${toElmType(nullableType.ofType, item, getItemById)})`;
+  }
+
+  if (isCompositeType(nullableType)) {
+    return `{${item.children
+      .map(getItemById)
+      .map(item => `${item.name}: ${toElmType(item.type, item, getItemById)}`)
+      .join(", ")}}`;
+  }
+
+  if (isScalarType(nullableType)) {
+    switch (nullableType.name) {
+      case "Int":
+        return "Int";
+      case "Float":
+        return "Float";
+      case "Boolean":
+        return "Bool";
+      case "String":
+        return "String";
+      case "ID": // FIXME
+        return "String";
+    }
+  }
+
+  throw new Error(
+    `Unhandled type: ${type}/${isListType(type)}/${JSON.stringify(item)}`
+  );
+};
+
+const generateElm = elmIntel => "module To.Do\n\n";

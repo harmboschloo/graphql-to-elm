@@ -13,6 +13,9 @@ query TestQuery {
       id
       age
     }
+    relatives {
+      name
+    }
   }
   them {
     age

@@ -37,7 +37,7 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
   src: string
 ): void => {
   console.log("reading", src);
-  const query = readFileSync(src, "utf-8");
+  const query = readFileSync(src, "utf-8").trim();
   const queryDocument = parse(query);
 
   const errors = validate(schema, queryDocument);
@@ -222,7 +222,7 @@ const queryToElmIntel = ({ src, query, items }: QueryIntel): ElmIntel => {
       module,
       query,
       items: [],
-      names: getReservedNames(),
+      names: reservedNames,
       recordNames: {},
       recordDecoderNames: {},
       imports: {}
@@ -308,11 +308,6 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
   );
 };
 
-const getReservedNames = () =>
-  ["Data", "query", "decoder"]
-    .concat(reservedWords)
-    .reduce((names, name) => ({ ...names, [name]: true }), {});
-
 const reservedWords = [
   "if",
   "then",
@@ -329,6 +324,10 @@ const reservedWords = [
   "as",
   "port"
 ];
+
+const reservedNames = ["Data", "query", "decoder"]
+  .concat(reservedWords)
+  .reduce((names, name) => ({ ...names, [name]: true }), {});
 
 const addItem = (item: ElmIntelItem, intel: ElmIntel): ElmIntel => ({
   ...intel,
@@ -405,7 +404,7 @@ ${generateImports(intel)}
 
 query : String
 query =
-    """${intel.query.trim()}"""
+    """${intel.query}"""
 
 
 ${generateRecordDecoders(intel)}

@@ -27,13 +27,16 @@ export interface Options {
 }
 
 export const graphqlToElm = (options: Options): void => {
+  console.log("reading", options.schema);
   const schema = buildSchema(readFileSync(options.schema, "utf-8"));
   options.queries.forEach(queryToElm(schema, options));
+  console.log("done");
 };
 
 const queryToElm = (schema: GraphQLSchema, options: Options) => (
   src: string
 ): void => {
+  console.log("reading", src);
   const query = readFileSync(src, "utf-8");
   const queryDocument = parse(query);
 
@@ -51,6 +54,7 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
   const elmIntel = queryToElmIntel(queryIntel);
   const elm = generateElm(elmIntel);
 
+  console.log("writing", elmIntel.dest);
   writeFileSync(elmIntel.dest, elm, "utf-8");
 
   // writeFileSync(

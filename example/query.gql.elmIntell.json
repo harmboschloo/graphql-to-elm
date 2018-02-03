@@ -1,180 +1,317 @@
-[
-	{
-		"id": 13,
-		"type": "String!",
-		"name": "name",
-		"depth": 3,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 10,
-		"type": "ID!",
-		"name": "id",
-		"depth": 3,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 11,
-		"type": "Int",
-		"name": "age",
-		"depth": 3,
-		"children": [],
-		"signature": "Maybe (Int)"
-	},
-	{
-		"id": 9,
-		"type": "[User!]",
-		"name": "friends",
-		"depth": 2,
-		"children": [
-			10,
-			11
-		],
-		"signature": "Maybe (List ({id: String, age: Maybe (Int)}))"
-	},
-	{
-		"id": 15,
-		"type": "Int",
-		"name": "age",
-		"depth": 2,
-		"children": [],
-		"signature": "Maybe (Int)"
-	},
-	{
-		"id": 5,
-		"type": "String!",
-		"name": "name",
-		"depth": 2,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 6,
-		"type": "Int",
-		"name": "age",
-		"depth": 2,
-		"children": [],
-		"signature": "Maybe (Int)"
-	},
-	{
-		"id": 18,
-		"type": "Int",
-		"name": "age",
-		"depth": 2,
-		"children": [],
-		"signature": "Maybe (Int)"
-	},
-	{
-		"id": 8,
-		"type": "String!",
-		"name": "name",
-		"depth": 2,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 12,
-		"type": "[User!]!",
-		"name": "relatives",
-		"depth": 2,
-		"children": [
-			13
-		],
-		"signature": "List ({name: String})"
-	},
-	{
-		"id": 2,
-		"type": "String!",
-		"name": "name",
-		"depth": 2,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 16,
-		"type": "String!",
-		"name": "name",
-		"depth": 2,
-		"children": [],
-		"signature": "String"
-	},
-	{
-		"id": 1,
-		"type": "User!",
-		"name": "i",
-		"depth": 1,
-		"children": [
-			2
-		],
-		"signature": "{name: String}"
-	},
-	{
-		"id": 7,
-		"type": "User",
-		"name": "you",
-		"depth": 1,
-		"children": [
-			8,
-			9,
-			12
-		],
-		"signature": "Maybe ({name: String, friends: Maybe (List ({id: String, age: Maybe (Int)})), relatives: List ({name: String})})"
-	},
-	{
-		"id": 14,
-		"type": "[User!]!",
-		"name": "them",
-		"depth": 1,
-		"children": [
-			15,
-			16
-		],
-		"signature": "List ({age: Maybe (Int), name: String})"
-	},
-	{
-		"id": 4,
-		"type": "User!",
-		"name": "me",
-		"depth": 1,
-		"children": [
-			5,
-			6
-		],
-		"signature": "{name: String, age: Maybe (Int)}"
-	},
-	{
-		"id": 3,
-		"type": "Int!",
-		"name": "version",
-		"depth": 1,
-		"children": [],
-		"signature": "Int"
-	},
-	{
-		"id": 17,
-		"type": "[User]",
-		"name": "maybeThem",
-		"depth": 1,
-		"children": [
-			18
-		],
-		"signature": "Maybe (List (Maybe ({age: Maybe (Int)})))"
-	},
-	{
-		"id": 0,
-		"type": "Query",
-		"name": "TestQuery",
-		"depth": 0,
-		"children": [
-			1,
-			3,
-			4,
-			7,
-			14,
-			17
-		],
-		"signature": "Maybe ({i: {name: String}, version: Int, me: {name: String, age: Maybe (Int)}, you: Maybe ({name: String, friends: Maybe (List ({id: String, age: Maybe (Int)})), relatives: List ({name: String})}), them: List ({age: Maybe (Int), name: String}), maybeThem: Maybe (List (Maybe ({age: Maybe (Int)})))})"
+{
+	"items": [
+		{
+			"id": 13,
+			"name": "name",
+			"depth": 3,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 11,
+			"name": "age",
+			"depth": 3,
+			"children": [],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Int",
+			"isRecordType": false,
+			"decoder": "Json.Decode.int",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 10,
+			"name": "id",
+			"depth": 3,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 18,
+			"name": "age",
+			"depth": 2,
+			"children": [],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Int",
+			"isRecordType": false,
+			"decoder": "Json.Decode.int",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 16,
+			"name": "name",
+			"depth": 2,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 15,
+			"name": "age",
+			"depth": 2,
+			"children": [],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Int",
+			"isRecordType": false,
+			"decoder": "Json.Decode.int",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 12,
+			"name": "relatives",
+			"depth": 2,
+			"children": [
+				13
+			],
+			"isMaybe": false,
+			"isList": true,
+			"isListMaybe": false,
+			"type": "User",
+			"isRecordType": true,
+			"decoder": "userDecoder",
+			"imports": []
+		},
+		{
+			"id": 9,
+			"name": "friends",
+			"depth": 2,
+			"children": [
+				10,
+				11
+			],
+			"isMaybe": true,
+			"isList": true,
+			"isListMaybe": false,
+			"type": "User2",
+			"isRecordType": true,
+			"decoder": "user2Decoder",
+			"imports": []
+		},
+		{
+			"id": 8,
+			"name": "name",
+			"depth": 2,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 6,
+			"name": "age",
+			"depth": 2,
+			"children": [],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Int",
+			"isRecordType": false,
+			"decoder": "Json.Decode.int",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 5,
+			"name": "name",
+			"depth": 2,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 2,
+			"name": "name",
+			"depth": 2,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "String",
+			"isRecordType": false,
+			"decoder": "Json.Decode.string",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 17,
+			"name": "maybeThem",
+			"depth": 1,
+			"children": [
+				18
+			],
+			"isMaybe": true,
+			"isList": true,
+			"isListMaybe": true,
+			"type": "User3",
+			"isRecordType": true,
+			"decoder": "user3Decoder",
+			"imports": []
+		},
+		{
+			"id": 14,
+			"name": "them",
+			"depth": 1,
+			"children": [
+				15,
+				16
+			],
+			"isMaybe": false,
+			"isList": true,
+			"isListMaybe": false,
+			"type": "User4",
+			"isRecordType": true,
+			"decoder": "user4Decoder",
+			"imports": []
+		},
+		{
+			"id": 7,
+			"name": "you",
+			"depth": 1,
+			"children": [
+				8,
+				9,
+				12
+			],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "User5",
+			"isRecordType": true,
+			"decoder": "user5Decoder",
+			"imports": []
+		},
+		{
+			"id": 4,
+			"name": "me",
+			"depth": 1,
+			"children": [
+				5,
+				6
+			],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "User6",
+			"isRecordType": true,
+			"decoder": "user6Decoder",
+			"imports": []
+		},
+		{
+			"id": 3,
+			"name": "version",
+			"depth": 1,
+			"children": [],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Int",
+			"isRecordType": false,
+			"decoder": "Json.Decode.int",
+			"imports": [
+				"Json.Decode"
+			]
+		},
+		{
+			"id": 1,
+			"name": "i",
+			"depth": 1,
+			"children": [
+				2
+			],
+			"isMaybe": false,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "User7",
+			"isRecordType": true,
+			"decoder": "user7Decoder",
+			"imports": []
+		},
+		{
+			"id": 0,
+			"name": "TestQuery",
+			"depth": 0,
+			"children": [
+				1,
+				3,
+				4,
+				7,
+				14,
+				17
+			],
+			"isMaybe": true,
+			"isList": false,
+			"isListMaybe": false,
+			"type": "Query",
+			"isRecordType": true,
+			"decoder": "queryDecoder",
+			"imports": []
+		}
+	],
+	"names": {
+		"User": true,
+		"userDecoder": true,
+		"User2": true,
+		"user2Decoder": true,
+		"User3": true,
+		"user3Decoder": true,
+		"User4": true,
+		"user4Decoder": true,
+		"User5": true,
+		"user5Decoder": true,
+		"User6": true,
+		"user6Decoder": true,
+		"User7": true,
+		"user7Decoder": true,
+		"Query": true,
+		"queryDecoder": true
 	}
-]
+}

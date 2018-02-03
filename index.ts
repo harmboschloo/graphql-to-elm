@@ -2,6 +2,8 @@ import { readFileSync, writeFileSync } from "fs";
 import {
   GraphQLSchema,
   GraphQLOutputType,
+  GraphQLNullableType,
+  GraphQLNamedType,
   GraphQLNonNull,
   buildSchema,
   validate,
@@ -45,8 +47,8 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
 
   visit(query, visitWithTypeInfo(typeInfo, visitor));
 
-  const queryIntel = visitor.queryIntel();
-  const elmIntel = queryToElmIntell(visitor.queryIntel());
+  const queryIntel = visitor.intel();
+  const elmIntel = queryToElmIntel(queryIntel.items);
   const elm = generateElm(elmIntel);
 
   writeFileSync(
@@ -63,6 +65,11 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
 };
 
 interface QueryIntel {
+  items: QueryIntelItem[];
+  parentStack: QueryIntelItem[];
+}
+
+interface QueryIntelItem {
   id: number;
   type: GraphQLOutputType;
   name: string;
@@ -71,13 +78,17 @@ interface QueryIntel {
 }
 
 const queryVisitor = (typeInfo: TypeInfo) => {
-  const queryIntel: QueryIntel[] = [];
-  const parentRecordStack: QueryIntel[] = [];
-  const getParentRecord = () => {
-    if (parentRecordStack.length > 0) {
-      return parentRecordStack[parentRecordStack.length - 1];
+  const intel: QueryIntel = {
+    items: [],
+    parentStack: []
+  };
+
+  const getParentItem = () => {
+    if (intel.parentStack.length > 0) {
+      return intel.parentStack[intel.parentStack.length - 1];
     }
   };
+
   const isItemNode = node => {
     const { kind } = node;
     const type = typeInfo.getType();
@@ -95,8 +106,8 @@ const queryVisitor = (typeInfo: TypeInfo) => {
   let pad = "";
 
   return {
-    queryIntel() {
-      return queryIntel;
+    intel() {
+      return intel;
     },
     enter(node) {
       pad += "  ";
@@ -113,27 +124,27 @@ const queryVisitor = (typeInfo: TypeInfo) => {
 
       if (isItemNode(node)) {
         const item = {
-          id: queryIntel.length,
+          id: intel.items.length,
           type: typeInfo.getType(),
           name: node.name && node.name.value,
-          depth: parentRecordStack.length,
+          depth: intel.parentStack.length,
           children: []
         };
 
-        const parent = getParentRecord();
+        const parent = getParentItem();
         if (parent) {
           parent.children.push(item.id);
         }
 
-        queryIntel.push(item);
-        parentRecordStack.push(item);
+        intel.items.push(item);
+        intel.parentStack.push(item);
       }
     },
     leave(node) {
       console.log(pad, "leave", node.kind);
 
       if (isItemNode(node)) {
-        parentRecordStack.pop();
+        intel.parentStack.pop();
       }
 
       pad = pad.slice(0, -2);
@@ -141,78 +152,143 @@ const queryVisitor = (typeInfo: TypeInfo) => {
   };
 };
 
-const queryToElmIntell = queryIntel => {
-  const itemsById = queryIntel.reduce(
-    (acc, item) => ({ ...acc, [item.id]: item }),
-    {}
-  );
+interface ElmIntel {
+  items: ElmIntelItem[];
+  names: {};
+}
 
-  const getItemById = (id: number): any => {
-    const item = itemsById[id];
-    if (!item) {
-      throw new Error(`Could not find item with id: ${id}`);
+interface ElmIntelItem {
+  id: number;
+  name: stirng;
+  depth: number;
+  children: number[];
+  isMaybe: boolean;
+  isList: boolean;
+  isListMaybe: boolean;
+  type: string;
+  isRecordType: boolean;
+  decoder: string;
+  imports: string[];
+}
+
+const getName = (name: string, intel: ElmIntel): string => {
+  if (!intel.names[name]) {
+    intel.names[name] = true;
+    return name;
+  } else {
+    let count = 2;
+    while (intel.names[name + count]) {
+      count++;
     }
-    return item;
-  };
-
-  const items = queryIntel
-    .sort((a, b) => b.depth - a.depth)
-    .map(a => ({ ...a, signature: a.children }))
-    .map(item => ({
-      ...item,
-      signature: toElmType(item.type, item, getItemById)
-    }));
-
-  // .filter(a => a.children && a.children.length);
-
-  // const recordsByName = records.reduce((acc, record) => {
-  //   const recordType
-  //   return acc;s
-  // }, {});
-
-  return items;
+    const name2 = name + count;
+    intel.names[name2] = true;
+    return name2;
+  }
 };
 
-const toElmType = (type, item, getItemById) => {
-  const nullableType = getNullableType(type);
+const getTypeName = (name: string, intel: ElmIntel): string =>
+  getName(name.charAt(0).toUpperCase() + name.slice(1), intel);
 
-  if (isNullableType(type)) {
-    return `Maybe (${toElmType(
-      GraphQLNonNull(nullableType),
-      item,
-      getItemById
-    )})`;
-  }
+const getVariableName = (name: string, intel: ElmIntel): string =>
+  getName(name.charAt(0).toLowerCase() + name.slice(1), intel);
 
-  if (isListType(nullableType)) {
-    return `List (${toElmType(nullableType.ofType, item, getItemById)})`;
-  }
+const queryToElmIntel = (queryItems: QueryIntelItem[]): ElmIntel => {
+  // const itemsById = queryItems.reduce(
+  //   (acc, item) => ({ ...acc, [item.id]: item }),
+  //   {}
+  // );
 
-  if (isCompositeType(nullableType)) {
-    return `{${item.children
-      .map(getItemById)
-      .map(item => `${item.name}: ${toElmType(item.type, item, getItemById)}`)
-      .join(", ")}}`;
-  }
+  // const getItemById = (id: number): any => {
+  //   const item = itemsById[id];
+  //   if (!item) {
+  //     throw new Error(`Could not find item with id: ${id}`);
+  //   }
+  //   return item;
+  // };
 
-  if (isScalarType(nullableType)) {
+  const intel: ElmIntel = {
+    items: [],
+    names: {}
+  };
+
+  intel.items = queryItems
+    .sort((a, b) => b.depth - a.depth || b.id - a.id)
+    .map(getElmIntel(intel));
+
+  return intel;
+};
+
+const getElmIntel = (intel: ElmIntel) => (
+  queryItem: QueryIntelItem
+): ElmIntelItem => {
+  const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
+  const namedType: GraphQLNamedType = getNamedType(queryItem.type);
+
+  const id = queryItem.id;
+  const name = queryItem.name;
+  const depth = queryItem.depth;
+  const children = queryItem.children;
+  const isMaybe = isNullableType(queryItem.type);
+  const isList = isListType(nullableType);
+  const isListMaybe = isList && isNullableType(nullableType.ofType);
+  let type;
+  let isRecordType;
+  let decoder;
+  const imports: string[] = [];
+
+  if (isCompositeType(namedType)) {
+    type = getTypeName(namedType.toString(), intel);
+    isRecordType = true;
+    decoder = getVariableName(`${type}Decoder`, intel);
+  } else if (isScalarType(nullableType)) {
+    isRecordType = false;
+
     switch (nullableType.name) {
       case "Int":
-        return "Int";
+        type = "Int";
+        decoder = "Json.Decode.int";
+        imports.push("Json.Decode");
+        break;
       case "Float":
-        return "Float";
+        type = "Float";
+        decoder = "Json.Decode.float";
+        imports.push("Json.Decode");
+        break;
       case "Boolean":
-        return "Bool";
+        type = "Bool";
+        decoder = "Json.Decode.bool";
+        imports.push("Json.Decode");
+        break;
       case "String":
-        return "String";
+        type = "String";
+        decoder = "Json.Decode.string";
+        imports.push("Json.Decode");
+        break;
       case "ID": // FIXME
-        return "String";
+        type = "String";
+        decoder = "Json.Decode.string";
+        imports.push("Json.Decode");
+        break;
+      default:
+        throw new Error(`Unhandled query scalar type: ${queryItem.type}`);
     }
+  } else {
+    throw new Error(`Unhandled query type: ${queryItem.type}`);
   }
 
-  throw new Error(
-    `Unhandled type: ${type}/${isListType(type)}/${JSON.stringify(item)}`
-  );
+  return {
+    id,
+    name,
+    depth,
+    children,
+    isMaybe,
+    isList,
+    isListMaybe,
+    type,
+    isRecordType,
+    decoder,
+    imports
+  };
 };
 
 const generateElm = elmIntel => "module To.Do\n\n";

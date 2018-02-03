@@ -155,11 +155,13 @@ const queryVisitor = (typeInfo: TypeInfo) => {
 interface ElmIntel {
   items: ElmIntelItem[];
   names: {};
+  recordNames: {};
+  recordDecoderNames: {};
 }
 
 interface ElmIntelItem {
   id: number;
-  name: stirng;
+  name: string;
   depth: number;
   children: number[];
   isMaybe: boolean;
@@ -171,56 +173,17 @@ interface ElmIntelItem {
   imports: string[];
 }
 
-const getName = (name: string, intel: ElmIntel): string => {
-  if (!intel.names[name]) {
-    intel.names[name] = true;
-    return name;
-  } else {
-    let count = 2;
-    while (intel.names[name + count]) {
-      count++;
-    }
-    const name2 = name + count;
-    intel.names[name2] = true;
-    return name2;
-  }
-};
-
-const getTypeName = (name: string, intel: ElmIntel): string =>
-  getName(name.charAt(0).toUpperCase() + name.slice(1), intel);
-
-const getVariableName = (name: string, intel: ElmIntel): string =>
-  getName(name.charAt(0).toLowerCase() + name.slice(1), intel);
-
-const queryToElmIntel = (queryItems: QueryIntelItem[]): ElmIntel => {
-  // const itemsById = queryItems.reduce(
-  //   (acc, item) => ({ ...acc, [item.id]: item }),
-  //   {}
-  // );
-
-  // const getItemById = (id: number): any => {
-  //   const item = itemsById[id];
-  //   if (!item) {
-  //     throw new Error(`Could not find item with id: ${id}`);
-  //   }
-  //   return item;
-  // };
-
-  const intel: ElmIntel = {
-    items: [],
-    names: {}
-  };
-
-  intel.items = queryItems
+const queryToElmIntel = (queryItems: QueryIntelItem[]): ElmIntel =>
+  queryItems
     .sort((a, b) => b.depth - a.depth || b.id - a.id)
-    .map(getElmIntel(intel));
+    .reduce(getElmIntel, {
+      items: [],
+      names: {},
+      recordNames: {},
+      recordDecoderNames: {}
+    });
 
-  return intel;
-};
-
-const getElmIntel = (intel: ElmIntel) => (
-  queryItem: QueryIntelItem
-): ElmIntelItem => {
+const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
 
@@ -237,9 +200,9 @@ const getElmIntel = (intel: ElmIntel) => (
   const imports: string[] = [];
 
   if (isCompositeType(namedType)) {
-    type = getTypeName(namedType.toString(), intel);
     isRecordType = true;
-    decoder = getVariableName(`${type}Decoder`, intel);
+    type = getRecordTypeName(namedType.toString(), children, intel);
+    decoder = getRecordDecoderName(type, intel);
   } else if (isScalarType(nullableType)) {
     isRecordType = false;
 
@@ -276,19 +239,103 @@ const getElmIntel = (intel: ElmIntel) => (
     throw new Error(`Unhandled query type: ${queryItem.type}`);
   }
 
-  return {
-    id,
-    name,
-    depth,
-    children,
-    isMaybe,
-    isList,
-    isListMaybe,
-    type,
-    isRecordType,
-    decoder,
-    imports
-  };
+  return addItem(
+    {
+      id,
+      name,
+      depth,
+      children,
+      isMaybe,
+      isList,
+      isListMaybe,
+      type,
+      isRecordType,
+      decoder,
+      imports
+    },
+    intel
+  );
 };
 
+const addItem = (item: ElmIntelItem, intel: ElmIntel): ElmIntel => ({
+  ...intel,
+  items: intel.items.concat(item)
+});
+
+const getChild = (id: number, intel: ElmIntel): ElmIntelItem => {
+  const child = intel.items.find(item => item.id === id);
+  if (!child) {
+    throw new Error(`Could not find child item with id: ${id}`);
+  }
+  return child;
+};
+
+const getName = (name: string, intel: ElmIntel): string => {
+  if (!intel.names[name]) {
+    intel.names[name] = true;
+    return name;
+  } else {
+    let count = 2;
+    while (intel.names[name + count]) {
+      count++;
+    }
+    const name2 = name + count;
+    intel.names[name2] = true;
+    return name2;
+  }
+};
+
+const getRecordTypeName = (
+  type: string,
+  children: number[],
+  intel: ElmIntel
+): string => {
+  const propertyNames = children
+    .map(id => getChild(id, intel).name)
+    .sort()
+    .join(",");
+
+  const signature = `${type}: ${propertyNames}`;
+
+  if (intel.recordNames[signature]) {
+    return intel.recordNames[signature];
+  } else {
+    const name = getName(type.charAt(0).toUpperCase() + type.slice(1), intel);
+    intel.recordNames[signature] = name;
+    return name;
+  }
+};
+
+const getRecordDecoderName = (type: string, intel: ElmIntel) => {
+  if (intel.recordDecoderNames[type]) {
+    return intel.recordDecoderNames[type];
+  } else {
+    const name = getName(
+      `${type.charAt(0).toLowerCase()}${type.slice(1)}Decoder`,
+      intel
+    );
+    intel.recordDecoderNames[type] = name;
+    return name;
+  }
+};
+
+const getVariableName = (name: string, intel: ElmIntel): string =>
+  getName(name.charAt(0).toLowerCase() + name.slice(1), intel);
+
+// TODO
+
 const generateElm = elmIntel => "module To.Do\n\n";
+
+const getItemSignature = (item: ElmIntelItem): string => {
+  let signature = item.type;
+  if (item.isListMaybe) {
+    signature = `Maybe ${signature}`;
+  }
+  if (item.isList) {
+    signature = `List (${signature})`;
+  }
+  if (item.isMaybe) {
+    signature = `Maybe (${signature})`;
+  }
+  return signature;
+};

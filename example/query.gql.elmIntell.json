@@ -240,9 +240,9 @@
 			"isMaybe": false,
 			"isList": false,
 			"isListMaybe": false,
-			"type": "User6",
+			"type": "User4",
 			"isRecordType": true,
-			"decoder": "user6Decoder",
+			"decoder": "user4Decoder",
 			"imports": []
 		},
 		{
@@ -270,9 +270,9 @@
 			"isMaybe": false,
 			"isList": false,
 			"isListMaybe": false,
-			"type": "User7",
+			"type": "User",
 			"isRecordType": true,
-			"decoder": "user7Decoder",
+			"decoder": "userDecoder",
 			"imports": []
 		},
 		{
@@ -307,11 +307,23 @@
 		"user4Decoder": true,
 		"User5": true,
 		"user5Decoder": true,
-		"User6": true,
-		"user6Decoder": true,
-		"User7": true,
-		"user7Decoder": true,
 		"Query": true,
 		"queryDecoder": true
+	},
+	"recordNames": {
+		"User: name": "User",
+		"User: age,id": "User2",
+		"User: age": "User3",
+		"User: age,name": "User4",
+		"User: friends,name,relatives": "User5",
+		"Query: i,maybeThem,me,them,version,you": "Query"
+	},
+	"recordDecoderNames": {
+		"User": "userDecoder",
+		"User2": "user2Decoder",
+		"User3": "user3Decoder",
+		"User4": "user4Decoder",
+		"User5": "user5Decoder",
+		"Query": "queryDecoder"
 	}
 }

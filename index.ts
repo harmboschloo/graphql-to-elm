@@ -66,6 +66,10 @@ const queryToElm = (schema: GraphQLSchema, options: Options) => (
   // );
 };
 
+////////////////////////////////////////////////////////////////////////////////
+// Query Intel                                                                //
+////////////////////////////////////////////////////////////////////////////////
+
 interface QueryIntel {
   src: string;
   query: string;
@@ -165,6 +169,10 @@ const queryVisitor = ({
     }
   };
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// Elm Intel                                                                  //
+////////////////////////////////////////////////////////////////////////////////
 
 interface ElmIntel {
   dest: string;
@@ -381,7 +389,9 @@ const addImport = (name: string, intel: ElmIntel) => {
   intel.imports[name] = true;
 };
 
-// TODO
+////////////////////////////////////////////////////////////////////////////////
+// Generate Elm                                                               //
+////////////////////////////////////////////////////////////////////////////////
 
 const generateElm = (intel: ElmIntel): string =>
   `module ${intel.module} exposing (${generateExports(intel)})
@@ -494,7 +504,9 @@ const getDecoder = (item: ElmIntelItem): string => {
   return decoder;
 };
 
-// Utils
+////////////////////////////////////////////////////////////////////////////////
+// Utils                                                                      //
+////////////////////////////////////////////////////////////////////////////////
 
 const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;

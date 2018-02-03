@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync } from "fs";
+import * as path from "path";
 import {
   GraphQLSchema,
   GraphQLOutputType,
   GraphQLNullableType,
   GraphQLNamedType,
-  GraphQLNonNull,
   buildSchema,
   validate,
   parse,
@@ -32,39 +32,43 @@ export const graphqlToElm = (options: Options): void => {
 };
 
 const queryToElm = (schema: GraphQLSchema, options: Options) => (
-  queryPath: string
+  src: string
 ): void => {
-  const query = parse(readFileSync(queryPath, "utf-8"));
+  const query = readFileSync(src, "utf-8");
+  const queryDocument = parse(query);
 
-  const errors = validate(schema, query);
-
+  const errors = validate(schema, queryDocument);
   if (errors.length > 0) {
     throw errors[0];
   }
 
   const typeInfo = new TypeInfo(schema);
-  const visitor = queryVisitor(typeInfo);
+  const visitor = queryVisitor({ src, query, typeInfo });
 
-  visit(query, visitWithTypeInfo(typeInfo, visitor));
+  visit(queryDocument, visitWithTypeInfo(typeInfo, visitor));
 
   const queryIntel = visitor.intel();
-  const elmIntel = queryToElmIntel(queryIntel.items);
+  const elmIntel = queryToElmIntel(queryIntel);
   const elm = generateElm(elmIntel);
 
-  writeFileSync(
-    `${queryPath}.queryIntell.json`,
-    JSON.stringify(queryIntel, null, "\t"),
-    "utf-8"
-  );
-  writeFileSync(
-    `${queryPath}.elmIntell.json`,
-    JSON.stringify(elmIntel, null, "\t"),
-    "utf-8"
-  );
-  writeFileSync(`${queryPath}.elm`, elm, "utf-8");
+  writeFileSync(elmIntel.dest, elm, "utf-8");
+
+  // writeFileSync(
+  //   `${src}.queryIntell.json`,
+  //   JSON.stringify(queryIntel, null, "\t"),
+  //   "utf-8"
+  // );
+
+  // writeFileSync(
+  //   `${src}.elmIntell.json`,
+  //   JSON.stringify(elmIntel, null, "\t"),
+  //   "utf-8"
+  // );
 };
 
 interface QueryIntel {
+  src: string;
+  query: string;
   items: QueryIntelItem[];
   parentStack: QueryIntelItem[];
 }
@@ -77,8 +81,18 @@ interface QueryIntelItem {
   children: number[];
 }
 
-const queryVisitor = (typeInfo: TypeInfo) => {
+const queryVisitor = ({
+  src,
+  query,
+  typeInfo
+}: {
+  src: string;
+  query: string;
+  typeInfo: TypeInfo;
+}) => {
   const intel: QueryIntel = {
+    src,
+    query,
     items: [],
     parentStack: []
   };
@@ -102,19 +116,19 @@ const queryVisitor = (typeInfo: TypeInfo) => {
     );
   };
 
-  let indent = 0;
-  let pad = "";
+  // let indent = 0;
+  // let pad = "";
 
   return {
     intel() {
       return intel;
     },
     enter(node) {
-      pad += "  ";
+      // pad += "  ";
 
-      console.log(pad, "enter", node.kind, node.value);
-      console.log(pad, "type", typeInfo.getType());
-      console.log(pad, "name", node.name);
+      // console.log(pad, "enter", node.kind, node.value);
+      // console.log(pad, "type", typeInfo.getType());
+      // console.log(pad, "name", node.name);
       // console.log("isNullableType", isNullableType(typeInfo.getType()));
       // console.log("nullableType", getNullableType(typeInfo.getType()));
       // console.log("fieldDef", typeInfo.getFieldDef());
@@ -141,22 +155,26 @@ const queryVisitor = (typeInfo: TypeInfo) => {
       }
     },
     leave(node) {
-      console.log(pad, "leave", node.kind);
+      // console.log(pad, "leave", node.kind);
 
       if (isItemNode(node)) {
         intel.parentStack.pop();
       }
 
-      pad = pad.slice(0, -2);
+      // pad = pad.slice(0, -2);
     }
   };
 };
 
 interface ElmIntel {
+  dest: string;
+  module: string;
+  query: string;
   items: ElmIntelItem[];
   names: {};
   recordNames: {};
   recordDecoderNames: {};
+  imports: {};
 }
 
 interface ElmIntelItem {
@@ -170,18 +188,34 @@ interface ElmIntelItem {
   type: string;
   isRecordType: boolean;
   decoder: string;
-  imports: string[];
 }
 
-const queryToElmIntel = (queryItems: QueryIntelItem[]): ElmIntel =>
-  queryItems
+const queryToElmIntel = ({ src, query, items }: QueryIntel): ElmIntel => {
+  const srcInfo = path.parse(src);
+
+  const moduleParts = srcInfo.dir
+    .split(/[\\/]/)
+    .filter(x => !!x)
+    .concat(srcInfo.name)
+    .map(firstToUpperCase);
+
+  const module = moduleParts.join(".");
+
+  const dest = path.resolve(...moduleParts) + ".elm";
+
+  return items
     .sort((a, b) => b.depth - a.depth || b.id - a.id)
     .reduce(getElmIntel, {
+      dest,
+      module,
+      query,
       items: [],
-      names: {},
+      names: getReservedNames(),
       recordNames: {},
-      recordDecoderNames: {}
+      recordDecoderNames: {},
+      imports: {}
     });
+};
 
 const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
@@ -197,12 +231,18 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
   let type;
   let isRecordType;
   let decoder;
-  const imports: string[] = [];
 
   if (isCompositeType(namedType)) {
     isRecordType = true;
-    type = getRecordTypeName(namedType.toString(), children, intel);
-    decoder = getRecordDecoderName(type, intel);
+    if (id === 0) {
+      type = "Data";
+      decoder = "decoder";
+      intel.recordNames[""] = type;
+      intel.recordDecoderNames[type] = decoder;
+    } else {
+      type = getRecordTypeName(namedType.toString(), children, intel);
+      decoder = getRecordDecoderName(type, intel);
+    }
   } else if (isScalarType(nullableType)) {
     isRecordType = false;
 
@@ -210,27 +250,27 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
       case "Int":
         type = "Int";
         decoder = "Json.Decode.int";
-        imports.push("Json.Decode");
+        addImport("Json.Decode", intel);
         break;
       case "Float":
         type = "Float";
         decoder = "Json.Decode.float";
-        imports.push("Json.Decode");
+        addImport("Json.Decode", intel);
         break;
       case "Boolean":
         type = "Bool";
         decoder = "Json.Decode.bool";
-        imports.push("Json.Decode");
+        addImport("Json.Decode", intel);
         break;
       case "String":
         type = "String";
         decoder = "Json.Decode.string";
-        imports.push("Json.Decode");
+        addImport("Json.Decode", intel);
         break;
       case "ID": // FIXME
         type = "String";
         decoder = "Json.Decode.string";
-        imports.push("Json.Decode");
+        addImport("Json.Decode", intel);
         break;
       default:
         throw new Error(`Unhandled query scalar type: ${queryItem.type}`);
@@ -250,12 +290,33 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
       isListMaybe,
       type,
       isRecordType,
-      decoder,
-      imports
+      decoder
     },
     intel
   );
 };
+
+const getReservedNames = () =>
+  ["Data", "query", "decoder"]
+    .concat(reservedWords)
+    .reduce((names, name) => ({ ...names, [name]: true }), {});
+
+const reservedWords = [
+  "if",
+  "then",
+  "else",
+  "case",
+  "of",
+  "let",
+  "in",
+  "type",
+  "module",
+  "where",
+  "import",
+  "exposing",
+  "as",
+  "port"
+];
 
 const addItem = (item: ElmIntelItem, intel: ElmIntel): ElmIntel => ({
   ...intel,
@@ -300,7 +361,7 @@ const getRecordTypeName = (
   if (intel.recordNames[signature]) {
     return intel.recordNames[signature];
   } else {
-    const name = getName(type.charAt(0).toUpperCase() + type.slice(1), intel);
+    const name = getName(firstToUpperCase(type), intel);
     intel.recordNames[signature] = name;
     return name;
   }
@@ -310,32 +371,137 @@ const getRecordDecoderName = (type: string, intel: ElmIntel) => {
   if (intel.recordDecoderNames[type]) {
     return intel.recordDecoderNames[type];
   } else {
-    const name = getName(
-      `${type.charAt(0).toLowerCase()}${type.slice(1)}Decoder`,
-      intel
-    );
+    const name = getName(`${firstToLowerCase(type)}Decoder`, intel);
     intel.recordDecoderNames[type] = name;
     return name;
   }
 };
 
-const getVariableName = (name: string, intel: ElmIntel): string =>
-  getName(name.charAt(0).toLowerCase() + name.slice(1), intel);
+const addImport = (name: string, intel: ElmIntel) => {
+  intel.imports[name] = true;
+};
 
 // TODO
 
-const generateElm = elmIntel => "module To.Do\n\n";
+const generateElm = (intel: ElmIntel): string =>
+  `module ${intel.module} exposing (${generateExports(intel)})
 
-const getItemSignature = (item: ElmIntelItem): string => {
+${generateImports(intel)}
+
+
+query : String
+query =
+    """${intel.query.trim()}"""
+
+
+${generateRecordDecoders(intel)}
+`;
+
+const generateExports = (intel: ElmIntel): string =>
+  Object.values(intel.recordNames)
+    .sort()
+    .concat(["decoder", "query"])
+    .join(", ");
+
+const generateImports = (intel: ElmIntel): string =>
+  Object.keys(intel.imports)
+    .sort()
+    .map(name => `import ${name}`)
+    .join("\n");
+
+const generateRecordDecoders = (intel: ElmIntel): string =>
+  intel.items
+    .sort((a, b) => sortString(a.type, a.type))
+    .map(generateRecordDecoder(intel))
+    .filter(x => !!x)
+    .join("\n\n\n");
+
+const generateRecordDecoder = (intel: ElmIntel) => {
+  const generatedTypes = {};
+
+  return (item: ElmIntelItem): string => {
+    if (!item.isRecordType || generatedTypes[item.type]) {
+      return "";
+    }
+
+    generatedTypes[item.type] = true;
+
+    const children = item.children
+      .map(id => getChild(id, intel))
+      .sort((a, b) => sortString(a.name, b.name));
+
+    const fieldTypes = children
+      .map(child => `${child.name} : ${getTypeSignature(child)}`)
+      .join("\n    , ");
+
+    const map = children.length > 1 ? children.length : "";
+
+    const fieldDecoders = children
+      .map(
+        child =>
+          `        (Json.Decode.field "${child.name}" ${getDecoder(child)})`
+      )
+      .join("\n");
+
+    return `type alias ${item.type} =
+    { ${fieldTypes}
+    }
+
+
+${item.decoder} : Json.Decode.Decoder ${item.type}
+${item.decoder} =
+    Json.Decode.map${map} ${item.type}
+${fieldDecoders}`;
+  };
+};
+
+const getTypeSignature = (item: ElmIntelItem): string => {
   let signature = item.type;
+  let wrap = x => x;
+
   if (item.isListMaybe) {
     signature = `Maybe ${signature}`;
+    wrap = withParentheses;
   }
+
   if (item.isList) {
-    signature = `List (${signature})`;
+    signature = `List ${wrap(signature)}`;
+    wrap = withParentheses;
   }
+
   if (item.isMaybe) {
-    signature = `Maybe (${signature})`;
+    signature = `Maybe ${wrap(signature)}`;
   }
+
   return signature;
 };
+
+const getDecoder = (item: ElmIntelItem): string => {
+  let decoder = item.decoder;
+
+  if (item.isListMaybe) {
+    decoder = `(Json.Decode.nullable ${decoder})`;
+  }
+
+  if (item.isList) {
+    decoder = `(Json.Decode.list ${decoder})`;
+  }
+
+  if (item.isMaybe) {
+    decoder = `(Json.Decode.nullable ${decoder})`;
+  }
+
+  return decoder;
+};
+
+// Utils
+
+const firstToUpperCase = (string: string): string =>
+  string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
+
+const firstToLowerCase = (string: string): string =>
+  string ? `${string.charAt(0).toLowerCase()}${string.slice(1)}` : string;
+
+const sortString = (a, b) => (a < b ? -1 : b < a ? 1 : 0);
+
+const withParentheses = x => `(${x})`;

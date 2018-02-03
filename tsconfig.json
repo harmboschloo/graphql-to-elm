@@ -3,6 +3,7 @@
     "strictNullChecks": true,
     "target": "es6",
     "module": "commonjs",
-    "types": ["node"]
+    "types": ["node"],
+    "lib": ["es2017"]
   }
 }

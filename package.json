@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@types/node": "^9.3.0",
-    "chokidar-cli": "^1.2.0",
+    "chokidar": "^2.0.0",
     "glob": "^7.1.2",
     "graphql": "^0.12.3",
     "ts-node": "^4.1.0",
@@ -20,8 +20,7 @@
   },
   "scripts": {
     "test": "ts-node test/test.ts",
-    "test:watch":
-      "npm test && chokidar \"test/**/*\" -i \"test/**/generated-*\" -c \"npm test\""
+    "test:watch": "ts-node test/watch.ts"
   },
   "author": "Harm Boschloo",
   "repository": {

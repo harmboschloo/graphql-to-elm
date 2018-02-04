@@ -1,4 +1,5 @@
 import { graphqlToElm } from "../..";
+import { compareDirs } from "../utils";
 
 graphqlToElm({
   schema: "src/schema.gql",
@@ -6,3 +7,5 @@ graphqlToElm({
   src: "src",
   dest: "generated-output"
 });
+
+compareDirs("generated-output", "expected-output");

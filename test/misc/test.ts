@@ -1,5 +1,5 @@
 import { graphqlToElm } from "../..";
-import { compareDirs } from "../utils";
+import { compareDirs, makeElm, testPage } from "../utils";
 
 graphqlToElm({
   schema: "src/schema.gql",
@@ -9,3 +9,7 @@ graphqlToElm({
 });
 
 compareDirs("generated-output", "expected-output");
+
+makeElm("generated-test", "Main.elm");
+
+testPage("generated-test", "index.html");

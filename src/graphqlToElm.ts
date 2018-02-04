@@ -27,7 +27,7 @@ export const graphqlToElm = (options: Options): Result => {
   result.queries.forEach(({ elmIntel, elm }) => {
     log(`writing ${elmIntel.dest}`, options);
     mkdirp.sync(dirname(elmIntel.dest));
-    writeFileSync(elmIntel.dest, elm, "utf-8");
+    writeFileSync(elmIntel.dest, elm, "utf8");
   });
 
   log("done", options);
@@ -39,7 +39,7 @@ export const getGraphqlToElm = (options: Options): Result => {
   options = { ...defaultOptions, ...options };
 
   log(`reading schema ${options.schema}`, options);
-  const schema = buildSchema(readFileSync(options.schema, "utf-8"));
+  const schema = buildSchema(readFileSync(options.schema, "utf8"));
 
   const queriesResults = options.queries.map(src => {
     const queryIntel = readQueryIntel(src, schema, options);

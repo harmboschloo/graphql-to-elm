@@ -25,6 +25,6 @@ const run = () => {
   try {
     require("./test");
   } catch (e) {
-    console.error(e);
+    console.error(e.message || e);
   }
 };

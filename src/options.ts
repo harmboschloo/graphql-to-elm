@@ -10,7 +10,7 @@ export const log = (message: string, options: Options): void =>
   options.log && options.log(message);
 
 export const logDebug = (message: string, options: Options): void =>
-  options.log && options.log(`[DEBUG] ${debugPadding()}${message}`);
+  options.log && options.log(`[Debug] ${debugPadding()}${message}`);
 
 let debugIndent = 0;
 

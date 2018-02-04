@@ -6,12 +6,11 @@
     "index.js"
   ],
   "main": "index.js",
-  "dependencies": {
-    "mkdirp": "^0.5.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^9.3.0",
     "graphql": "^0.12.3",
+    "mkdirp": "^0.5.1",
     "typescript": "^2.6.2"
   },
   "scripts": {},

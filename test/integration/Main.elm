@@ -1,9 +1,9 @@
 module Main exposing (main)
 
+import Generated.Tests
 import Html exposing (Html)
 import Http
 import Json.Decode
-import Tests
 
 
 -- Model
@@ -27,7 +27,7 @@ init =
 
 requests : List (Cmd Msg)
 requests =
-    Tests.requests
+    Generated.Tests.requests
         |> List.map
             (\{ id, body } ->
                 Http.send (ResponseReceived id) <|

@@ -1,14 +1,51 @@
 import { readFileSync } from "fs";
-import { resolve, relative } from "path";
+import { resolve, relative, dirname } from "path";
 import { execSync } from "child_process";
 import * as assert from "assert";
 import * as glob from "glob";
 import phantom from "phantom";
-
-export const log = (...messages) => console.log("[Test]", ...messages);
+import * as lib from "..";
 
 export const logPassed = (...messages) =>
   console.log("[Test Passed]", ...messages);
+
+export const graphqlToElm = (options: lib.Options): lib.Result => {
+  const result = lib.graphqlToElm(options);
+  // TODO generate integration test files
+  return result;
+};
+
+export const runSnapshotTests = () => {
+  const testFiles = resolve(__dirname, "snapshot/**/test.ts");
+
+  glob.sync(testFiles).map(file => {
+    const cwd = process.cwd();
+
+    console.log("[Start Test] ", file);
+
+    process.chdir(dirname(file));
+    require(file);
+
+    console.log("[End Test] ", file);
+
+    process.chdir(cwd);
+  });
+};
+
+export const runSnapshotAndIntegrationTests = () => {
+  runSnapshotTests();
+
+  const path = resolve(__dirname, "integration");
+
+  console.log("[Start Elm Make]");
+  makeElm(path, "Main.elm");
+  console.log("[End Elm Make]");
+
+  console.log("[Start Integration Test]");
+  testPage(path, "index.html", () => {
+    console.log("[End Integration Test]");
+  });
+};
 
 export const compareDirs = (actualPath: string, expectedPath: string) => {
   const actualFiles = glob
@@ -40,27 +77,37 @@ export const makeElm = (path, mainFile) => {
   console.log(log2.toString());
 };
 
-export const testPage = (path, htmlFile) => {
+export const testPage = (path, htmlFile, callback) => {
   phantom
     .create()
     .then(instance => {
       instance
         .createPage()
         .then(page => {
-          page.on("onConsoleMessage", (...messages) => {
-            console.log("CONSOLE", ...messages);
-            // instance.exit();
+          page.on("onConsoleMessage", message => {
+            console.log(message);
+
+            if (message.startsWith("[Test Failed]")) {
+              throw new Error(message);
+            }
+
+            if (message.startsWith("[End Test]")) {
+              logPassed("page test");
+              instance.exit();
+              callback();
+            }
           });
           page.on("onError", (...messages) => {
-            console.log("CONSOLE ERROR", ...messages);
-            instance.exit();
+            throw new Error(messages[0]);
           });
           page.open("file:///" + resolve(path, htmlFile));
         })
         .catch(error => {
-          console.error(error);
           instance.exit();
+          throw error;
         });
     })
-    .catch(error => console.error(error));
+    .catch(error => {
+      throw error;
+    });
 };

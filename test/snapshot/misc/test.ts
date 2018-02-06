@@ -1,6 +1,6 @@
-import { graphqlToElm, compareDirs } from "../../utils";
+import { graphqlToElm, compareDirs } from "../../lib";
 
-graphqlToElm({
+graphqlToElm("misc", {
   schema: "src/schema.gql",
   queries: ["src/query.gql"],
   src: "src",

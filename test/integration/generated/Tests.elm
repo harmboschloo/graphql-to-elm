@@ -2,7 +2,7 @@ module Generated.Tests exposing (Test, tests)
 
 import Json.Decode exposing (Decoder)
 import Json.Encode
-import Generated.Misc.Query
+import Generated.Test0misc.Query
 
 
 type alias Test =
@@ -15,9 +15,9 @@ type alias Test =
 
 tests : List Test
 tests =
-    [ { id = "misc"
-      , query = Generated.Misc.Query.query
+    [ { id = "test0-misc"
+      , query = Generated.Test0misc.Query.query
       , variables = Json.Encode.null
-      , decoder = Json.Decode.map (always "ok") Generated.Misc.Query.decoder
+      , decoder = Json.Decode.map (always "ok") Generated.Test0misc.Query.decoder
       }
-    ]
+    ]  

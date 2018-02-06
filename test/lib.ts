@@ -1,22 +1,52 @@
-import { readFileSync } from "fs";
-import { resolve, relative, dirname } from "path";
+import { readFileSync, writeFileSync } from "fs";
+import { resolve, relative, dirname, normalize } from "path";
 import { spawn, execSync } from "child_process";
 import * as assert from "assert";
+import * as rimraf from "rimraf";
+import * as mkdirp from "mkdirp";
 import * as glob from "glob";
 import phantom from "phantom";
-import * as lib from "..";
+import {
+  Options,
+  Result,
+  QueryResult,
+  ElmIntel,
+  graphqlToElm as gqlToElm,
+  generateElm
+} from "..";
+import { firstToUpperCase } from "../src/utils";
 import { setTimeout } from "timers";
 
 export const logPassed = (...messages) =>
   console.log("[Test Passed]", ...messages);
 
-export const graphqlToElm = (options: lib.Options): lib.Result => {
-  const result = lib.graphqlToElm(options);
-  // TODO generate integration test files
+interface TestResult {
+  id: string;
+  cwd: string;
+  options: Options;
+  result: Result;
+}
+
+let graphqlToElmResults: TestResult[] = [];
+
+export const graphqlToElm = (testName: string, options: Options): Result => {
+  const result = gqlToElm(options);
+
+  graphqlToElmResults.push({
+    id: `test${graphqlToElmResults.length}-${testName}`,
+    cwd: process.cwd(),
+    options,
+    result
+  });
+
   return result;
 };
 
 export const runSnapshotTests = () => {
+  graphqlToElmResults = [];
+
+  rimraf.sync(resolve(__dirname, "snapshot/**/generated*"));
+
   const testFiles = resolve(__dirname, "snapshot/**/test.ts");
 
   glob.sync(testFiles).map(file => {
@@ -35,6 +65,12 @@ export const runSnapshotTests = () => {
 
 export const runSnapshotAndIntegrationTests = () => {
   runSnapshotTests();
+
+  rimraf.sync(resolve(__dirname, "integration/generated*"));
+
+  console.log("[Start Generating Integration Test]");
+  writeIntegrationTests(graphqlToElmResults);
+  console.log("[End Generating Integration Test]");
 
   const path = resolve(__dirname, "integration");
 
@@ -189,3 +225,106 @@ export const testPage = () =>
         });
     });
   });
+
+const writeIntegrationTests = (results: TestResult[]) => {
+  writeSchemas(results);
+  writeTests(results);
+};
+
+const writeSchemas = (results: TestResult[]) => {
+  const schemas = results.map(({ id, cwd, options }) => ({
+    id,
+    path: normalizePath(resolve(cwd, options.schema))
+  }));
+
+  const entries = schemas.map(({ id, path }) => `  "${id}": "${path}"`);
+  const content = `export const schemas = {\n${entries.join("\n")}\n};\n`;
+
+  const schemasPath = resolve(__dirname, "integration/generated/schemas.ts");
+
+  writeFile(schemasPath, content);
+};
+
+interface TestElmIntel {
+  test: TestResult;
+  elmIntel: ElmIntel;
+}
+
+const writeTests = (results: TestResult[]) => {
+  const testIntels: TestElmIntel[] = results
+    .reduce(
+      (testIntels: TestElmIntel[], test: TestResult) =>
+        test.result.queries.reduce(
+          (testIntels: TestElmIntel[], query: QueryResult) =>
+            testIntels.concat({ elmIntel: query.elmIntel, test }),
+          testIntels
+        ),
+      []
+    )
+    .map(({ test, elmIntel }) => {
+      const testDir = firstToUpperCase(test.id.replace(/[^A-Za-z0-9]/g, ""));
+      const module = `Generated.${testDir}.${elmIntel.module}`;
+
+      const modulePath = elmIntel.module.replace(/\./g, "/") + ".elm";
+      const dest = resolve(
+        __dirname,
+        "integration/generated",
+        testDir,
+        modulePath
+      );
+
+      return { test, elmIntel: { ...elmIntel, module, dest } };
+    });
+
+  testIntels.forEach(({ elmIntel }) => {
+    const content = generateElm(elmIntel);
+    writeFile(elmIntel.dest, content);
+  });
+
+  const testImports = testIntels.map(
+    ({ elmIntel }) => `import ${elmIntel.module}`
+  );
+
+  const tests = testIntels.map(
+    ({ test, elmIntel }) =>
+      `{ id = "${test.id}"
+      , query = ${elmIntel.module}.query
+      , variables = Json.Encode.null
+      , decoder = Json.Decode.map (always "ok") ${elmIntel.module}.decoder
+      }
+`
+  );
+
+  const content = `module Generated.Tests exposing (Test, tests)
+
+import Json.Decode exposing (Decoder)
+import Json.Encode
+${testImports.join("\n")}
+
+
+type alias Test =
+    { id : String
+    , query : String
+    , variables : Json.Encode.Value
+    , decoder : Decoder String
+    }
+
+
+tests : List Test
+tests =
+    [ ${tests.join("    , ")}    ]  
+`;
+
+  const testsPath = resolve(__dirname, "integration/generated/Tests.elm");
+
+  writeFile(testsPath, content);
+};
+
+const normalizePath = (path: string): string =>
+  normalize(path).replace(/\\/g, "/");
+
+const writeFile = (path: string, content: string) => {
+  console.log(`writing file ${path}`);
+  mkdirp.sync(dirname(path));
+  writeFileSync(path, content, "utf8");
+};

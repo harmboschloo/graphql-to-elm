@@ -1,4 +1,4 @@
-module Generated.Misc.Query exposing (Data, User, User2, User3, User4, User5, decoder, query)
+module Generated.Test0misc.Query exposing (Data, User, User2, User3, User4, User5, decoder, query)
 
 import Json.Decode
 

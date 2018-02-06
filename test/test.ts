@@ -1,3 +1,3 @@
-import { runSnapshotAndIntegrationTests } from "./utils";
+import { runSnapshotAndIntegrationTests } from "./lib";
 
 runSnapshotAndIntegrationTests();

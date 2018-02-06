@@ -76,7 +76,7 @@ post : String -> Query -> Decoder a -> Request a
 post url query dataDecoder =
     Request <|
         Http.post
-            (Debug.log "url" url)
+            url
             (Http.jsonBody <| encodeQuery query)
             (responseDecoder dataDecoder)
 

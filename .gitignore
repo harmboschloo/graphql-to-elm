@@ -1,5 +1,2 @@
-node_modules
-*.log
-/lib
-/output
-/test/**/*_tag*.*
+/node_modules
+/elm-stuff

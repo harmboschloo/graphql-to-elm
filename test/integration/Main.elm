@@ -1,9 +1,14 @@
 module Main exposing (main)
 
-import Generated.Tests
+import Generated.Tests exposing (Test, tests)
 import Html exposing (Html)
-import Http
-import Json.Decode
+import GraphqlToElm exposing (Response(..), send, post)
+
+
+numberOfTests : Int
+numberOfTests =
+    List.length tests
+
 
 
 -- Model
@@ -20,34 +25,21 @@ init =
     let
         _ =
             Debug.log "[Start Test]"
-                ("requests: " ++ toString (List.length requests))
+                ("number of tests: " ++ toString numberOfTests)
     in
-    ( Model 0 0, Cmd.batch requests )
+        ( Model 0 0
+        , Cmd.batch (List.map sendTest tests)
+        )
 
 
-requests : List (Cmd Msg)
-requests =
-    Generated.Tests.requests
-        |> List.map
-            (\{ id, body } ->
-                Http.send (ResponseReceived id) <|
-                    Http.post ("/graphql/" ++ id)
-                        (Http.jsonBody body)
-                        responseDecoder
-            )
-
-
-type alias Response =
-    { data : Maybe Json.Decode.Value
-    , errors : Maybe Json.Decode.Value
-    }
-
-
-responseDecoder : Json.Decode.Decoder Response
-responseDecoder =
-    Json.Decode.map2 Response
-        (Json.Decode.maybe <| Json.Decode.field "data" Json.Decode.value)
-        (Json.Decode.maybe <| Json.Decode.field "errors" Json.Decode.value)
+sendTest : Test -> Cmd Msg
+sendTest test =
+    send (TestResponseReceived test.id) <|
+        post ("/graphql/" ++ test.id)
+            { query = test.query
+            , variables = test.variables
+            }
+            test.decoder
 
 
 
@@ -55,28 +47,22 @@ responseDecoder =
 
 
 type Msg
-    = ResponseReceived String (Result Http.Error Response)
+    = TestResponseReceived String (Response String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ResponseReceived id (Ok response) ->
-            case ( response.data, response.errors ) of
-                ( Just _, Nothing ) ->
-                    passed id model
+        TestResponseReceived id (Data _) ->
+            passed id model
 
-                ( Just _, Just errors ) ->
-                    failed id ("data with errors:" ++ toString errors) model
+        TestResponseReceived id (Errors errors data) ->
+            failed id
+                ("Errors: " ++ toString { errors = errors, data = data })
+                model
 
-                ( Nothing, Just errors ) ->
-                    failed id ("errors: " ++ toString errors) model
-
-                ( Nothing, Nothing ) ->
-                    failed id "empty response" model
-
-        ResponseReceived id (Err error) ->
-            failed id ("http error: " ++ toString error) model
+        TestResponseReceived id (HttpError error) ->
+            failed id ("HttpError: " ++ toString error) model
 
 
 passed : String -> Model -> ( Model, Cmd Msg )
@@ -85,8 +71,8 @@ passed id model =
         _ =
             Debug.log "[Test Passed]" id
     in
-    { model | passed = model.passed + 1 }
-        |> end
+        { model | passed = model.passed + 1 }
+            |> end
 
 
 failed : String -> String -> Model -> ( Model, Cmd Msg )
@@ -95,15 +81,15 @@ failed id error model =
         _ =
             Debug.log "[Test Failed]" (id ++ ": " ++ error)
     in
-    { model | failed = model.failed + 1 }
-        |> end
+        { model | failed = model.failed + 1 }
+            |> end
 
 
 end : Model -> ( Model, Cmd Msg )
 end model =
     let
         _ =
-            if model.passed + model.failed == List.length requests then
+            if model.passed + model.failed == numberOfTests then
                 Debug.log "[End Test]"
                     ("passed: "
                         ++ toString model.passed
@@ -113,7 +99,7 @@ end model =
             else
                 ""
     in
-    ( model, Cmd.none )
+        ( model, Cmd.none )
 
 
 
@@ -122,7 +108,7 @@ end model =
 
 view : Model -> Html Msg
 view model =
-    Html.text ""
+    Html.text "GraphqlToElm Integration Tests (see console)"
 
 
 

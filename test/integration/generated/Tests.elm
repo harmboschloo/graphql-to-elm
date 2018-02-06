@@ -1,15 +1,23 @@
-module Generated.Tests exposing (requests)
+module Generated.Tests exposing (Test, tests)
 
+import Json.Decode exposing (Decoder)
 import Json.Encode
+import Generated.Misc.Query
 
 
-requests : List { id : String, body : Json.Encode.Value }
-requests =
+type alias Test =
+    { id : String
+    , query : String
+    , variables : Json.Encode.Value
+    , decoder : Decoder String
+    }
+
+
+tests : List Test
+tests =
     [ { id = "misc"
-      , body =
-            Json.Encode.object
-                [ ( "query", Json.Encode.string "{ i { name } }" )
-                , ( "variables", Json.Encode.string "{}" )
-                ]
+      , query = Generated.Misc.Query.query
+      , variables = Json.Encode.null
+      , decoder = Json.Decode.map (always "ok") Generated.Misc.Query.decoder
       }
     ]

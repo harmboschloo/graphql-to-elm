@@ -28,11 +28,14 @@
     "graphql": "^0.12.3"
   },
   "scripts": {
-    "test": "tape -r ts-node/register test/**/*Test.ts | tap-diff",
-    "test:unit": "tape -r ts-node/register test/graphqlToElmTest.ts | tap-diff",
-    "test:unit-update":
-      "tape -r ts-node/register test/graphqlToElmTest.ts --update | tap-diff",
-    "start": "ts-node test/watch"
+    "test": "npm run test:gen && npm run test:browser",
+    "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
+    "test:gen-update":
+      "tape -r ts-node/register test/genTest.ts --update | tap-diff",
+    "test:gen-watch": "echo TODO",
+    "test:browser": "echo TODO",
+    "test:browser-update": "echo TODO",
+    "start": "npm run test:gen-watch"
   },
   "author": "Harm Boschloo",
   "repository": {

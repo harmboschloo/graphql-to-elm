@@ -6,7 +6,7 @@ import { test } from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import { graphqlToElm } from "..";
 
-test("graphqlToElm test", t => {
+test("graphqlToElm generate test", t => {
   rimraf.sync(resolve(__dirname, "fixtures/**/generated*"));
   const cwd = process.cwd();
   getFixtures().forEach(testFixture(t));

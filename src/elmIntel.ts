@@ -11,7 +11,7 @@ import {
 } from "graphql";
 import { Options } from "./options";
 import { QueryIntel, QueryIntelItem } from "./queryIntel";
-import { firstToUpperCase, firstToLowerCase } from "./utils";
+import { validModuleName, validTypeName, validVariableName } from "./utils";
 
 export interface ElmIntel {
   dest: string;
@@ -63,7 +63,7 @@ export const queryToElmIntel = (
       .split(/[\\/]/)
       .filter(x => !!x)
       .concat(srcInfo.name)
-      .map(firstToUpperCase);
+      .map(validModuleName);
 
     dest = path.resolve(options.dest || ".", ...moduleParts) + ".elm";
     module = moduleParts.join(".");
@@ -218,7 +218,7 @@ const getRecordTypeName = (
   if (intel.recordNames[signature]) {
     return intel.recordNames[signature];
   } else {
-    const name = getName(firstToUpperCase(type), intel);
+    const name = getName(validTypeName(type), intel);
     intel.recordNames[signature] = name;
     return name;
   }
@@ -228,7 +228,7 @@ const getRecordDecoderName = (type: string, intel: ElmIntel) => {
   if (intel.recordDecoderNames[type]) {
     return intel.recordDecoderNames[type];
   } else {
-    const name = getName(`${firstToLowerCase(type)}Decoder`, intel);
+    const name = getName(validVariableName(`${type}Decoder`), intel);
     intel.recordDecoderNames[type] = name;
     return name;
   }

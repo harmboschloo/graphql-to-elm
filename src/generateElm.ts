@@ -1,10 +1,5 @@
 import { ElmIntel, ElmIntelItem, getChild } from "./elmIntel";
-import {
-  sortString,
-  firstToLowerCase,
-  firstToUpperCase,
-  withParentheses
-} from "./utils";
+import { sortString, withParentheses } from "./utils";
 
 export const generateElm = (intel: ElmIntel): string =>
   `module ${intel.module} exposing (${generateExports(intel)})

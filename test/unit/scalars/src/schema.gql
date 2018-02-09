@@ -1,0 +1,20 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  intOrNull: Int
+  int: Int!
+  floatOrNull: Float
+  float: Float!
+  stringOrNull: String
+  string: String!
+  booleanOrNull: Boolean
+  boolean: Boolean!
+  idOrNull: ID
+  id: ID!
+}

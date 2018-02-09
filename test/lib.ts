@@ -14,7 +14,7 @@ import {
   graphqlToElm as gqlToElm,
   generateElm
 } from "..";
-import { firstToUpperCase } from "../src/utils";
+import { validModuleName } from "../src/utils";
 import { setTimeout } from "timers";
 
 export const logPassed = (...messages) =>
@@ -41,8 +41,13 @@ export const addGraphqlToElmResult = (result: TestResult) =>
 export const graphqlToElm = (testName: string, options: Options): Result => {
   const result = gqlToElm(options);
 
+  const id = `test${getGraphqlToElmResults().length}-${testName}`
+    .split(/[^A-Za-z0-9_-]/g)
+    .filter(x => !!x)
+    .join("-");
+
   addGraphqlToElmResult({
-    id: `test${getGraphqlToElmResults().length}-${testName}`,
+    id,
     cwd: process.cwd(),
     options,
     result
@@ -272,11 +277,7 @@ const writeTests = (results: TestResult[]) => {
       []
     )
     .map(({ test, elmIntel }) => {
-      const testDir = test.id
-        .split(/[^A-Za-z0-9]/g)
-        .filter(x => !!x)
-        .map(firstToUpperCase)
-        .join("");
+      const testDir = validModuleName(test.id);
       const module = `Generated.${testDir}.${elmIntel.module}`;
 
       const modulePath = elmIntel.module.replace(/\./g, "/") + ".elm";

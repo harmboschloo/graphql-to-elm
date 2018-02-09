@@ -1,4 +1,4 @@
-module Generated.Test1ObjectsAndLists.Query exposing (Data, Person, Person2, Person3, Person4, Person5, Person6, decoder, query)
+module Generated.Test1Objects_and_lists.Query exposing (Data, Person, Person2, Person3, Person4, Person5, Person6, decoder, query)
 
 import Json.Decode
 

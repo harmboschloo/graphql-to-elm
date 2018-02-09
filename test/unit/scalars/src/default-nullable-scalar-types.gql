@@ -1,0 +1,7 @@
+{
+  intOrNull
+  floatOrNull
+  stringOrNull
+  booleanOrNull
+  idOrNull
+}

@@ -76,7 +76,7 @@ export const queryToElmIntel = (
       module,
       query: queryIntel.query,
       items: [],
-      names: reservedNames,
+      names: getReservedNames(),
       recordNames: {},
       recordDecoderNames: {},
       imports: {}
@@ -109,10 +109,10 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
       type = getRecordTypeName(namedType.toString(), children, intel);
       decoder = getRecordDecoderName(type, intel);
     }
-  } else if (isScalarType(nullableType)) {
+  } else if (isScalarType(namedType)) {
     isRecordType = false;
 
-    switch (nullableType.name) {
+    switch (namedType.name) {
       case "Int":
         type = "Int";
         decoder = "Json.Decode.int";
@@ -179,9 +179,10 @@ const reservedWords = [
   "port"
 ];
 
-const reservedNames = ["Data", "query", "decoder"]
-  .concat(reservedWords)
-  .reduce((names, name) => ({ ...names, [name]: true }), {});
+const getReservedNames = () =>
+  ["Data", "query", "decoder"]
+    .concat(reservedWords)
+    .reduce((names, name) => ({ ...names, [name]: true }), {});
 
 const addItem = (item: ElmIntelItem, intel: ElmIntel): ElmIntel => ({
   ...intel,

@@ -1,0 +1,11 @@
+{
+  i {
+    name
+    age
+    bestFriend {
+      name
+      age
+      email
+    }
+  }
+}

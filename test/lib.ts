@@ -135,9 +135,12 @@ export const compareDirs = (actualPath: string, expectedPath: string) => {
   logPassed("compareDirs structure");
 
   actualFiles.forEach(file => {
-    const actualContent = readFileSync(resolve(actualPath, file), "utf8");
-    const expectedContent = readFileSync(resolve(expectedPath, file), "utf8");
-    assert.equal(actualContent, expectedContent);
+    const actualFile = resolve(actualPath, file);
+    const expectedFile = resolve(expectedPath, file);
+    const actualContent = readFileSync(actualFile, "utf8");
+    const expectedContent = readFileSync(expectedFile, "utf8");
+    console.log("checking", actualFile);
+    assert.strictEqual(actualContent, expectedContent);
   });
 
   logPassed("compareDirs content");

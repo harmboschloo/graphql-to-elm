@@ -1,0 +1,11 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  hello: String!
+}

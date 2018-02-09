@@ -1,0 +1,13 @@
+{
+  i {
+    dog {
+      name
+    }
+  }
+  me {
+    name
+  }
+  you {
+    email
+  }
+}

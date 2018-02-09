@@ -1,0 +1,23 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  friends_friend: [Friend!]!
+  friends_friendOrNull: [Friend]!
+  friendsOrNull_friend: [Friend!]
+  friendsOrNull_friendOrNull: [Friend]
+
+  pets_pet: [String!]!
+  pets_petOrNull: [String]!
+  petsOrNull_pet: [String!]
+  petsOrNull_petOrNull: [String]
+}
+
+type Friend {
+  name: String
+}

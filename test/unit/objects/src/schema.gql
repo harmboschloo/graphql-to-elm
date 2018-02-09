@@ -1,0 +1,34 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  i: Person!
+  me: Person!
+  you: Person2!
+  youOrNull: Person2
+}
+
+type Person {
+  name: String!
+  age: Int
+  email: String
+  dog: Dog
+  bestFriend: Person2
+  friends: [Person2]
+}
+
+type Person2 {
+  name: String!
+  age: Int
+  email: String
+}
+
+type Dog {
+  name: String
+  color: String!
+}

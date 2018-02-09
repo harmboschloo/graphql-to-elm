@@ -38,7 +38,9 @@ export const readQueryIntel = (
 ): QueryIntel => {
   log(`reading query ${src}`, options);
 
-  const query = readFileSync(src, "utf8").trim();
+  const query = readFileSync(src, "utf8")
+    .trim()
+    .replace(/\r\n/g, "\n");
 
   return {
     ...getQueryIntel(query, schema, options),

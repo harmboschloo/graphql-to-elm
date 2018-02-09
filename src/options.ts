@@ -9,8 +9,9 @@ export interface Options {
 export const log = (message: string, options: Options): void =>
   options.log && options.log(message);
 
-export const logDebug = (message: string, options: Options): void =>
-  options.log && options.log(`[Debug] ${debugPadding()}${message}`);
+export const logDebug = (message: string, options: Options): void => {
+  // options.log && options.log(`[Debug] ${debugPadding()}${message}`);
+};
 
 let debugIndent = 0;
 

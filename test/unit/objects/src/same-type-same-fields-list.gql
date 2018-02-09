@@ -1,0 +1,10 @@
+{
+  me {
+    bestFriend {
+      name
+    }
+    friends {
+      name
+    }
+  }
+}

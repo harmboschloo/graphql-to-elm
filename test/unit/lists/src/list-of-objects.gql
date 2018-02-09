@@ -1,0 +1,17 @@
+{
+  friends_friend {
+    name
+  }
+
+  friends_friendOrNull {
+    name
+  }
+
+  friendsOrNull_friend {
+    name
+  }
+
+  friendsOrNull_friendOrNull {
+    name
+  }
+}

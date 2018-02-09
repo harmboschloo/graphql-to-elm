@@ -1,0 +1,10 @@
+{
+  me {
+    name
+    email
+  }
+  you {
+    name
+    email
+  }
+}

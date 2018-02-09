@@ -15,7 +15,7 @@ watcher.on("ready", () => {
 const run = () => {
   clearCacheForWatchedFiles();
   try {
-    require("./runSnapshotTests");
+    require("./runUnitTests");
   } catch (e) {
     console.error(e);
   }

@@ -51,12 +51,12 @@ export const graphqlToElm = (testName: string, options: Options): Result => {
   return result;
 };
 
-export const runSnapshotTests = () => {
+export const runUnitTests = () => {
   clearGraphqlToElmResults();
 
-  rimraf.sync(resolve(__dirname, "snapshot/**/generated*"));
+  rimraf.sync(resolve(__dirname, "unit/**/generated*"));
 
-  const testFiles = resolve(__dirname, "snapshot/**/test.ts");
+  const testFiles = resolve(__dirname, "unit/**/test.ts");
 
   glob.sync(testFiles).map(file => {
     const cwd = process.cwd();
@@ -72,8 +72,8 @@ export const runSnapshotTests = () => {
   });
 };
 
-export const runSnapshotAndIntegrationTests = () => {
-  runSnapshotTests();
+export const runUnitAndIntegrationTests = () => {
+  runUnitTests();
   const graphqlToElmResults = getGraphqlToElmResults();
 
   rimraf.sync(resolve(__dirname, "integration/generated*"));

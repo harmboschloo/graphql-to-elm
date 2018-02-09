@@ -27,8 +27,8 @@
   },
   "scripts": {
     "test": "ts-node test/runAllTests",
-    "test:snapshot": "ts-node test/runSnapshotTests",
-    "start": "ts-node test/watchSnapshotTests"
+    "test:unit": "ts-node test/runUnitTests",
+    "start": "ts-node test/watchUnitTests"
   },
   "author": "Harm Boschloo",
   "repository": {

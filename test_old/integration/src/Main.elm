@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Generated.Tests exposing (Test, tests)
+import Tests exposing (Test, tests)
 import Html exposing (Html)
 import GraphqlToElm exposing (Response(..), send, post)
 

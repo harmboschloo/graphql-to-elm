@@ -16,7 +16,7 @@ Object.keys(schemas).forEach(id => {
   app.use(`/graphiql/${id}`, graphiqlExpress({ endpointURL }));
 });
 
-app.use(express.static(__dirname));
+app.use(express.static(`${__dirname}/generated`));
 
 app.listen(3000);
 

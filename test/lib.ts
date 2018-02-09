@@ -272,7 +272,11 @@ const writeTests = (results: TestResult[]) => {
       []
     )
     .map(({ test, elmIntel }) => {
-      const testDir = firstToUpperCase(test.id.replace(/[^A-Za-z0-9]/g, ""));
+      const testDir = test.id
+        .split(/[^A-Za-z0-9]/g)
+        .filter(x => !!x)
+        .map(firstToUpperCase)
+        .join("");
       const module = `Generated.${testDir}.${elmIntel.module}`;
 
       const modulePath = elmIntel.module.replace(/\./g, "/") + ".elm";

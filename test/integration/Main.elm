@@ -53,8 +53,8 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        TestResponseReceived id (Data _) ->
-            passed id model
+        TestResponseReceived id (Data data) ->
+            passed id data model
 
         TestResponseReceived id (Errors errors data) ->
             failed id
@@ -65,11 +65,11 @@ update msg model =
             failed id ("HttpError: " ++ toString error) model
 
 
-passed : String -> Model -> ( Model, Cmd Msg )
-passed id model =
+passed : String -> String -> Model -> ( Model, Cmd Msg )
+passed id data model =
     let
         _ =
-            Debug.log "[Test Passed]" id
+            Debug.log "[Test Passed]" { id = id, data = data }
     in
         { model | passed = model.passed + 1 }
             |> end

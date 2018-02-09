@@ -1,0 +1,31 @@
+{
+  i {
+    name
+    age
+  }
+  me {
+    name
+    age
+    parents {
+      name
+      email
+      friends {
+        name
+        age
+      }
+    }
+  }
+  you {
+    name
+    siblings {
+      age
+    }
+    family {
+      name
+      friends {
+        name
+        age
+      }
+    }
+  }
+}

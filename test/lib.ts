@@ -248,7 +248,7 @@ const writeSchemas = (results: TestResult[]) => {
   }));
 
   const entries = schemas.map(({ id, path }) => `  "${id}": "${path}"`);
-  const content = `export const schemas = {\n${entries.join("\n")}\n};\n`;
+  const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
 
   const schemasPath = resolve(__dirname, "integration/generated/schemas.ts");
 
@@ -300,7 +300,7 @@ const writeTests = (results: TestResult[]) => {
       `{ id = "${test.id}"
       , query = ${elmIntel.module}.query
       , variables = Json.Encode.null
-      , decoder = Json.Decode.map (always "ok") ${elmIntel.module}.decoder
+      , decoder = Json.Decode.map toString ${elmIntel.module}.decoder
       }
 `
   );

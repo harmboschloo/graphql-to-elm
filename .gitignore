@@ -1,2 +1,4 @@
-/node_modules
-/elm-stuff
+node_modules
+elm-stuff
+generated*
+index.html

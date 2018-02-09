@@ -19,6 +19,8 @@
     "graphql-tools": "^2.20.0",
     "phantom": "^4.0.12",
     "rimraf": "^2.6.2",
+    "tap-diff": "^0.1.1",
+    "tape": "^4.8.0",
     "ts-node": "^4.1.0",
     "typescript": "^2.6.2"
   },
@@ -26,9 +28,11 @@
     "graphql": "^0.12.3"
   },
   "scripts": {
-    "test": "ts-node test/runAllTests",
-    "test:unit": "ts-node test/runUnitTests",
-    "start": "ts-node test/watchUnitTests"
+    "test": "tape -r ts-node/register test/**/*Test.ts | tap-diff",
+    "test:unit": "tape -r ts-node/register test/graphqlToElmTest.ts | tap-diff",
+    "test:unit-update":
+      "tape -r ts-node/register test/graphqlToElmTest.ts --update | tap-diff",
+    "start": "ts-node test/watch"
   },
   "author": "Harm Boschloo",
   "repository": {

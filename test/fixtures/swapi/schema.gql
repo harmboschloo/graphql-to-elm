@@ -1,6 +1,8 @@
 # from https://github.com/apollographql/starwars-server/blob/master/data/swapiSchema.js
 # https://github.com/apollographql/starwars-server/blob/master/LICENSE
 # The MIT License (MIT) Copyright (c) 2016 Apollo
+# http://graphql.org/swapi-graphql/
+# https://github.com/graphql/swapi-graphql
 
 schema {
   query: Query

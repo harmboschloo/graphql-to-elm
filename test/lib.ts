@@ -29,11 +29,20 @@ interface TestResult {
 
 let graphqlToElmResults: TestResult[] = [];
 
+export const clearGraphqlToElmResults = () => {
+  graphqlToElmResults = [];
+};
+
+export const getGraphqlToElmResults = () => graphqlToElmResults;
+
+export const addGraphqlToElmResult = (result: TestResult) =>
+  graphqlToElmResults.push(result);
+
 export const graphqlToElm = (testName: string, options: Options): Result => {
   const result = gqlToElm(options);
 
-  graphqlToElmResults.push({
-    id: `test${graphqlToElmResults.length}-${testName}`,
+  addGraphqlToElmResult({
+    id: `test${getGraphqlToElmResults().length}-${testName}`,
     cwd: process.cwd(),
     options,
     result
@@ -43,7 +52,7 @@ export const graphqlToElm = (testName: string, options: Options): Result => {
 };
 
 export const runSnapshotTests = () => {
-  graphqlToElmResults = [];
+  clearGraphqlToElmResults();
 
   rimraf.sync(resolve(__dirname, "snapshot/**/generated*"));
 
@@ -65,6 +74,7 @@ export const runSnapshotTests = () => {
 
 export const runSnapshotAndIntegrationTests = () => {
   runSnapshotTests();
+  const graphqlToElmResults = getGraphqlToElmResults();
 
   rimraf.sync(resolve(__dirname, "integration/generated*"));
 

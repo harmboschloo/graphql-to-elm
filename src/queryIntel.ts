@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 import {
   GraphQLSchema,
   GraphQLOutputType,
@@ -15,6 +14,7 @@ import {
   getNullableType
 } from "graphql";
 import { Options, log, logDebug, logDebugAddIndent } from "./options";
+import { readFile } from "./utils";
 
 export interface QueryIntel {
   src: string;
@@ -38,7 +38,7 @@ export const readQueryIntel = (
 ): QueryIntel => {
   log(`reading query ${src}`, options);
 
-  const query = readFileSync(src, "utf8")
+  const query = readFile(src)
     .trim()
     .replace(/\r\n/g, "\n");
 

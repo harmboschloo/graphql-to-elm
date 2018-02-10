@@ -33,8 +33,7 @@
     "test:gen-update":
       "tape -r ts-node/register test/genTest.ts --update | tap-diff",
     "test:gen-watch": "echo TODO",
-    "test:browser": "echo TODO",
-    "test:browser-update": "echo TODO",
+    "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "start": "npm run test:gen-watch"
   },
   "author": "Harm Boschloo",

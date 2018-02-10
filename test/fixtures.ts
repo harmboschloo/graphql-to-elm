@@ -68,6 +68,6 @@ export interface Fixture {
 export const getFixtures = (): Fixture[] =>
   Object.keys(data).map(key => ({
     id: key,
-    dir: key,
+    dir: `fixtures/${key}`,
     ...data[key]
   }));

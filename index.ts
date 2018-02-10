@@ -2,7 +2,8 @@ export {
   Result,
   QueryResult,
   graphqlToElm,
-  getGraphqlToElm
+  getGraphqlToElm,
+  writeResult
 } from "./src/graphqlToElm";
 
 export { Options } from "./src/options";

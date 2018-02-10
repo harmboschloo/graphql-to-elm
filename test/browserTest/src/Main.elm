@@ -35,7 +35,7 @@ init =
 sendTest : Test -> Cmd Msg
 sendTest test =
     send (TestResponseReceived test.id) <|
-        post ("/graphql/" ++ test.id)
+        post ("/graphql/" ++ test.schemaId)
             { query = test.query
             , variables = test.variables
             }

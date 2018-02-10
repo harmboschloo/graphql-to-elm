@@ -1,3 +1,7 @@
+import { readFileSync, writeFileSync } from "fs";
+import { dirname } from "path";
+import * as mkdirp from "mkdirp";
+
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
 
@@ -9,7 +13,7 @@ export const sortString = (a: string, b: string): number =>
 
 export const withParentheses = (x: string): string => `(${x})`;
 
-export const validModuleName = name =>
+export const validModuleName = (name: string): string =>
   name
     .split(/[^A-Za-z0-9_]/g)
     .filter(x => !!x)
@@ -17,7 +21,7 @@ export const validModuleName = name =>
     .join("")
     .replace(/^_+/, "");
 
-export const validTypeName = name =>
+export const validTypeName = (name: string): string =>
   name
     .split(/[^A-Za-z0-9_]/g)
     .filter(x => !!x)
@@ -25,10 +29,17 @@ export const validTypeName = name =>
     .join("")
     .replace(/^_+/, "");
 
-export const validVariableName = name =>
+export const validVariableName = (name: string): string =>
   name
     .split(/[^A-Za-z0-9_]/g)
     .filter(x => !!x)
     .map(firstToLowerCase)
     .join("")
     .replace(/^_+/, "");
+
+export const readFile = (path: string): string => readFileSync(path, "utf8");
+
+export const writeFile = (dest: string, content: string): void => {
+  mkdirp.sync(dirname(dest));
+  writeFileSync(dest, content, "utf8");
+};

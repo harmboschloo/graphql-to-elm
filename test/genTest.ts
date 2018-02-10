@@ -11,6 +11,7 @@ test("graphqlToElm generate test", t => {
   const cwd = process.cwd();
   getFixtures().forEach(testFixture(t));
   process.chdir(cwd);
+  t.end();
 });
 
 const testFixture = t => ({
@@ -22,8 +23,8 @@ const testFixture = t => ({
   dest,
   expect
 }: Fixture) =>
-  t.test(`- fixture ${id}`, t => {
-    process.chdir(resolve(__dirname, "fixtures", dir));
+  t.test(`== fixture ${id} ==`, t => {
+    process.chdir(resolve(__dirname, dir));
 
     if (process.argv.slice(2).includes("--update")) {
       t.doesNotThrow(
@@ -32,7 +33,8 @@ const testFixture = t => ({
             schema,
             queries,
             src,
-            dest: expect
+            dest: expect,
+            log: t.comment
           }),
         "graphqlToElm UPDATE should not throw"
       );
@@ -44,7 +46,8 @@ const testFixture = t => ({
           schema,
           queries,
           src,
-          dest
+          dest,
+          log: t.comment
         }),
       "graphqlToElm should not throw"
     );

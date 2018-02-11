@@ -69,7 +69,7 @@ passed : String -> String -> Model -> ( Model, Cmd Msg )
 passed id data model =
     let
         _ =
-            Debug.log "[Test Passed]" { id = id, data = data }
+            Debug.log "[Test Passed]" id
     in
         { model | passed = model.passed + 1 }
             |> end

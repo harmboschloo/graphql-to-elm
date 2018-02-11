@@ -1,6 +1,6 @@
 import { resolve, relative, normalize } from "path";
 import { readFileSync } from "fs";
-import { execSync, spawn } from "child_process";
+import { execSync, spawn, ChildProcess } from "child_process";
 import * as rimraf from "rimraf";
 import * as glob from "glob";
 import phantom from "phantom";
@@ -29,12 +29,16 @@ test("graphqlToElm browser test", t => {
   generateTestFiles(t);
   makeElm(t);
 
-  const server = initServer(t);
-  server.run();
-  openTestPage(t, server.close);
+  const killServer = runServer(t);
+  const killBrowser = openTestPage(t);
+
+  test.onFinish(() => {
+    killServer();
+    killBrowser();
+  });
 });
 
-const generateTestFiles = t => () => {
+const generateTestFiles = t => {
   rimraf.sync(generatePath);
   const fixtures = getFixtures();
   const results: FixtureResult[] = fixtures.map(writeQueries(t));
@@ -137,7 +141,7 @@ const writeSchemas = (fixtures: Fixture[]) => {
   writeFile(schemasPath, content);
 };
 
-export const makeElm = t => () => {
+export const makeElm = t => {
   t.comment("running elm-make");
   const log = execSync(
     `elm-make src/Main.elm --output generated/index.html --yes`,
@@ -146,102 +150,83 @@ export const makeElm = t => () => {
   t.comment(log.toString());
 };
 
-export const initServer = t => {
-  let server;
+export const runServer = t => {
+  let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
+    cwd: basePath,
+    shell: true
+  });
 
-  const run = () => {
-    if (server) {
-      t.fail("server already started");
-    }
+  server.stdout.on("data", data => {
+    t.comment(`[SERVER] ${data.toString()}`);
+  });
 
-    server = spawn("ts-node", ["server.ts"], {
-      cwd: basePath,
-      shell: true
-    });
+  server.stderr.on("data", data => {
+    t.end(`[SERVER] ${data.toString()}`);
+  });
 
-    server.stdout.on("data", data => {
-      t.comment("[SERVER]", data.toString());
-    });
+  const kill = () => {
+    t.comment(`kill server ${server && server.pid}`);
+    if (server && server.pid) {
+      const pid = server.pid;
+      server = null;
 
-    server.stderr.on("data", data => {
-      t.fail(data.toString());
-      close();
-    });
-
-    server.on("close", code => {
-      if (server) {
-        server = null;
-        t.end(`[SERVER] exited with code ${code}`);
+      if (process.platform === "win32") {
+        execSync(`taskkill /pid ${pid} /f /t`);
       } else {
-        t.comment("[SERVER] closed");
-        t.end();
+        process.kill(pid);
       }
-    });
-  };
-
-  const close = () => {
-    if (!server) {
-      return;
-    }
-
-    const pid = server.pid;
-    server = null;
-
-    if (process.platform === "win32") {
-      execSync(`taskkill /pid ${pid} /f /t`);
-    } else {
-      process.kill(pid);
     }
   };
 
-  return { run, close };
+  return kill;
 };
 
-export const openTestPage = (t, done) => {
+export const openTestPage = t => {
+  let browser;
+  let killed = false;
+
   phantom
     .create()
     .then(instance => {
-      instance
+      if (killed) {
+        instance.kill();
+        return;
+      }
+
+      browser = instance;
+
+      browser
         .createPage()
         .then(page => {
-          page.on("onConsoleMessage", message => {
+          page.on("onConsoleMessage", (message: string) => {
             if (message.startsWith("[Test Failed]")) {
-              instance.kill();
               t.fail(message);
-              done();
             } else if (message.startsWith("[Test Passed]")) {
               t.pass(message);
-            } else if (message.startsWith("[End Test]")) {
-              instance.kill();
-              t.comment(message);
-
-              if (message.includes("failed: 0")) {
-                done();
-              } else {
-                t.fail(message);
-                done();
-              }
             } else {
               t.comment(message);
+              if (message.startsWith("[End Test]")) {
+                t.end();
+              }
             }
           });
 
-          page.on("onError", message => {
-            instance.kill();
-            t.fail(message);
-            done();
-          });
+          page.on("onError", t.end);
 
           page.open("http://localhost:3000");
         })
-        .catch(error => {
-          instance.kill();
-          t.fail(error);
-          done();
-        });
+        .catch(t.end);
     })
-    .catch(error => {
-      t.fail(error);
-      done();
-    });
+    .catch(t.end);
+
+  const kill = () => {
+    t.comment(`kill browser ${!!browser}`);
+    killed = true;
+    if (browser) {
+      browser.kill();
+      browser = null;
+    }
+  };
+
+  return kill;
 };

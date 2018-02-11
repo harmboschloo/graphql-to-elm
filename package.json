@@ -32,7 +32,7 @@
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
     "test:gen-update":
       "tape -r ts-node/register test/genTest.ts --update | tap-diff",
-    "test:gen-watch": "echo TODO",
+    "test:gen-watch": "ts-node test/genWatch.ts",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "start": "npm run test:gen-watch"
   },

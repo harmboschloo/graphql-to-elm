@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawnSync } from "child_process";
 import { watch } from "chokidar";
 
 const watcher = watch(
@@ -12,27 +12,9 @@ watcher.on("ready", () => {
   run();
 });
 
-let running = false;
-let rerun = false;
-
 const run = () => {
-  if (running) {
-    rerun = true;
-    return;
-  }
-
-  running = true;
-  rerun = false;
-
-  const test = spawn("npm", ["run", "test:gen"], {
+  spawnSync("npm", ["run", "test:gen"], {
     stdio: "inherit",
     shell: true
-  });
-
-  test.on("close", () => {
-    running = false;
-    if (rerun) {
-      run();
-    }
   });
 };

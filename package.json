@@ -28,7 +28,8 @@
     "graphql": "^0.12.3"
   },
   "scripts": {
-    "test": "npm run test:gen && npm run test:browser",
+    "test":
+      "tape -r ts-node/register test/genTest.ts test/browserTest.ts | tap-diff",
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
     "test:gen-update":
       "tape -r ts-node/register test/genTest.ts --update | tap-diff",

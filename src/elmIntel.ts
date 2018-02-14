@@ -9,7 +9,7 @@ import {
   getNamedType,
   getNullableType
 } from "graphql";
-import { Options } from "./options";
+import { FinalOptions } from "./options";
 import { QueryIntel, QueryIntelItem } from "./queryIntel";
 import { validModuleName, validTypeName, validVariableName } from "./utils";
 
@@ -47,7 +47,7 @@ export const getChild = (id: number, intel: ElmIntel): ElmIntelItem => {
 
 export const queryToElmIntel = (
   queryIntel: QueryIntel,
-  options: Options
+  options: FinalOptions
 ): ElmIntel => {
   let dest;
   let module;
@@ -56,7 +56,7 @@ export const queryToElmIntel = (
     dest = "./Query.elm";
     module = "Query";
   } else {
-    const srcPath = path.relative(options.src || ".", queryIntel.src);
+    const srcPath = path.relative(options.src, queryIntel.src);
     const srcInfo = path.parse(srcPath);
 
     const moduleParts = srcInfo.dir
@@ -65,7 +65,7 @@ export const queryToElmIntel = (
       .concat(srcInfo.name)
       .map(validModuleName);
 
-    dest = path.resolve(options.dest || ".", ...moduleParts) + ".elm";
+    dest = path.resolve(options.dest, ...moduleParts) + ".elm";
     module = moduleParts.join(".");
   }
 

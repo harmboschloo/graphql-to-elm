@@ -6,15 +6,35 @@ export interface Options {
   log?: (message: string) => void;
 }
 
-export const log = (message: string, options: Options): void =>
-  options.log && options.log(message);
+export interface FinalOptions {
+  schema: string;
+  queries: string[];
+  src: string;
+  dest: string;
+  log: (message: string) => void;
+}
 
-export const logDebug = (message: string, options: Options): void => {
-  // options.log && options.log(`[Debug] ${debugPadding()}${message}`);
+const defaultOptions: {
+  src: string;
+  dest: string;
+  log: (message: string) => void;
+} = {
+  src: ".",
+  dest: ".",
+  log: message => console.log(message)
 };
 
-let debugIndent = 0;
+export const finalize = (options: Options): FinalOptions => {
+  const { schema, queries } = options;
+  const src = withDefault(".", options.src);
+  const dest = withDefault(src, options.dest);
+  const log =
+    typeof options.log !== "undefined"
+      ? options.log || (x => {})
+      : message => console.log(message);
 
-export const logDebugAddIndent = (indent: number) => (debugIndent += indent);
+  return { schema, queries, src, dest, log };
+};
 
-const debugPadding = () => "   ".repeat(debugIndent);
+const withDefault = (defaultValue, value) =>
+  value !== null && typeof value !== "undefined" ? value : defaultValue;

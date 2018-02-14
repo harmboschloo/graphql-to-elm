@@ -13,8 +13,9 @@ import {
   getNamedType,
   getNullableType
 } from "graphql";
-import { Options, log, logDebug, logDebugAddIndent } from "./options";
+import { FinalOptions } from "./options";
 import { readFile } from "./utils";
+import * as debug from "./debug";
 
 export interface QueryIntel {
   src: string;
@@ -34,9 +35,9 @@ export interface QueryIntelItem {
 export const readQueryIntel = (
   src: string,
   schema: GraphQLSchema,
-  options: Options
+  options: FinalOptions
 ): QueryIntel => {
-  log(`reading query ${src}`, options);
+  options.log(`reading query ${src}`);
 
   const query = readFile(src)
     .trim()
@@ -51,7 +52,7 @@ export const readQueryIntel = (
 export const getQueryIntel = (
   query: string,
   schema: GraphQLSchema,
-  options: Options
+  options: FinalOptions
 ): QueryIntel => {
   const queryDocument = parse(query);
 
@@ -68,7 +69,11 @@ export const getQueryIntel = (
   return visitor.intel();
 };
 
-const queryVisitor = (query: string, typeInfo: TypeInfo, options: Options) => {
+const queryVisitor = (
+  query: string,
+  typeInfo: TypeInfo,
+  options: FinalOptions
+) => {
   const intel: QueryIntel = {
     src: "",
     query,
@@ -100,8 +105,8 @@ const queryVisitor = (query: string, typeInfo: TypeInfo, options: Options) => {
       return intel;
     },
     enter(node) {
-      logDebugAddIndent(1);
-      logDebug(`enter ${node.kind} ${node.value}`, options);
+      debug.addLogIndent(1);
+      debug.log(`enter ${node.kind} ${node.value}`);
 
       if (isItemNode(node)) {
         const item = {
@@ -122,13 +127,13 @@ const queryVisitor = (query: string, typeInfo: TypeInfo, options: Options) => {
       }
     },
     leave(node) {
-      logDebug(`leave ${node.kind}`, options);
+      debug.log(`leave ${node.kind}`);
 
       if (isItemNode(node)) {
         intel.parentStack.pop();
       }
 
-      logDebugAddIndent(-1);
+      debug.addLogIndent(-1);
     }
   };
 };

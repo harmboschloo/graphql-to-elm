@@ -14,15 +14,7 @@ test("graphqlToElm generate test", t => {
   t.end();
 });
 
-const testFixture = t => ({
-  id,
-  dir,
-  schema,
-  queries,
-  src,
-  dest,
-  expect
-}: Fixture) =>
+const testFixture = t => ({ id, dir, options, expect }: Fixture) =>
   t.test(`== fixture ${id} ==`, t => {
     process.chdir(resolve(__dirname, dir));
 
@@ -30,9 +22,7 @@ const testFixture = t => ({
       t.doesNotThrow(
         () =>
           graphqlToElm({
-            schema,
-            queries,
-            src,
+            ...options,
             dest: expect,
             log: t.comment
           }),
@@ -43,36 +33,33 @@ const testFixture = t => ({
     t.doesNotThrow(
       () =>
         graphqlToElm({
-          schema,
-          queries,
-          src,
-          dest,
+          ...options,
           log: t.comment
         }),
       "graphqlToElm should not throw"
     );
 
     t.doesNotThrow(
-      () => compareDirs(t, { dest, expect }),
+      () => compareDirs(t, { actual: options.dest, expect }),
       "compare generated and expected should not throw"
     );
 
     t.end();
   });
 
-const compareDirs = (t, { dest, expect }) => {
+const compareDirs = (t, { actual, expect }) => {
   const actualFiles = glob
-    .sync(resolve(dest, "**/*"))
-    .map(path => relative(dest, path));
+    .sync(resolve(actual, "**/*"))
+    .map(path => relative(actual, path));
 
   const expectedFiles = glob
     .sync(resolve(expect, "**/*"))
     .map(path => relative(expect, path));
 
-  t.deepEqual(actualFiles, expectedFiles, `${dest}/**/* === ${expect}/**/*`);
+  t.deepEqual(actualFiles, expectedFiles, `${actual}/**/* === ${expect}/**/*`);
 
   actualFiles.forEach(file => {
-    const actualFile = resolve(dest, file);
+    const actualFile = resolve(actual, file);
     const expectedFile = resolve(expect, file);
     const actualContent = readFileSync(actualFile, "utf8");
     const expectedContent = readFileSync(expectedFile, "utf8");

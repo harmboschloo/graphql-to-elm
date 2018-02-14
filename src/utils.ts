@@ -37,6 +37,9 @@ export const validVariableName = (name: string): string =>
     .join("")
     .replace(/^_+/, "");
 
+export const extractModule = (expression: string): string =>
+  expression.substr(0, expression.lastIndexOf("."));
+
 export const readFile = (path: string): string => readFileSync(path, "utf8");
 
 export const writeFile = (dest: string, content: string): void => {

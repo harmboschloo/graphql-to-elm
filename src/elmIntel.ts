@@ -9,9 +9,14 @@ import {
   getNamedType,
   getNullableType
 } from "graphql";
-import { FinalOptions } from "./options";
+import { FinalOptions, ScalarDecoders, ScalarDecoder } from "./options";
 import { QueryIntel, QueryIntelItem } from "./queryIntel";
-import { validModuleName, validTypeName, validVariableName } from "./utils";
+import {
+  validModuleName,
+  validTypeName,
+  validVariableName,
+  extractModule
+} from "./utils";
 
 export interface ElmIntel {
   dest: string;
@@ -71,7 +76,7 @@ export const queryToElmIntel = (
 
   return queryIntel.items
     .sort((a, b) => b.depth - a.depth || b.id - a.id)
-    .reduce(getElmIntel, {
+    .reduce(getElmIntel(options), {
       dest,
       module,
       query: queryIntel.query,
@@ -83,7 +88,10 @@ export const queryToElmIntel = (
     });
 };
 
-const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
+const getElmIntel = (options: FinalOptions) => (
+  intel: ElmIntel,
+  queryItem: QueryIntelItem
+): ElmIntel => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
 
@@ -111,39 +119,28 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
     }
   } else if (isScalarType(namedType)) {
     isRecordType = false;
+    const typeName: string = namedType.name;
 
-    switch (namedType.name) {
-      case "Int":
-        type = "Int";
-        decoder = "Json.Decode.int";
-        addImport("Json.Decode", intel);
-        break;
-      case "Float":
-        type = "Float";
-        decoder = "Json.Decode.float";
-        addImport("Json.Decode", intel);
-        break;
-      case "Boolean":
-        type = "Bool";
-        decoder = "Json.Decode.bool";
-        addImport("Json.Decode", intel);
-        break;
-      case "String":
-        type = "String";
-        decoder = "Json.Decode.string";
-        addImport("Json.Decode", intel);
-        break;
-      case "ID": // FIXME
-        type = "String";
-        decoder = "Json.Decode.string";
-        addImport("Json.Decode", intel);
-        break;
-      default:
-        throw new Error(`Unhandled query scalar type: ${queryItem.type}`);
+    const scalarDecoder: ScalarDecoder | undefined =
+      options.scalarDecoders[typeName] || defaultScalarDecoders[typeName];
+
+    if (!scalarDecoder) {
+      throw new Error(
+        `No decoder defined for scalar type: ${
+          queryItem.type
+        }. Please add one to options.scalarDecoders`
+      );
     }
+
+    type = scalarDecoder.type;
+    decoder = scalarDecoder.decoder;
+    addImport(extractModule(type), intel);
+    addImport(extractModule(decoder), intel);
   } else {
     throw new Error(`Unhandled query type: ${queryItem.type}`);
   }
+
+  addImport("Json.Decode", intel);
 
   return addItem(
     {
@@ -162,26 +159,62 @@ const getElmIntel = (intel: ElmIntel, queryItem: QueryIntelItem): ElmIntel => {
   );
 };
 
-const reservedWords = [
-  "if",
-  "then",
-  "else",
-  "case",
-  "of",
-  "let",
-  "in",
-  "type",
-  "module",
-  "where",
-  "import",
-  "exposing",
+const defaultScalarDecoders: ScalarDecoders = {
+  Int: {
+    type: "Int",
+    decoder: "Json.Decode.int"
+  },
+  Float: {
+    type: "Float",
+    decoder: "Json.Decode.float"
+  },
+  Boolean: {
+    type: "Bool",
+    decoder: "Json.Decode.bool"
+  },
+  String: {
+    type: "String",
+    decoder: "Json.Decode.string"
+  },
+  ID: {
+    type: "String",
+    decoder: "Json.Decode.string"
+  }
+};
+
+const reservedWordsElm = [
+  "alias",
   "as",
-  "port"
+  "case",
+  "command",
+  "effect",
+  "else",
+  "exposing",
+  "false",
+  "if",
+  "import",
+  "in",
+  "infix",
+  "left",
+  "let",
+  "module",
+  "non",
+  "null",
+  "of",
+  "port",
+  "right",
+  "subscription",
+  "then",
+  "type",
+  "true",
+  "where"
 ];
 
+const reservedWords = ["Data", "query", "decoder"];
+
 const getReservedNames = () =>
-  ["Data", "query", "decoder"]
-    .concat(reservedWords)
+  reservedWords
+    .concat(reservedWordsElm)
     .reduce((names, name) => ({ ...names, [name]: true }), {});
 
 const addItem = (item: ElmIntelItem, intel: ElmIntel): ElmIntel => ({
@@ -236,5 +269,7 @@ const getRecordDecoderName = (type: string, intel: ElmIntel) => {
 };
 
 const addImport = (name: string, intel: ElmIntel) => {
-  intel.imports[name] = true;
+  if (name) {
+    intel.imports[name] = true;
+  }
 };

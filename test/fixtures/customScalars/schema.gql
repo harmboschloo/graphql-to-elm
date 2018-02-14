@@ -1,0 +1,18 @@
+# Scalars
+
+scalar Date
+
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  idOrNull: ID
+  id: ID!
+  dateOrNull: Date
+  date: Date!
+}

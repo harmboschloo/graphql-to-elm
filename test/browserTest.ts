@@ -47,12 +47,13 @@ const generateTestFiles = t => {
 };
 
 const writeQueries = t => (fixture: Fixture): FixtureResult => {
-  const { id, dir, schema, queries, src } = fixture;
+  const { id, dir, options } = fixture;
 
   const result: Result = getGraphqlToElm({
-    schema: resolve(__dirname, dir, schema),
-    queries: queries.map(query => resolve(__dirname, dir, query)),
-    src: resolve(__dirname, dir, src),
+    ...options,
+    schema: resolve(__dirname, dir, options.schema),
+    queries: options.queries.map(query => resolve(__dirname, dir, query)),
+    src: resolve(__dirname, dir, options.src || ""),
     log: t.comment
   });
 
@@ -128,9 +129,9 @@ tests =
 };
 
 const writeSchemas = (fixtures: Fixture[]) => {
-  const schemas = fixtures.map(({ id, dir, schema }) => ({
+  const schemas = fixtures.map(({ id, dir, options }) => ({
     id,
-    path: normalize(resolve(__dirname, dir, schema)).replace(/\\/g, "/")
+    path: normalize(resolve(__dirname, dir, options.schema)).replace(/\\/g, "/")
   }));
 
   const entries = schemas.map(({ id, path }) => `  "${id}": "${path}"`);

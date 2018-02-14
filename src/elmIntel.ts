@@ -5,11 +5,12 @@ import {
   isCompositeType,
   isListType,
   isScalarType,
+  isEnumType,
   isNullableType,
   getNamedType,
   getNullableType
 } from "graphql";
-import { FinalOptions, ScalarDecoders, ScalarDecoder } from "./options";
+import { FinalOptions, TypeDecoders, TypeDecoder } from "./options";
 import { QueryIntel, QueryIntelItem } from "./queryIntel";
 import {
   validModuleName,
@@ -103,7 +104,7 @@ const getElmIntel = (options: FinalOptions) => (
   const isList = isListType(nullableType);
   const isListMaybe = isList && isNullableType(nullableType.ofType);
   let type;
-  let isRecordType;
+  let isRecordType = false;
   let decoder;
 
   if (isCompositeType(namedType)) {
@@ -118,10 +119,8 @@ const getElmIntel = (options: FinalOptions) => (
       decoder = getRecordDecoderName(type, intel);
     }
   } else if (isScalarType(namedType)) {
-    isRecordType = false;
     const typeName: string = namedType.name;
-
-    const scalarDecoder: ScalarDecoder | undefined =
+    const scalarDecoder: TypeDecoder | undefined =
       options.scalarDecoders[typeName] || defaultScalarDecoders[typeName];
 
     if (!scalarDecoder) {
@@ -134,6 +133,22 @@ const getElmIntel = (options: FinalOptions) => (
 
     type = scalarDecoder.type;
     decoder = scalarDecoder.decoder;
+    addImport(extractModule(type), intel);
+    addImport(extractModule(decoder), intel);
+  } else if (isEnumType(namedType)) {
+    const typeName: string = namedType.name;
+    const enumDecoder: TypeDecoder | undefined = options.enumDecoders[typeName];
+
+    if (!enumDecoder) {
+      throw new Error(
+        `No decoder defined for enum type: ${
+          queryItem.type
+        }. Please add one to options.enumDecoders`
+      );
+    }
+
+    type = enumDecoder.type;
+    decoder = enumDecoder.decoder;
     addImport(extractModule(type), intel);
     addImport(extractModule(decoder), intel);
   } else {
@@ -159,7 +174,7 @@ const getElmIntel = (options: FinalOptions) => (
   );
 };
 
-const defaultScalarDecoders: ScalarDecoders = {
+const defaultScalarDecoders: TypeDecoders = {
   Int: {
     type: "Int",
     decoder: "Json.Decode.int"

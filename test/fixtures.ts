@@ -1,4 +1,4 @@
-import { Options, ScalarDecoders } from "../src/options";
+import { Options, TypeDecoders } from "../src/options";
 
 export interface Fixture {
   id: string;
@@ -17,7 +17,8 @@ export const getFixtures = (): Fixture[] =>
 interface Config {
   schema?: string;
   queries: string[];
-  scalarDecoders?: ScalarDecoders;
+  scalarDecoders?: TypeDecoders;
+  enumDecoders?: TypeDecoders;
   src?: string;
   dest?: string;
   expect?: string;
@@ -32,6 +33,7 @@ const create = ({
   schema = "schema.gql",
   queries,
   scalarDecoders,
+  enumDecoders,
   src,
   dest = "generated-output",
   expect = "expected-output"
@@ -40,6 +42,7 @@ const create = ({
     schema,
     queries,
     scalarDecoders,
+    enumDecoders,
     src,
     dest
   },
@@ -80,6 +83,15 @@ const data: { [key: string]: FinalConfig } = {
         decoder: "Data.Date.decoder"
       }
     }
+  }),
+  enums: create({
+    queries: ["enum.gql", "nullable-enum.gql"],
+    enumDecoders: {
+      Binary: {
+        type: "Data.Binary.Binary",
+        decoder: "Data.Binary.decoder"
+      }
+    }
   })
   // TODO
   // - endpoint
@@ -88,7 +100,6 @@ const data: { [key: string]: FinalConfig } = {
   // - directives
   // - mutations
   // - swapi
-  // - enums
   // - unions
   // - variables
 };

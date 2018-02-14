@@ -1,0 +1,17 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  binaryOrNull: Binary
+  binary: Binary!
+}
+
+enum Binary {
+  ZERO
+  ONE
+}

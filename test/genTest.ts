@@ -6,12 +6,18 @@ import { test } from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import { graphqlToElm } from "..";
 
+const fixtureId = "";
+
 test("graphqlToElm generate test", t => {
   rimraf.sync(resolve(__dirname, "fixtures/**/generated*"));
+
   const cwd = process.cwd();
-  getFixtures().forEach(testFixture(t));
+
+  getFixtures(fixtureId).forEach(testFixture(t));
+
   process.chdir(cwd);
-  t.end();
+
+  t.end(fixtureId ? "with fixture filter" : undefined);
 });
 
 const testFixture = t => ({ id, dir, options, expect }: Fixture) =>

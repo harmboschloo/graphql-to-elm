@@ -7,12 +7,14 @@ export interface Fixture {
   expect: string;
 }
 
-export const getFixtures = (): Fixture[] =>
-  Object.keys(data).map(key => ({
-    id: key,
-    dir: `fixtures/${key}`,
-    ...data[key]
-  }));
+export const getFixtures = (fixtureId?: string): Fixture[] =>
+  Object.keys(data)
+    .map(key => ({
+      id: key,
+      dir: `fixtures/${key}`,
+      ...data[key]
+    }))
+    .filter(fixture => !fixtureId || fixture.id === fixtureId);
 
 interface Config {
   schema?: string;

@@ -1,0 +1,27 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  user(id: String!): User
+
+  ages(range: Range): [Int!]!
+}
+
+type User {
+  name: String!
+}
+
+input Range {
+  begin: Int
+  end: Int!
+  means: [Mean!]
+}
+
+input Mean {
+  mean: Float
+}

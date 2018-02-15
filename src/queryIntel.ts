@@ -1,6 +1,7 @@
 import {
   GraphQLSchema,
   GraphQLOutputType,
+  GraphQLInputType,
   validate,
   parse,
   visit,
@@ -10,6 +11,7 @@ import {
   isCompositeType,
   isListType,
   isLeafType,
+  isInputObjectType,
   getNamedType,
   getNullableType
 } from "graphql";
@@ -20,6 +22,7 @@ import * as debug from "./debug";
 export interface QueryIntel {
   src: string;
   query: string;
+  variables: QueryIntelItem[];
   items: QueryIntelItem[];
   parentStack: QueryIntelItem[];
 }
@@ -77,6 +80,7 @@ const queryVisitor = (
   const intel: QueryIntel = {
     src: "",
     query,
+    variables: [],
     items: [],
     parentStack: []
   };
@@ -87,13 +91,46 @@ const queryVisitor = (
     }
   };
 
+  const addVariable = ({
+    type,
+    name,
+    parent
+  }: {
+    type: GraphQLInputType;
+    name: string;
+    parent: QueryIntelItem;
+  }) => {
+    const item = {
+      id: intel.variables.length,
+      type,
+      name,
+      depth: parent.depth + 1,
+      children: []
+    };
+
+    intel.variables.push(item);
+    parent.children.push(item.id);
+
+    const namedType = getNamedType(type);
+    if (isInputObjectType(namedType)) {
+      const fields = namedType.getFields();
+      Object.keys(fields).forEach(fieldName =>
+        addVariable({
+          type: fields[fieldName].type,
+          name: fieldName,
+          parent: item
+        })
+      );
+    }
+  };
+
   const isItemNode = node => {
     const { kind } = node;
     const type = typeInfo.getType();
     const nullableType = getNullableType(type);
     const namedType = getNamedType(type);
     return (
-      (kind == Kind.OPERATION_DEFINITION || kind == Kind.FIELD) &&
+      (kind === Kind.OPERATION_DEFINITION || kind === Kind.FIELD) &&
       (isListType(nullableType) ||
         isCompositeType(namedType) ||
         isLeafType(namedType))
@@ -104,9 +141,28 @@ const queryVisitor = (
     intel() {
       return intel;
     },
-    enter(node) {
+
+    enter(node, key, parent) {
       debug.addLogIndent(1);
       debug.log(`enter ${node.kind} ${node.value}`);
+
+      if (node.kind === Kind.VARIABLE_DEFINITION) {
+        if (intel.variables.length === 0) {
+          intel.variables.push({
+            id: 0,
+            type: "",
+            name: "",
+            depth: 0,
+            children: []
+          });
+        }
+
+        addVariable({
+          type: typeInfo.getInputType(),
+          name: node.variable.name.value,
+          parent: intel.variables[0]
+        });
+      }
 
       if (isItemNode(node)) {
         const item = {
@@ -126,6 +182,7 @@ const queryVisitor = (
         intel.parentStack.push(item);
       }
     },
+
     leave(node) {
       debug.log(`leave ${node.kind}`);
 

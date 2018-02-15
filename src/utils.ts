@@ -13,27 +13,20 @@ export const sortString = (a: string, b: string): number =>
 
 export const withParentheses = (x: string): string => `(${x})`;
 
-export const validModuleName = (name: string): string =>
+export const validModuleName = (name: string): string => validNameUpper(name);
+
+export const validTypeName = (name: string): string => validNameUpper(name);
+
+export const validVariableName = (name: string): string => validNameLower(name);
+
+export const validNameLower = (name: string): string =>
+  firstToLowerCase(validNameUpper(name));
+
+export const validNameUpper = (name: string): string =>
   name
     .split(/[^A-Za-z0-9_]/g)
     .filter(x => !!x)
     .map(firstToUpperCase)
-    .join("")
-    .replace(/^_+/, "");
-
-export const validTypeName = (name: string): string =>
-  name
-    .split(/[^A-Za-z0-9_]/g)
-    .filter(x => !!x)
-    .map(firstToUpperCase)
-    .join("")
-    .replace(/^_+/, "");
-
-export const validVariableName = (name: string): string =>
-  name
-    .split(/[^A-Za-z0-9_]/g)
-    .filter(x => !!x)
-    .map(firstToLowerCase)
     .join("")
     .replace(/^_+/, "");
 

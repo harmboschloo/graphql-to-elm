@@ -1,6 +1,8 @@
 export interface Options {
   schema: string;
   queries: string[];
+  scalarEncoders?: TypeEncoders;
+  enumEncoders?: TypeEncoders;
   scalarDecoders?: TypeDecoders;
   enumDecoders?: TypeDecoders;
   src?: string;
@@ -11,11 +13,22 @@ export interface Options {
 export interface FinalOptions {
   schema: string;
   queries: string[];
+  scalarEncoders: TypeEncoders;
+  enumEncoders: TypeEncoders;
   scalarDecoders: TypeDecoders;
   enumDecoders: TypeDecoders;
   src: string;
   dest: string;
   log: (message: string) => void;
+}
+
+export interface TypeEncoders {
+  [graphqlType: string]: TypeEncoder;
+}
+
+export interface TypeEncoder {
+  type: string;
+  encoder: string;
 }
 
 export interface TypeDecoders {
@@ -39,6 +52,8 @@ const defaultOptions: {
 
 export const finalize = (options: Options): FinalOptions => {
   const { schema, queries } = options;
+  const scalarEncoders = withDefault({}, options.scalarEncoders);
+  const enumEncoders = withDefault({}, options.enumEncoders);
   const scalarDecoders = withDefault({}, options.scalarDecoders);
   const enumDecoders = withDefault({}, options.enumDecoders);
   const src = withDefault(".", options.src);
@@ -48,7 +63,17 @@ export const finalize = (options: Options): FinalOptions => {
       ? options.log || (x => {})
       : message => console.log(message);
 
-  return { schema, queries, scalarDecoders, enumDecoders, src, dest, log };
+  return {
+    schema,
+    queries,
+    scalarEncoders,
+    enumEncoders,
+    scalarDecoders,
+    enumDecoders,
+    src,
+    dest,
+    log
+  };
 };
 
 const withDefault = (defaultValue, value) =>

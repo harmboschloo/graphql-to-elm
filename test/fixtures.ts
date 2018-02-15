@@ -94,6 +94,9 @@ const data: { [key: string]: FinalConfig } = {
         decoder: "Data.Binary.decoder"
       }
     }
+  }),
+  variables: create({
+    queries: ["scalar-variable.gql"]
   })
   // TODO
   // - endpoint
@@ -103,5 +106,4 @@ const data: { [key: string]: FinalConfig } = {
   // - mutations
   // - swapi
   // - unions
-  // - variables
 };

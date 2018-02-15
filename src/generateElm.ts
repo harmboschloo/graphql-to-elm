@@ -1,4 +1,4 @@
-import { ElmIntel, ElmIntelItem, getChild } from "./elmIntel";
+import { ElmIntel, ElmIntelDecodeItem, getDecodeItemChild } from "./elmIntel";
 import { sortString, withParentheses } from "./utils";
 
 export const generateElm = (intel: ElmIntel): string =>
@@ -28,7 +28,7 @@ const generateImports = (intel: ElmIntel): string =>
     .join("\n");
 
 const generateRecordDecoders = (intel: ElmIntel): string =>
-  intel.items
+  intel.decodeItems
     .sort((a, b) => sortString(a.type, a.type))
     .map(generateRecordDecoder(intel))
     .filter(x => !!x)
@@ -37,7 +37,7 @@ const generateRecordDecoders = (intel: ElmIntel): string =>
 const generateRecordDecoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
-  return (item: ElmIntelItem): string => {
+  return (item: ElmIntelDecodeItem): string => {
     if (!item.isRecordType || generatedTypes[item.type]) {
       return "";
     }
@@ -45,11 +45,11 @@ const generateRecordDecoder = (intel: ElmIntel) => {
     generatedTypes[item.type] = true;
 
     const children = item.children
-      .map(id => getChild(id, intel))
+      .map(id => getDecodeItemChild(id, intel))
       .sort((a, b) => sortString(a.name, b.name));
 
     const fieldTypes = children
-      .map(child => `${child.name} : ${getTypeSignature(child)}`)
+      .map(child => `${child.name} : ${getDecoderTypeSignature(child)}`)
       .join("\n    , ");
 
     const map = children.length > 1 ? children.length : "";
@@ -73,7 +73,7 @@ ${fieldDecoders}`;
   };
 };
 
-const getTypeSignature = (item: ElmIntelItem): string => {
+const getDecoderTypeSignature = (item: ElmIntelDecodeItem): string => {
   let signature = item.type;
   let wrap = x => x;
 
@@ -94,7 +94,7 @@ const getTypeSignature = (item: ElmIntelItem): string => {
   return signature;
 };
 
-const getDecoder = (item: ElmIntelItem): string => {
+const getDecoder = (item: ElmIntelDecodeItem): string => {
   let decoder = item.decoder;
 
   if (item.isListMaybe) {

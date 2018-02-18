@@ -1,4 +1,11 @@
-module Nested exposing (Data, Person, Person2, decoder, query)
+module Nested
+    exposing
+        ( Data
+        , Person
+        , Person2
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -30,30 +37,30 @@ decoder =
 
 
 type alias Person =
-    { age : Maybe Int
-    , bestFriend : Maybe Person2
-    , name : String
+    { name : String
+    , age : Maybe.Maybe Int
+    , bestFriend : Maybe.Maybe Person2
     }
 
 
 personDecoder : Json.Decode.Decoder Person
 personDecoder =
     Json.Decode.map3 Person
+        (Json.Decode.field "name" Json.Decode.string)
         (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "bestFriend" (Json.Decode.nullable person2Decoder))
-        (Json.Decode.field "name" Json.Decode.string)
 
 
 type alias Person2 =
-    { age : Maybe Int
-    , email : Maybe String
-    , name : String
+    { name : String
+    , age : Maybe.Maybe Int
+    , email : Maybe.Maybe String
     }
 
 
 person2Decoder : Json.Decode.Decoder Person2
 person2Decoder =
     Json.Decode.map3 Person2
+        (Json.Decode.field "name" Json.Decode.string)
         (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))
-        (Json.Decode.field "name" Json.Decode.string)

@@ -1,7 +1,0 @@
-query ScalarVariables($id: String!, $range: Range!) {
-  user(id: $id) {
-    name
-  }
-
-  ages(range: $range)
-}

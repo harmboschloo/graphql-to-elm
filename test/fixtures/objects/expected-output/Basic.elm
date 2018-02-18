@@ -1,4 +1,10 @@
-module Basic exposing (Data, Person, decoder, query)
+module Basic
+    exposing
+        ( Data
+        , Person
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -25,13 +31,13 @@ decoder =
 
 
 type alias Person =
-    { age : Maybe Int
-    , name : String
+    { name : String
+    , age : Maybe.Maybe Int
     }
 
 
 personDecoder : Json.Decode.Decoder Person
 personDecoder =
     Json.Decode.map2 Person
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))

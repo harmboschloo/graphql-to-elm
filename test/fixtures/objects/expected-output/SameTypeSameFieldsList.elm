@@ -1,4 +1,11 @@
-module SameTypeSameFieldsList exposing (Data, Person, Person2, decoder, query)
+module SameTypeSameFieldsList
+    exposing
+        ( Data
+        , Person
+        , Person2
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -29,8 +36,8 @@ decoder =
 
 
 type alias Person =
-    { bestFriend : Maybe Person2
-    , friends : Maybe (List (Maybe Person2))
+    { bestFriend : Maybe.Maybe Person2
+    , friends : Maybe.Maybe (List (Maybe.Maybe Person2))
     }
 
 

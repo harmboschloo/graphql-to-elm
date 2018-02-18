@@ -1,0 +1,3 @@
+query Inputs($optionalInput: Input, $input: Input!) {
+  inputs(optionalInput: $optionalInput, input: $input)
+}

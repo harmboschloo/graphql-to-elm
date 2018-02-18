@@ -1,4 +1,9 @@
-module NullableEnum exposing (Data, decoder, query)
+module NullableEnum
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Data.Binary
 import Json.Decode
@@ -12,7 +17,7 @@ query =
 
 
 type alias Data =
-    { binaryOrNull : Maybe Data.Binary.Binary
+    { binaryOrNull : Maybe.Maybe Data.Binary.Binary
     }
 
 

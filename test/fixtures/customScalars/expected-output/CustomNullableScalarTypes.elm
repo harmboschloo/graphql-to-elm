@@ -1,4 +1,9 @@
-module CustomNullableScalarTypes exposing (Data, decoder, query)
+module CustomNullableScalarTypes
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Data.Date
 import Data.Id
@@ -14,13 +19,13 @@ query =
 
 
 type alias Data =
-    { dateOrNull : Maybe Data.Date.Date
-    , idOrNull : Maybe Data.Id.Id
+    { idOrNull : Maybe.Maybe Data.Id.Id
+    , dateOrNull : Maybe.Maybe Data.Date.Date
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map2 Data
-        (Json.Decode.field "dateOrNull" (Json.Decode.nullable Data.Date.decoder))
         (Json.Decode.field "idOrNull" (Json.Decode.nullable Data.Id.decoder))
+        (Json.Decode.field "dateOrNull" (Json.Decode.nullable Data.Date.decoder))

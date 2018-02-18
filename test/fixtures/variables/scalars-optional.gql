@@ -1,0 +1,3 @@
+query ScalarsOptional($string: String, $int: Int) {
+  scalarsOptional(string: $string, int: $int)
+}

@@ -1,4 +1,10 @@
-module SameTypeSameFieldsNullable exposing (Data, Person2, decoder, query)
+module SameTypeSameFieldsNullable
+    exposing
+        ( Data
+        , Person2
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -17,7 +23,7 @@ query =
 
 type alias Data =
     { you : Person2
-    , youOrNull : Maybe Person2
+    , youOrNull : Maybe.Maybe Person2
     }
 
 
@@ -29,7 +35,7 @@ decoder =
 
 
 type alias Person2 =
-    { email : Maybe String
+    { email : Maybe.Maybe String
     }
 
 

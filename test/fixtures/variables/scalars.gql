@@ -1,0 +1,3 @@
+query Scalars($string: String!, $int: Int!) {
+  scalars(string: $string, int: $int)
+}

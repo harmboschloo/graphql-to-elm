@@ -1,4 +1,10 @@
-module ListOfObjects exposing (Data, Friend, decoder, query)
+module ListOfObjects
+    exposing
+        ( Data
+        , Friend
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -25,24 +31,24 @@ query =
 
 
 type alias Data =
-    { friendsOrNull_friend : Maybe (List Friend)
-    , friendsOrNull_friendOrNull : Maybe (List (Maybe Friend))
-    , friends_friend : List Friend
-    , friends_friendOrNull : List (Maybe Friend)
+    { friends_friend : List Friend
+    , friends_friendOrNull : List (Maybe.Maybe Friend)
+    , friendsOrNull_friend : Maybe.Maybe (List Friend)
+    , friendsOrNull_friendOrNull : Maybe.Maybe (List (Maybe.Maybe Friend))
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map4 Data
-        (Json.Decode.field "friendsOrNull_friend" (Json.Decode.nullable (Json.Decode.list friendDecoder)))
-        (Json.Decode.field "friendsOrNull_friendOrNull" (Json.Decode.nullable (Json.Decode.list (Json.Decode.nullable friendDecoder))))
         (Json.Decode.field "friends_friend" (Json.Decode.list friendDecoder))
         (Json.Decode.field "friends_friendOrNull" (Json.Decode.list (Json.Decode.nullable friendDecoder)))
+        (Json.Decode.field "friendsOrNull_friend" (Json.Decode.nullable (Json.Decode.list friendDecoder)))
+        (Json.Decode.field "friendsOrNull_friendOrNull" (Json.Decode.nullable (Json.Decode.list (Json.Decode.nullable friendDecoder))))
 
 
 type alias Friend =
-    { name : Maybe String
+    { name : Maybe.Maybe String
     }
 
 

@@ -1,4 +1,9 @@
-module Enum exposing (Data, decoder, query)
+module Enum
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Data.Binary
 import Json.Decode

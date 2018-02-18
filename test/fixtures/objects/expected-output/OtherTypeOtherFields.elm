@@ -1,4 +1,13 @@
-module OtherTypeOtherFields exposing (Data, Dog, Person, Person2, Person3, decoder, query)
+module OtherTypeOtherFields
+    exposing
+        ( Data
+        , Person3
+        , Person
+        , Person2
+        , Dog
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -36,7 +45,7 @@ decoder =
 
 
 type alias Person3 =
-    { dog : Maybe Dog
+    { dog : Maybe.Maybe Dog
     }
 
 
@@ -47,7 +56,7 @@ person3Decoder =
 
 
 type alias Dog =
-    { name : Maybe String
+    { name : Maybe.Maybe String
     }
 
 
@@ -69,7 +78,7 @@ personDecoder =
 
 
 type alias Person2 =
-    { email : Maybe String
+    { email : Maybe.Maybe String
     }
 
 

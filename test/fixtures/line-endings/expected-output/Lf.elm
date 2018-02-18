@@ -1,4 +1,9 @@
-module Lf exposing (Data, decoder, query)
+module Lf
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Json.Decode
 

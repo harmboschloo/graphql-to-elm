@@ -1,0 +1,11 @@
+query Lists(
+  $optionalList: [Input!]
+  $list: [Input!]!
+  $listOfOptionals: [Input]!
+) {
+  lists(
+    optionalList: $optionalList
+    list: $list
+    listOfOptionals: $listOfOptionals
+  )
+}

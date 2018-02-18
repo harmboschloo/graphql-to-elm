@@ -1,4 +1,14 @@
-module Query exposing (Data, ElmBasics, ElmKeywords, GraphqlToElmReservedWords, Misc, OtherElmKeywords, decoder, query)
+module Query
+    exposing
+        ( Data
+        , ElmKeywords
+        , OtherElmKeywords
+        , ElmBasics
+        , GraphqlToElmReservedWords
+        , Misc
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -67,22 +77,22 @@ query =
 
 
 type alias Data =
-    { elmBasics : ElmBasics
-    , elmKeywords : ElmKeywords
+    { elmKeywords : ElmKeywords
+    , otherElmKeywords : OtherElmKeywords
+    , elmBasics : ElmBasics
     , graphqlToElmReservedWords : GraphqlToElmReservedWords
     , misc : Misc
-    , otherElmKeywords : OtherElmKeywords
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map5 Data
-        (Json.Decode.field "elmBasics" elmBasicsDecoder)
         (Json.Decode.field "elmKeywords" elmKeywordsDecoder)
+        (Json.Decode.field "otherElmKeywords" otherElmKeywordsDecoder)
+        (Json.Decode.field "elmBasics" elmBasicsDecoder)
         (Json.Decode.field "graphqlToElmReservedWords" graphqlToElmReservedWordsDecoder)
         (Json.Decode.field "misc" miscDecoder)
-        (Json.Decode.field "otherElmKeywords" otherElmKeywordsDecoder)
 
 
 type alias ElmKeywords =
@@ -136,63 +146,63 @@ otherElmKeywordsDecoder =
 
 
 type alias ElmBasics =
-    { int : String
-    , just : String
-    , string : String
-    , true : String
+    { not : String
     , flip : String
+    , string : String
+    , int : String
     , infix : String
     , min : String
-    , not : String
+    , just : String
+    , true : String
     }
 
 
 elmBasicsDecoder : Json.Decode.Decoder ElmBasics
 elmBasicsDecoder =
     Json.Decode.map8 ElmBasics
-        (Json.Decode.field "Int" Json.Decode.string)
-        (Json.Decode.field "Just" Json.Decode.string)
-        (Json.Decode.field "String" Json.Decode.string)
-        (Json.Decode.field "True" Json.Decode.string)
+        (Json.Decode.field "not" Json.Decode.string)
         (Json.Decode.field "flip" Json.Decode.string)
+        (Json.Decode.field "String" Json.Decode.string)
+        (Json.Decode.field "Int" Json.Decode.string)
         (Json.Decode.field "infix" Json.Decode.string)
         (Json.Decode.field "min" Json.Decode.string)
-        (Json.Decode.field "not" Json.Decode.string)
+        (Json.Decode.field "Just" Json.Decode.string)
+        (Json.Decode.field "True" Json.Decode.string)
 
 
 type alias GraphqlToElmReservedWords =
-    { data : String
-    , variables : String
-    , decoder : String
-    , encodeVariables : String
+    { variables : String
+    , data : String
     , query : String
+    , encodeVariables : String
+    , decoder : String
     }
 
 
 graphqlToElmReservedWordsDecoder : Json.Decode.Decoder GraphqlToElmReservedWords
 graphqlToElmReservedWordsDecoder =
     Json.Decode.map5 GraphqlToElmReservedWords
-        (Json.Decode.field "Data" Json.Decode.string)
         (Json.Decode.field "Variables" Json.Decode.string)
-        (Json.Decode.field "decoder" Json.Decode.string)
-        (Json.Decode.field "encodeVariables" Json.Decode.string)
+        (Json.Decode.field "Data" Json.Decode.string)
         (Json.Decode.field "query" Json.Decode.string)
+        (Json.Decode.field "encodeVariables" Json.Decode.string)
+        (Json.Decode.field "decoder" Json.Decode.string)
 
 
 type alias Misc =
-    { variables2 : String
-    , decoder2 : String
-    , else_ : String
+    { else_ : String
     , else_2 : String
     , type_ : String
+    , variables2 : String
+    , decoder2 : String
     }
 
 
 miscDecoder : Json.Decode.Decoder Misc
 miscDecoder =
     Json.Decode.map5 Misc
-        (Json.Decode.field "Variables2" Json.Decode.string)
-        (Json.Decode.field "decoder2" Json.Decode.string)
         (Json.Decode.field "else" Json.Decode.string)
         (Json.Decode.field "else_" Json.Decode.string)
         (Json.Decode.field "type_" Json.Decode.string)
+        (Json.Decode.field "Variables2" Json.Decode.string)
+        (Json.Decode.field "decoder2" Json.Decode.string)

@@ -1,4 +1,11 @@
-module SameTypeOtherFields exposing (Data, Person, Person2, decoder, query)
+module SameTypeOtherFields
+    exposing
+        ( Data
+        , Person2
+        , Person
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -31,26 +38,26 @@ decoder =
 
 
 type alias Person2 =
-    { age : Maybe Int
-    , name : String
+    { name : String
+    , age : Maybe.Maybe Int
     }
 
 
 person2Decoder : Json.Decode.Decoder Person2
 person2Decoder =
     Json.Decode.map2 Person2
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
 
 
 type alias Person =
-    { age : Maybe Int
-    , email : Maybe String
+    { email : Maybe.Maybe String
+    , age : Maybe.Maybe Int
     }
 
 
 personDecoder : Json.Decode.Decoder Person
 personDecoder =
     Json.Decode.map2 Person
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))

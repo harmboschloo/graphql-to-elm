@@ -1,4 +1,9 @@
-module CustomScalarTypes exposing (Data, decoder, query)
+module CustomScalarTypes
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Data.Date
 import Data.Id
@@ -14,13 +19,13 @@ query =
 
 
 type alias Data =
-    { date : Data.Date.Date
-    , id : Data.Id.Id
+    { id : Data.Id.Id
+    , date : Data.Date.Date
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map2 Data
-        (Json.Decode.field "date" Data.Date.decoder)
         (Json.Decode.field "id" Data.Id.decoder)
+        (Json.Decode.field "date" Data.Date.decoder)

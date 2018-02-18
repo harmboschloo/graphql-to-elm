@@ -1,4 +1,9 @@
-module DefaultScalarTypes exposing (Data, decoder, query)
+module DefaultScalarTypes
+    exposing
+        ( Data
+        , query
+        , decoder
+        )
 
 import Json.Decode
 
@@ -15,19 +20,19 @@ query =
 
 
 type alias Data =
-    { boolean : Bool
+    { int : Int
     , float : Float
-    , id : String
-    , int : Int
     , string : String
+    , boolean : Bool
+    , id : String
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map5 Data
-        (Json.Decode.field "boolean" Json.Decode.bool)
-        (Json.Decode.field "float" Json.Decode.float)
-        (Json.Decode.field "id" Json.Decode.string)
         (Json.Decode.field "int" Json.Decode.int)
+        (Json.Decode.field "float" Json.Decode.float)
         (Json.Decode.field "string" Json.Decode.string)
+        (Json.Decode.field "boolean" Json.Decode.bool)
+        (Json.Decode.field "id" Json.Decode.string)

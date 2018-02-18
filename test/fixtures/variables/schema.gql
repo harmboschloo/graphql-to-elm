@@ -7,21 +7,28 @@ schema {
 # Query
 
 type Query {
-  user(id: String!): User
+  scalars(string: String!, int: Int!): String
 
-  ages(range: Range): [Int!]!
+  scalarsOptional(string: String, int: Int): String
+
+  scalarsMixed(string: String, int: Int!): String
+
+  inputs(optionalInput: Input, input: Input!): String
+
+  lists(
+    optionalList: [Input!]
+    list: [Input!]!
+    listOfOptionals: [Input]!
+  ): String
 }
 
-type User {
-  name: String!
+input Input {
+  optionalInt: Int
+  float: Float
+  optionalSubInput: SubInput
+  subInput: SubInput!
 }
 
-input Range {
-  begin: Int
-  end: Int!
-  means: [Mean!]
-}
-
-input Mean {
-  mean: Float
+input SubInput {
+  string: String!
 }

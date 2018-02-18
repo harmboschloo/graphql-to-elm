@@ -68,6 +68,7 @@ const data: { [key: string]: FinalConfig } = {
       "other-type-other-fields.gql"
       // TODO
       // - big objects (more than 8 fields, needs andMap)
+      //   - see also keywords
       // - resursive decoding? (using lazy)
     ]
   }),
@@ -95,10 +96,15 @@ const data: { [key: string]: FinalConfig } = {
         decoder: "Data.Binary.decoder"
       }
     }
+  }),
+  variables: create({
+    queries: [
+      "scalars.gql",
+      "scalars-optional.gql",
+      "scalars-mixed.gql"
+      // TODO , "inputs.gql", "lists.gql"
+    ]
   })
-  // variables: create({
-  //   queries: ["scalar-variable.gql"]
-  // })
   // TODO
   // - endpoint
   // - field names

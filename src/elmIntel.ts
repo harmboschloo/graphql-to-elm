@@ -1,4 +1,5 @@
 import * as path from "path";
+import * as assert from "assert";
 import {
   GraphQLNullableType,
   GraphQLNamedType,
@@ -25,20 +26,22 @@ import {
   validModuleName,
   validTypeName,
   validVariableName,
-  validFieldName,
-  extractModule
+  validFieldName
 } from "./utils";
 
 export interface ElmIntel {
   dest: string;
   module: string;
   query: string;
-  encodeItems: ElmIntelEncodeItem[];
-  decodeItems: ElmIntelDecodeItem[];
   usedNames: string[];
-  recordNames: {};
-  recordDecoderNames: {};
-  imports: {};
+  encode: {
+    items: ElmIntelEncodeItem[];
+  };
+  decode: {
+    items: ElmIntelDecodeItem[];
+    recordNamesBySignature: {};
+    decoderNamesByRecordName: {};
+  };
 }
 
 export interface ElmIntelItem {
@@ -47,9 +50,9 @@ export interface ElmIntelItem {
   fieldName: string;
   depth: number;
   children: number[];
-  isMaybe: boolean;
+  isNullable: boolean;
   isList: boolean;
-  isListMaybe: boolean;
+  isListOfNullables: boolean;
   type: string;
   isRecordType: boolean;
 }
@@ -90,12 +93,15 @@ export const queryToElmIntel = (
     dest,
     module,
     query: queryIntel.query,
-    decodeItems: [],
-    encodeItems: [],
     usedNames: getReservedNames(),
-    recordNames: {},
-    recordDecoderNames: {},
-    imports: {}
+    encode: {
+      items: []
+    },
+    decode: {
+      items: [],
+      recordNamesBySignature: {},
+      decoderNamesByRecordName: {}
+    }
   };
 
   queryIntel.variables
@@ -119,25 +125,28 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   let encoder;
 
   if (item.id === 0) {
+    assert.ok(item.children.length > 0, "Variables should have children");
     item.isRecordType = true;
     type = "Variables";
     encoder = "encodeVariables";
+    setRecordFieldNames(item, intel.encode.items);
   } else if (isInputObjectType(namedType)) {
+    assert.ok(item.children.length > 0, "InputObjectType should have children");
     item.isRecordType = true;
     type = getEncodeRecordTypeName(namedType.name, intel);
     encoder = getRecordEncoderName(type, intel);
+    setRecordFieldNames(item, intel.encode.items);
   } else if (isScalarType(namedType)) {
     const scalarEncoder: TypeEncoder | undefined =
       options.scalarEncoders[namedType.name] ||
       defaultScalarEncoders[namedType.name];
 
-    if (!scalarEncoder) {
-      throw new Error(
-        `No encoder defined for scalar type: ${
-          queryItem.type
-        }. Please add one to options.scalarEncoders`
-      );
-    }
+    assert.ok(
+      scalarEncoder,
+      `No encoder defined for scalar type: ${
+        queryItem.type
+      }. Please add one to options.scalarEncoders`
+    );
 
     type = scalarEncoder.type;
     encoder = scalarEncoder.encoder;
@@ -145,25 +154,20 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
     const typeName: string = namedType.name;
     const enumEncoder: TypeEncoder | undefined = options.enumEncoders[typeName];
 
-    if (!enumEncoder) {
-      throw new Error(
-        `No encoder defined for enum type: ${
-          queryItem.type
-        }. Please add one to options.enumEncoders`
-      );
-    }
+    assert.ok(
+      enumEncoder,
+      `No encoder defined for enum type: ${
+        queryItem.type
+      }. Please add one to options.enumEncoders`
+    );
 
     type = enumEncoder.type;
     encoder = enumEncoder.encoder;
   } else {
-    throw new Error(`Unhandled query type: ${queryItem.type}`);
+    assert.fail(`Unhandled query type: ${queryItem.type}`);
   }
 
-  addImport("Json.Encode", intel);
-  addImport(extractModule(type), intel);
-  addImport(extractModule(encoder), intel);
-
-  intel.encodeItems.push({
+  intel.encode.items.push({
     ...item,
     type,
     encoder
@@ -180,13 +184,14 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
   let decoder;
 
   if (isCompositeType(namedType)) {
+    assert.ok(item.children.length > 0, "CompositeType should have children");
     item.isRecordType = true;
-    setFieldNames(item, intel.decodeItems);
+    setRecordFieldNames(item, intel.decode.items);
     if (item.id === 0) {
       type = "Data";
       decoder = "decoder";
-      intel.recordNames[""] = type;
-      intel.recordDecoderNames[type] = decoder;
+      intel.decode.recordNamesBySignature[""] = type;
+      intel.decode.decoderNamesByRecordName[type] = decoder;
     } else {
       type = getDecodeRecordTypeName(namedType.name, item.children, intel);
       decoder = getRecordDecoderName(type, intel);
@@ -196,13 +201,12 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
       options.scalarDecoders[namedType.name] ||
       defaultScalarDecoders[namedType.name];
 
-    if (!scalarDecoder) {
-      throw new Error(
-        `No decoder defined for scalar type: ${
-          queryItem.type
-        }. Please add one to options.scalarDecoders`
-      );
-    }
+    assert.ok(
+      scalarDecoder,
+      `No decoder defined for scalar type: ${
+        queryItem.type
+      }. Please add one to options.scalarDecoders`
+    );
 
     type = scalarDecoder.type;
     decoder = scalarDecoder.decoder;
@@ -210,25 +214,20 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
     const typeName: string = namedType.name;
     const enumDecoder: TypeDecoder | undefined = options.enumDecoders[typeName];
 
-    if (!enumDecoder) {
-      throw new Error(
-        `No decoder defined for enum type: ${
-          queryItem.type
-        }. Please add one to options.enumDecoders`
-      );
-    }
+    assert.ok(
+      enumDecoder,
+      `No decoder defined for enum type: ${
+        queryItem.type
+      }. Please add one to options.enumDecoders`
+    );
 
     type = enumDecoder.type;
     decoder = enumDecoder.decoder;
   } else {
-    throw new Error(`Unhandled query type: ${queryItem.type}`);
+    assert.fail(`Unhandled query type: ${queryItem.type}`);
   }
 
-  addImport("Json.Decode", intel);
-  addImport(extractModule(type), intel);
-  addImport(extractModule(decoder), intel);
-
-  intel.decodeItems.push({
+  intel.decode.items.push({
     ...item,
     type,
     decoder
@@ -281,16 +280,6 @@ const defaultScalarDecoders: TypeDecoders = {
   }
 };
 
-const reservedNames = [
-  "Variables",
-  "Data",
-  "query",
-  "encodeVariables",
-  "decoder"
-];
-
-const getReservedNames = () => [...reservedNames];
-
 const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
   const isList = isListType(nullableType);
@@ -301,18 +290,31 @@ const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
     fieldName: "",
     depth: queryItem.depth,
     children: queryItem.children,
-    isMaybe: isNullableType(queryItem.type),
+    isNullable: isNullableType(queryItem.type),
     isList,
-    isListMaybe: isList && isNullableType(nullableType.ofType),
+    isListOfNullables: isList && isNullableType(nullableType.ofType),
     type: "",
     isRecordType: false
   };
 };
 
+const reservedNames = [
+  "Variables",
+  "Data",
+  "query",
+  "encodeVariables",
+  "decoder"
+];
+
+const getReservedNames = () => [...reservedNames];
+
 const getName = (name: string, intel: ElmIntel): string =>
   nextValidName(name, intel.usedNames);
 
-const setFieldNames = ({ children }: ElmIntelItem, items: ElmIntelItem[]) => {
+const setRecordFieldNames = (
+  { children }: ElmIntelItem,
+  items: ElmIntelItem[]
+) => {
   const usedFieldNames = [];
   const findItem = id => items.find(item => item.id === id);
   children.map(findItem).forEach(child => {
@@ -321,12 +323,30 @@ const setFieldNames = ({ children }: ElmIntelItem, items: ElmIntelItem[]) => {
         validFieldName(child.name),
         usedFieldNames
       );
+    } else {
+      assert.fail("Could not find elm intel item child with id: ${id}");
     }
   });
 };
 
 const getEncodeRecordTypeName = (type: string, intel: ElmIntel): string =>
   getName(validTypeName(type), intel);
+
+const getRecordEncoderName = (type: string, intel: ElmIntel) =>
+  getName(`encode${validNameUpper(type)}`, intel);
+
+export const getEncodeItemChild = (
+  id: number,
+  intel: ElmIntel
+): ElmIntelEncodeItem => {
+  const child = intel.encode.items.find(item => item.id === id);
+  if (!child) {
+    throw new Error(
+      `Could not find elm intel encode item child with id: ${id}`
+    );
+  }
+  return child;
+};
 
 const getDecodeRecordTypeName = (
   type: string,
@@ -340,11 +360,11 @@ const getDecodeRecordTypeName = (
 
   const signature = `${type}: ${propertyNames}`;
 
-  if (intel.recordNames[signature]) {
-    return intel.recordNames[signature];
+  if (intel.decode.recordNamesBySignature[signature]) {
+    return intel.decode.recordNamesBySignature[signature];
   } else {
     const name = getName(validTypeName(type), intel);
-    intel.recordNames[signature] = name;
+    intel.decode.recordNamesBySignature[signature] = name;
     return name;
   }
 };
@@ -353,7 +373,7 @@ export const getDecodeItemChild = (
   id: number,
   intel: ElmIntel
 ): ElmIntelDecodeItem => {
-  const child = intel.decodeItems.find(item => item.id === id);
+  const child = intel.decode.items.find(item => item.id === id);
   if (!child) {
     throw new Error(
       `Could not find elm intel decode item child with id: ${id}`
@@ -362,21 +382,12 @@ export const getDecodeItemChild = (
   return child;
 };
 
-const getRecordEncoderName = (type: string, intel: ElmIntel) =>
-  getName(`encode${validNameUpper(type)}`, intel);
-
 const getRecordDecoderName = (type: string, intel: ElmIntel) => {
-  if (intel.recordDecoderNames[type]) {
-    return intel.recordDecoderNames[type];
+  if (intel.decode.decoderNamesByRecordName[type]) {
+    return intel.decode.decoderNamesByRecordName[type];
   } else {
     const name = getName(validVariableName(`${type}Decoder`), intel);
-    intel.recordDecoderNames[type] = name;
+    intel.decode.decoderNamesByRecordName[type] = name;
     return name;
-  }
-};
-
-const addImport = (name: string, intel: ElmIntel) => {
-  if (name) {
-    intel.imports[name] = true;
   }
 };

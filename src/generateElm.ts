@@ -29,7 +29,7 @@ const generateImports = (intel: ElmIntel): string =>
 
 const generateRecordDecoders = (intel: ElmIntel): string =>
   intel.decodeItems
-    .sort((a, b) => sortString(a.type, a.type))
+    .sort((a, b) => a.id - b.id)
     .map(generateRecordDecoder(intel))
     .filter(x => !!x)
     .join("\n\n\n");
@@ -49,7 +49,7 @@ const generateRecordDecoder = (intel: ElmIntel) => {
       .sort((a, b) => sortString(a.name, b.name));
 
     const fieldTypes = children
-      .map(child => `${child.name} : ${getDecoderTypeSignature(child)}`)
+      .map(child => `${child.fieldName} : ${getDecoderTypeSignature(child)}`)
       .join("\n    , ");
 
     const map = children.length > 1 ? children.length : "";

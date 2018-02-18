@@ -34,6 +34,27 @@ query =
 }"""
 
 
+type alias Data =
+    { i : User
+    , maybeThem : Maybe (List (Maybe User3))
+    , me : User4
+    , them : List User4
+    , version : Int
+    , you : Maybe User5
+    }
+
+
+decoder : Json.Decode.Decoder Data
+decoder =
+    Json.Decode.map6 Data
+        (Json.Decode.field "i" userDecoder)
+        (Json.Decode.field "maybeThem" (Json.Decode.nullable (Json.Decode.list (Json.Decode.nullable user3Decoder))))
+        (Json.Decode.field "me" user4Decoder)
+        (Json.Decode.field "them" (Json.Decode.list user4Decoder))
+        (Json.Decode.field "version" Json.Decode.int)
+        (Json.Decode.field "you" (Json.Decode.nullable user5Decoder))
+
+
 type alias User =
     { name : String
     }
@@ -43,30 +64,6 @@ userDecoder : Json.Decode.Decoder User
 userDecoder =
     Json.Decode.map User
         (Json.Decode.field "name" Json.Decode.string)
-
-
-type alias User2 =
-    { age : Maybe Int
-    , id : String
-    }
-
-
-user2Decoder : Json.Decode.Decoder User2
-user2Decoder =
-    Json.Decode.map2 User2
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
-        (Json.Decode.field "id" Json.Decode.string)
-
-
-type alias User3 =
-    { age : Maybe Int
-    }
-
-
-user3Decoder : Json.Decode.Decoder User3
-user3Decoder =
-    Json.Decode.map User3
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
 
 
 type alias User4 =
@@ -97,22 +94,25 @@ user5Decoder =
         (Json.Decode.field "relatives" (Json.Decode.list userDecoder))
 
 
-type alias Data =
-    { i : User
-    , maybeThem : Maybe (List (Maybe User3))
-    , me : User4
-    , them : List User4
-    , version : Int
-    , you : Maybe User5
+type alias User2 =
+    { age : Maybe Int
+    , id : String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map6 Data
-        (Json.Decode.field "i" userDecoder)
-        (Json.Decode.field "maybeThem" (Json.Decode.nullable (Json.Decode.list (Json.Decode.nullable user3Decoder))))
-        (Json.Decode.field "me" user4Decoder)
-        (Json.Decode.field "them" (Json.Decode.list user4Decoder))
-        (Json.Decode.field "version" Json.Decode.int)
-        (Json.Decode.field "you" (Json.Decode.nullable user5Decoder))
+user2Decoder : Json.Decode.Decoder User2
+user2Decoder =
+    Json.Decode.map2 User2
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+        (Json.Decode.field "id" Json.Decode.string)
+
+
+type alias User3 =
+    { age : Maybe Int
+    }
+
+
+user3Decoder : Json.Decode.Decoder User3
+user3Decoder =
+    Json.Decode.map User3
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))

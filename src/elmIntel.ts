@@ -20,10 +20,12 @@ import {
 } from "./options";
 import { QueryIntel, QueryIntelItem } from "./queryIntel";
 import {
+  nextValidName,
   validNameUpper,
   validModuleName,
   validTypeName,
   validVariableName,
+  validFieldName,
   extractModule
 } from "./utils";
 
@@ -33,7 +35,7 @@ export interface ElmIntel {
   query: string;
   encodeItems: ElmIntelEncodeItem[];
   decodeItems: ElmIntelDecodeItem[];
-  names: {};
+  usedNames: string[];
   recordNames: {};
   recordDecoderNames: {};
   imports: {};
@@ -42,6 +44,7 @@ export interface ElmIntel {
 export interface ElmIntelItem {
   id: number;
   name: string;
+  fieldName: string;
   depth: number;
   children: number[];
   isMaybe: boolean;
@@ -89,7 +92,7 @@ export const queryToElmIntel = (
     query: queryIntel.query,
     decodeItems: [],
     encodeItems: [],
-    names: getReservedNames(),
+    usedNames: getReservedNames(),
     recordNames: {},
     recordDecoderNames: {},
     imports: {}
@@ -178,6 +181,7 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
 
   if (isCompositeType(namedType)) {
     item.isRecordType = true;
+    setFieldNames(item, intel.decodeItems);
     if (item.id === 0) {
       type = "Data";
       decoder = "decoder";
@@ -277,35 +281,7 @@ const defaultScalarDecoders: TypeDecoders = {
   }
 };
 
-const reservedWordsElm = [
-  "alias",
-  "as",
-  "case",
-  "command",
-  "effect",
-  "else",
-  "exposing",
-  "false",
-  "if",
-  "import",
-  "in",
-  "infix",
-  "left",
-  "let",
-  "module",
-  "non",
-  "null",
-  "of",
-  "port",
-  "right",
-  "subscription",
-  "then",
-  "type",
-  "true",
-  "where"
-];
-
-const reservedWords = [
+const reservedNames = [
   "Variables",
   "Data",
   "query",
@@ -313,10 +289,7 @@ const reservedWords = [
   "decoder"
 ];
 
-const getReservedNames = () =>
-  reservedWords
-    .concat(reservedWordsElm)
-    .reduce((names, name) => ({ ...names, [name]: true }), {});
+const getReservedNames = () => [...reservedNames];
 
 const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
@@ -325,6 +298,7 @@ const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
   return {
     id: queryItem.id,
     name: queryItem.name,
+    fieldName: "",
     depth: queryItem.depth,
     children: queryItem.children,
     isMaybe: isNullableType(queryItem.type),
@@ -335,19 +309,20 @@ const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
   };
 };
 
-const getName = (name: string, intel: ElmIntel): string => {
-  if (!intel.names[name]) {
-    intel.names[name] = true;
-    return name;
-  } else {
-    let count = 2;
-    while (intel.names[name + count]) {
-      count++;
+const getName = (name: string, intel: ElmIntel): string =>
+  nextValidName(name, intel.usedNames);
+
+const setFieldNames = ({ children }: ElmIntelItem, items: ElmIntelItem[]) => {
+  const usedFieldNames = [];
+  const findItem = id => items.find(item => item.id === id);
+  children.map(findItem).forEach(child => {
+    if (child) {
+      child.fieldName = nextValidName(
+        validFieldName(child.name),
+        usedFieldNames
+      );
     }
-    const name2 = name + count;
-    intel.names[name2] = true;
-    return name2;
-  }
+  });
 };
 
 const getEncodeRecordTypeName = (type: string, intel: ElmIntel): string =>

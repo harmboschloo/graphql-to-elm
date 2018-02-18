@@ -1,0 +1,73 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  elmKeywords: ElmKeywords!
+  otherElmKeywords: OtherElmKeywords!
+  elmBasics: ElmBasics!
+  graphqlToElmReservedWords: GraphqlToElmReservedWords!
+  misc: Misc!
+}
+
+type ElmKeywords {
+  as: String!
+  case: String!
+  else: String!
+  exposing: String!
+  if: String!
+  import: String!
+  in: String!
+  let: String!
+  module: String!
+  of: String!
+  port: String!
+  then: String!
+  type: String!
+  where: String!
+}
+
+type OtherElmKeywords {
+  alias: String!
+  command: String!
+  effect: String!
+  false: String!
+  infix: String!
+  left: String!
+  non: String!
+  null: String!
+  right: String!
+  subscription: String!
+  true: String!
+}
+
+type ElmBasics {
+  not: String!
+  flip: String!
+  String: String!
+  Int: String!
+  infix: String!
+  min: String!
+  Just: String!
+  True: String!
+}
+
+type GraphqlToElmReservedWords {
+  Variables: String!
+  Data: String!
+  query: String!
+  encodeVariables: String!
+  decoder: String!
+}
+
+type Misc {
+  else: String!
+  else_: String!
+  type_: String!
+  Variables2: String!
+  decoder2: String!
+}

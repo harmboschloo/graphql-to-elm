@@ -53,6 +53,7 @@ const create = ({
 
 const data: { [key: string]: FinalConfig } = {
   "line-endings": create({ queries: ["lf.gql", "crlf.gql"] }),
+  keywords: create({ queries: ["query.gql"] }),
   lists: create({ queries: ["list-of-objects.gql", "list-of-scalars.gql"] }),
   misc: create({ queries: ["query.gql"] }),
   objects: create({
@@ -94,10 +95,10 @@ const data: { [key: string]: FinalConfig } = {
         decoder: "Data.Binary.decoder"
       }
     }
-  }),
-  variables: create({
-    queries: ["scalar-variable.gql"]
   })
+  // variables: create({
+  //   queries: ["scalar-variable.gql"]
+  // })
   // TODO
   // - endpoint
   // - field names

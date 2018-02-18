@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Tests exposing (Test, tests)
 import Html exposing (Html)
-import GraphqlToElm exposing (Response(..), send, post)
+import GraphqlToElm.Http exposing (Response(..), send, post)
 
 
 numberOfTests : Int

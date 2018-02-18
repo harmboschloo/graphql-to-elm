@@ -1,0 +1,59 @@
+{
+  elmKeywords {
+    as
+    case
+    else
+    exposing
+    if
+    import
+    in
+    let
+    # module
+    # of
+    # port
+    # then
+    # type
+    # where
+  }
+
+  otherElmKeywords {
+    alias
+    command
+    effect
+    false
+    infix
+    left
+    non
+    null
+    # right
+    # subscription
+    # true
+  }
+
+  elmBasics {
+    not
+    flip
+    String
+    Int
+    infix
+    min
+    Just
+    True
+  }
+
+  graphqlToElmReservedWords {
+    Variables
+    Data
+    query
+    encodeVariables
+    decoder
+  }
+
+  misc {
+    else
+    else_
+    type_
+    Variables2
+    decoder2
+  }
+}

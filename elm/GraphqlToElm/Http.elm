@@ -1,4 +1,4 @@
-module GraphqlToElm
+module GraphqlToElm.Http
     exposing
         ( Query
         , Request

@@ -17,17 +17,17 @@ query =
 }"""
 
 
-type alias Person =
-    { age : Maybe Int
-    , email : Maybe String
+type alias Data =
+    { i : Person2
+    , me : Person
     }
 
 
-personDecoder : Json.Decode.Decoder Person
-personDecoder =
-    Json.Decode.map2 Person
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
-        (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))
+decoder : Json.Decode.Decoder Data
+decoder =
+    Json.Decode.map2 Data
+        (Json.Decode.field "i" person2Decoder)
+        (Json.Decode.field "me" personDecoder)
 
 
 type alias Person2 =
@@ -43,14 +43,14 @@ person2Decoder =
         (Json.Decode.field "name" Json.Decode.string)
 
 
-type alias Data =
-    { i : Person2
-    , me : Person
+type alias Person =
+    { age : Maybe Int
+    , email : Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map2 Data
-        (Json.Decode.field "i" person2Decoder)
-        (Json.Decode.field "me" personDecoder)
+personDecoder : Json.Decode.Decoder Person
+personDecoder =
+    Json.Decode.map2 Person
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+        (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))

@@ -24,17 +24,6 @@ query =
 }"""
 
 
-type alias Friend =
-    { name : Maybe String
-    }
-
-
-friendDecoder : Json.Decode.Decoder Friend
-friendDecoder =
-    Json.Decode.map Friend
-        (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
-
-
 type alias Data =
     { friendsOrNull_friend : Maybe (List Friend)
     , friendsOrNull_friendOrNull : Maybe (List (Maybe Friend))
@@ -50,3 +39,14 @@ decoder =
         (Json.Decode.field "friendsOrNull_friendOrNull" (Json.Decode.nullable (Json.Decode.list (Json.Decode.nullable friendDecoder))))
         (Json.Decode.field "friends_friend" (Json.Decode.list friendDecoder))
         (Json.Decode.field "friends_friendOrNull" (Json.Decode.list (Json.Decode.nullable friendDecoder)))
+
+
+type alias Friend =
+    { name : Maybe String
+    }
+
+
+friendDecoder : Json.Decode.Decoder Friend
+friendDecoder =
+    Json.Decode.map Friend
+        (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))

@@ -133,8 +133,8 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   } else if (isInputObjectType(namedType)) {
     assert.ok(item.children.length > 0, "InputObjectType should have children");
     item.isRecordType = true;
-    type = getEncodeRecordTypeName(namedType.name, intel);
-    encoder = getRecordEncoderName(type, intel);
+    type = newEncodeRecordTypeName(namedType.name, intel);
+    encoder = newRecordEncoderName(type, intel);
     setRecordFieldNames(item, intel.encode.items);
   } else if (isScalarType(namedType)) {
     const scalarEncoder: TypeEncoder | undefined =
@@ -193,8 +193,8 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
       intel.decode.recordNamesBySignature[""] = type;
       intel.decode.decoderNamesByRecordName[type] = decoder;
     } else {
-      type = getDecodeRecordTypeName(namedType.name, item.children, intel);
-      decoder = getRecordDecoderName(type, intel);
+      type = newDecodeRecordTypeName(namedType.name, item.children, intel);
+      decoder = newRecordDecoderName(type, intel);
     }
   } else if (isScalarType(namedType)) {
     const scalarDecoder: TypeDecoder | undefined =
@@ -308,7 +308,7 @@ const reservedNames = [
 
 const getReservedNames = () => [...reservedNames];
 
-const getName = (name: string, intel: ElmIntel): string =>
+const newName = (name: string, intel: ElmIntel): string =>
   nextValidName(name, intel.usedNames);
 
 const setRecordFieldNames = (
@@ -329,11 +329,11 @@ const setRecordFieldNames = (
   });
 };
 
-const getEncodeRecordTypeName = (type: string, intel: ElmIntel): string =>
-  getName(validTypeName(type), intel);
+const newEncodeRecordTypeName = (type: string, intel: ElmIntel): string =>
+  newName(validTypeName(type), intel);
 
-const getRecordEncoderName = (type: string, intel: ElmIntel) =>
-  getName(`encode${validNameUpper(type)}`, intel);
+const newRecordEncoderName = (type: string, intel: ElmIntel) =>
+  newName(`encode${validNameUpper(type)}`, intel);
 
 export const getEncodeItemChild = (
   id: number,
@@ -348,7 +348,7 @@ export const getEncodeItemChild = (
   return child;
 };
 
-const getDecodeRecordTypeName = (
+const newDecodeRecordTypeName = (
   type: string,
   children: number[],
   intel: ElmIntel
@@ -363,8 +363,18 @@ const getDecodeRecordTypeName = (
   if (intel.decode.recordNamesBySignature[signature]) {
     return intel.decode.recordNamesBySignature[signature];
   } else {
-    const name = getName(validTypeName(type), intel);
+    const name = newName(validTypeName(type), intel);
     intel.decode.recordNamesBySignature[signature] = name;
+    return name;
+  }
+};
+
+const newRecordDecoderName = (type: string, intel: ElmIntel) => {
+  if (intel.decode.decoderNamesByRecordName[type]) {
+    return intel.decode.decoderNamesByRecordName[type];
+  } else {
+    const name = newName(validVariableName(`${type}Decoder`), intel);
+    intel.decode.decoderNamesByRecordName[type] = name;
     return name;
   }
 };
@@ -380,14 +390,4 @@ export const getDecodeItemChild = (
     );
   }
   return child;
-};
-
-const getRecordDecoderName = (type: string, intel: ElmIntel) => {
-  if (intel.decode.decoderNamesByRecordName[type]) {
-    return intel.decode.decoderNamesByRecordName[type];
-  } else {
-    const name = getName(validVariableName(`${type}Decoder`), intel);
-    intel.decode.decoderNamesByRecordName[type] = name;
-    return name;
-  }
 };

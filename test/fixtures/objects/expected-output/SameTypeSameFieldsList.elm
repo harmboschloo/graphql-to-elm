@@ -15,10 +15,12 @@ query =
     """{
   me {
     bestFriend {
+      age
       name
     }
     friends {
       name
+      age
     }
   }
 }"""
@@ -49,11 +51,13 @@ personDecoder =
 
 
 type alias Person2 =
-    { name : String
+    { age : Maybe.Maybe Int
+    , name : String
     }
 
 
 person2Decoder : Json.Decode.Decoder Person2
 person2Decoder =
-    Json.Decode.map Person2
+    Json.Decode.map2 Person2
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "name" Json.Decode.string)

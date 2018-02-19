@@ -1,10 +1,12 @@
 {
   me {
     bestFriend {
+      age
       name
     }
     friends {
       name
+      age
     }
   }
 }

@@ -1,8 +1,10 @@
 {
   you {
     email
+    age
   }
   youOrNull {
+    age
     email
   }
 }

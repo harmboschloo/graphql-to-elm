@@ -17,8 +17,8 @@ query =
     age
   }
   me {
-    name
     age
+    name
   }
 }"""
 

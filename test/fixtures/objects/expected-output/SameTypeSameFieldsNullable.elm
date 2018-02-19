@@ -14,8 +14,10 @@ query =
     """{
   you {
     email
+    age
   }
   youOrNull {
+    age
     email
   }
 }"""
@@ -36,10 +38,12 @@ decoder =
 
 type alias Person2 =
     { email : Maybe.Maybe String
+    , age : Maybe.Maybe Int
     }
 
 
 person2Decoder : Json.Decode.Decoder Person2
 person2Decoder =
-    Json.Decode.map Person2
+    Json.Decode.map2 Person2
         (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))

@@ -122,19 +122,17 @@ const generateRecordEncoder = (
     ? "GraphqlToElm.OptionalInput.encodeObject"
     : "Json.Encode.object";
 
-  const fieldNames = children.map(child => child.fieldName).join(", ");
-
   const fieldEncoders = children
     .map(
       child =>
-        `( "${child.name}", ${wrapEncoder(child, hasNullables)} ${
+        `( "${child.name}", ${wrapEncoder(child, hasNullables)} inputs.${
           child.fieldName
         } )`
     )
     .join("\n        , ");
 
   return `${item.encoder} : ${item.type} -> Json.Encode.Value
-${item.encoder} { ${fieldNames} } =
+${item.encoder} inputs =
     ${objectEncoder}
         [ ${fieldEncoders}
         ]`;

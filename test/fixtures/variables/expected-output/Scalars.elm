@@ -25,10 +25,10 @@ type alias Variables =
 
 
 encodeVariables : Variables -> Json.Encode.Value
-encodeVariables { string, int } =
+encodeVariables inputs =
     Json.Encode.object
-        [ ( "string", Json.Encode.string string )
-        , ( "int", Json.Encode.int int )
+        [ ( "string", Json.Encode.string inputs.string )
+        , ( "int", Json.Encode.int inputs.int )
         ]
 
 

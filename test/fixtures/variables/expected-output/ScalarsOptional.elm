@@ -26,10 +26,10 @@ type alias Variables =
 
 
 encodeVariables : Variables -> Json.Encode.Value
-encodeVariables { string, int } =
+encodeVariables inputs =
     GraphqlToElm.OptionalInput.encodeObject
-        [ ( "string", (GraphqlToElm.OptionalInput.map Json.Encode.string) string )
-        , ( "int", (GraphqlToElm.OptionalInput.map Json.Encode.int) int )
+        [ ( "string", (GraphqlToElm.OptionalInput.map Json.Encode.string) inputs.string )
+        , ( "int", (GraphqlToElm.OptionalInput.map Json.Encode.int) inputs.int )
         ]
 
 

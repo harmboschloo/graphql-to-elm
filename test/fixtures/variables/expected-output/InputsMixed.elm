@@ -30,10 +30,10 @@ type alias Variables =
 
 
 encodeVariables : Variables -> Json.Encode.Value
-encodeVariables { inputs, inputs2 } =
+encodeVariables inputs =
     GraphqlToElm.OptionalInput.encodeObject
-        [ ( "inputs", (encodeMixedInputs2 >> GraphqlToElm.OptionalInput.Present) inputs )
-        , ( "inputs2", (GraphqlToElm.OptionalInput.map encodeMixedInputs) inputs2 )
+        [ ( "inputs", (encodeMixedInputs2 >> GraphqlToElm.OptionalInput.Present) inputs.inputs )
+        , ( "inputs2", (GraphqlToElm.OptionalInput.map encodeMixedInputs) inputs.inputs2 )
         ]
 
 
@@ -45,11 +45,11 @@ type alias MixedInputs2 =
 
 
 encodeMixedInputs2 : MixedInputs2 -> Json.Encode.Value
-encodeMixedInputs2 { int, float, other } =
+encodeMixedInputs2 inputs =
     GraphqlToElm.OptionalInput.encodeObject
-        [ ( "int", (Json.Encode.int >> GraphqlToElm.OptionalInput.Present) int )
-        , ( "float", (GraphqlToElm.OptionalInput.map Json.Encode.float) float )
-        , ( "other", (encodeOtherInputs2 >> GraphqlToElm.OptionalInput.Present) other )
+        [ ( "int", (Json.Encode.int >> GraphqlToElm.OptionalInput.Present) inputs.int )
+        , ( "float", (GraphqlToElm.OptionalInput.map Json.Encode.float) inputs.float )
+        , ( "other", (encodeOtherInputs2 >> GraphqlToElm.OptionalInput.Present) inputs.other )
         ]
 
 
@@ -59,9 +59,9 @@ type alias OtherInputs2 =
 
 
 encodeOtherInputs2 : OtherInputs2 -> Json.Encode.Value
-encodeOtherInputs2 { string } =
+encodeOtherInputs2 inputs =
     Json.Encode.object
-        [ ( "string", Json.Encode.string string )
+        [ ( "string", Json.Encode.string inputs.string )
         ]
 
 
@@ -73,11 +73,11 @@ type alias MixedInputs =
 
 
 encodeMixedInputs : MixedInputs -> Json.Encode.Value
-encodeMixedInputs { int, float, other } =
+encodeMixedInputs inputs =
     GraphqlToElm.OptionalInput.encodeObject
-        [ ( "int", (Json.Encode.int >> GraphqlToElm.OptionalInput.Present) int )
-        , ( "float", (GraphqlToElm.OptionalInput.map Json.Encode.float) float )
-        , ( "other", (encodeOtherInputs >> GraphqlToElm.OptionalInput.Present) other )
+        [ ( "int", (Json.Encode.int >> GraphqlToElm.OptionalInput.Present) inputs.int )
+        , ( "float", (GraphqlToElm.OptionalInput.map Json.Encode.float) inputs.float )
+        , ( "other", (encodeOtherInputs >> GraphqlToElm.OptionalInput.Present) inputs.other )
         ]
 
 
@@ -87,9 +87,9 @@ type alias OtherInputs =
 
 
 encodeOtherInputs : OtherInputs -> Json.Encode.Value
-encodeOtherInputs { string } =
+encodeOtherInputs inputs =
     Json.Encode.object
-        [ ( "string", Json.Encode.string string )
+        [ ( "string", Json.Encode.string inputs.string )
         ]
 
 

@@ -1,0 +1,3 @@
+query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
+  inputsMixed(inputs: $inputs, inputs2: $inputs2)
+}

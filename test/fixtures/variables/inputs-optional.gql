@@ -1,0 +1,3 @@
+query InputsOptional($inputs: OptionalInputs) {
+  inputsOptional(inputs: $inputs)
+}

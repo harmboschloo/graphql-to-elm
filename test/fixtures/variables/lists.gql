@@ -1,11 +1,8 @@
 query Lists(
-  $optionalList: [Input!]
-  $list: [Input!]!
-  $listOfOptionals: [Input]!
+  $ints: [Int!]
+  $floats: [Float]
+  $inputs: [Inputs!]!
+  $inputs2: [OptionalInputs]!
 ) {
-  lists(
-    optionalList: $optionalList
-    list: $list
-    listOfOptionals: $listOfOptionals
-  )
+  lists(ints: $ints, floats: $floats, inputs: $inputs, inputs2: $inputs2)
 }

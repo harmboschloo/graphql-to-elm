@@ -96,15 +96,18 @@ const data: { [key: string]: FinalConfig } = {
         decoder: "Data.Binary.decoder"
       }
     }
+  }),
+  variables: create({
+    queries: [
+      "scalars.gql",
+      "scalars-optional.gql",
+      "scalars-mixed.gql",
+      "inputs.gql",
+      "inputs-optional.gql",
+      "inputs-mixed.gql",
+      "lists.gql"
+    ]
   })
-  // variables: create({
-  //   queries: [
-  //     "scalars.gql",
-  //     "scalars-optional.gql",
-  //     "scalars-mixed.gql"
-  //     // TODO , "inputs.gql", "lists.gql"
-  //   ]
-  // })
   // TODO
   // - endpoint
   // - field names

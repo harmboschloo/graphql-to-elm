@@ -13,22 +13,38 @@ type Query {
 
   scalarsMixed(string: String, int: Int!): String
 
-  inputs(optionalInput: Input, input: Input!): String
+  inputs(inputs: Inputs!): String
+
+  inputsOptional(inputs: OptionalInputs): String
+
+  inputsMixed(inputs: MixedInputs!, inputs2: MixedInputs): String
 
   lists(
-    optionalList: [Input!]
-    list: [Input!]!
-    listOfOptionals: [Input]!
+    ints: [Int!]
+    floats: [Float]
+    inputs: [Inputs!]!
+    inputs2: [OptionalInputs]!
   ): String
 }
 
-input Input {
-  optionalInt: Int
-  float: Float
-  optionalSubInput: SubInput
-  subInput: SubInput!
+input Inputs {
+  int: Int!
+  float: Float!
+  other: OtherInputs!
 }
 
-input SubInput {
+input OptionalInputs {
+  int: Int
+  float: Float
+  other: OtherInputs
+}
+
+input MixedInputs {
+  int: Int!
+  float: Float
+  other: OtherInputs!
+}
+
+input OtherInputs {
   string: String!
 }

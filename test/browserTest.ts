@@ -16,6 +16,7 @@ import {
   writeResult
 } from "..";
 import { validModuleName, writeFile } from "../src/utils";
+import { ElmIntelEncodeItem, getEncodeItemChild } from "../src/elmIntel";
 
 interface FixtureResult {
   fixture: Fixture;
@@ -59,7 +60,7 @@ const writeQueries = t => (fixture: Fixture): FixtureResult => {
 
   result.queries = result.queries.map(query => {
     const moduleName = validModuleName(id);
-    query.elmIntel.module = `GraphQL.${moduleName}.${query.elmIntel.module}`;
+    query.elmIntel.module = `Tests.${moduleName}.${query.elmIntel.module}`;
     query.elmIntel.dest = resolve(
       generatePath,
       `${query.elmIntel.module.replace(/\./g, "/")}.elm`
@@ -91,12 +92,22 @@ const writeTests = (results: FixtureResult[]) => {
 
   const imports = elmIntels.map(({ elmIntel }) => `import ${elmIntel.module}`);
 
+  const hasNullableInputs = elmIntels.some(({ elmIntel }) =>
+    elmIntel.encode.items.some(
+      item => item.isNullable || item.isListOfNullables
+    )
+  );
+
+  if (hasNullableInputs) {
+    imports.push("import GraphqlToElm.OptionalInput");
+  }
+
   const tests = elmIntels.map(
     ({ fixture, elmIntel }) =>
       `{ id = "${fixture.id}-${elmIntel.module}"
       , schemaId = "${fixture.id}"
       , query = ${elmIntel.module}.query
-      , variables = Json.Encode.null
+      , variables = ${generateVariables(elmIntel)}
       , decoder = Json.Decode.map toString ${elmIntel.module}.decoder
       }
 `
@@ -126,6 +137,47 @@ tests =
   const testsPath = resolve(generatePath, "Tests.elm");
 
   writeFile(testsPath, content);
+};
+
+const generateVariables = (intel: ElmIntel): string => {
+  const root = intel.encode.items.find(item => item.id === 0);
+
+  if (root) {
+    const variables = generateItemVariables(root, intel);
+    return `${intel.module}.encodeVariables ${variables}`;
+  } else {
+    return "Json.Encode.null";
+  }
+};
+
+const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
+  if (item.isNullable) {
+    return `GraphqlToElm.OptionalInput.Absent`;
+  } else if (item.isList) {
+    return "[]";
+  } else if (item.isRecordType) {
+    const fields = item.children
+      .map(id => getEncodeItemChild(id, intel))
+      .map(
+        child => `${child.fieldName} = ${generateItemVariables(child, intel)}`
+      );
+    return `{ ${fields.join(", ")} }`;
+  } else {
+    switch (item.type) {
+      case "Int":
+        return "0";
+      case "Float":
+        return "0.0";
+      case "Bool":
+        return "False";
+      case "String":
+        return '""';
+      default:
+        throw new Error(
+          `generateItemVariables unhandled item type: ${item.type}`
+        );
+    }
+  }
 };
 
 const writeSchemas = (fixtures: Fixture[]) => {

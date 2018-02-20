@@ -69,7 +69,7 @@ const generateImports = (intel: ElmIntel): string => {
     addImportOf(item.type);
     addImportOf(item.encoder);
     if (item.isNullable || item.isListOfNullables) {
-      imports["GraphqlToElm.OptionalInput"] = true;
+      imports["GraphqlToElm.Optional"] = true;
     }
   });
 
@@ -102,7 +102,7 @@ const generateRecordTypeAndEncoder = (intel: ElmIntel) => (
     return "";
   }
 
-  const nullableType = "GraphqlToElm.OptionalInput.OptionalInput";
+  const nullableType = "GraphqlToElm.Optional.Optional";
   const children = item.children.map(id => getEncodeItemChild(id, intel));
 
   return `${generateRecordTypeDeclaration(
@@ -119,7 +119,7 @@ const generateRecordEncoder = (
   const hasNullables = children.some(child => child.isNullable);
 
   const objectEncoder = hasNullables
-    ? "GraphqlToElm.OptionalInput.encodeObject"
+    ? "GraphqlToElm.Optional.encodeObject"
     : "Json.Encode.object";
 
   const fieldEncoders = children
@@ -145,16 +145,16 @@ const wrapEncoder = (
   let encoder = item.encoder;
 
   if (item.isListOfNullables) {
-    encoder = `(GraphqlToElm.OptionalInput.encodeList ${encoder})`;
+    encoder = `(GraphqlToElm.Optional.encodeList ${encoder})`;
   } else if (item.isList) {
     encoder = `(List.map ${encoder} >> Json.Encode.list)`;
   }
 
   if (parentHasNullables) {
     if (item.isNullable) {
-      encoder = `(GraphqlToElm.OptionalInput.map ${encoder})`;
+      encoder = `(GraphqlToElm.Optional.map ${encoder})`;
     } else {
-      encoder = `(${encoder} >> GraphqlToElm.OptionalInput.Present)`;
+      encoder = `(${encoder} >> GraphqlToElm.Optional.Present)`;
     }
   }
 

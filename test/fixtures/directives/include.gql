@@ -1,0 +1,5 @@
+query Include($withSchool: Boolean!, $withCity: Boolean!) {
+  name
+  school @include(if: $withSchool)
+  city @include(if: $withCity)
+}

@@ -99,7 +99,7 @@ const writeTests = (results: FixtureResult[]) => {
   );
 
   if (hasNullableInputs) {
-    imports.push("import GraphqlToElm.OptionalInput");
+    imports.push("import GraphqlToElm.Optional");
   }
 
   const tests = elmIntels.map(
@@ -152,7 +152,7 @@ const generateVariables = (intel: ElmIntel): string => {
 
 const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
   if (item.isNullable) {
-    return `GraphqlToElm.OptionalInput.Absent`;
+    return `GraphqlToElm.Optional.Absent`;
   } else if (item.isList) {
     return "[]";
   } else if (item.isRecordType) {

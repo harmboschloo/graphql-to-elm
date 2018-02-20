@@ -7,7 +7,7 @@ module ScalarsOptional
         , decoder
         )
 
-import GraphqlToElm.OptionalInput
+import GraphqlToElm.Optional
 import Json.Decode
 import Json.Encode
 
@@ -20,16 +20,16 @@ query =
 
 
 type alias Variables =
-    { string : GraphqlToElm.OptionalInput.OptionalInput String
-    , int : GraphqlToElm.OptionalInput.OptionalInput Int
+    { string : GraphqlToElm.Optional.Optional String
+    , int : GraphqlToElm.Optional.Optional Int
     }
 
 
 encodeVariables : Variables -> Json.Encode.Value
 encodeVariables inputs =
-    GraphqlToElm.OptionalInput.encodeObject
-        [ ( "string", (GraphqlToElm.OptionalInput.map Json.Encode.string) inputs.string )
-        , ( "int", (GraphqlToElm.OptionalInput.map Json.Encode.int) inputs.int )
+    GraphqlToElm.Optional.encodeObject
+        [ ( "string", (GraphqlToElm.Optional.map Json.Encode.string) inputs.string )
+        , ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
         ]
 
 

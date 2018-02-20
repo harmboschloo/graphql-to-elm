@@ -9,7 +9,7 @@ module InputsOptional
         , decoder
         )
 
-import GraphqlToElm.OptionalInput
+import GraphqlToElm.Optional
 import Json.Decode
 import Json.Encode
 
@@ -22,30 +22,30 @@ query =
 
 
 type alias Variables =
-    { inputs : GraphqlToElm.OptionalInput.OptionalInput OptionalInputs
+    { inputs : GraphqlToElm.Optional.Optional OptionalInputs
     }
 
 
 encodeVariables : Variables -> Json.Encode.Value
 encodeVariables inputs =
-    GraphqlToElm.OptionalInput.encodeObject
-        [ ( "inputs", (GraphqlToElm.OptionalInput.map encodeOptionalInputs) inputs.inputs )
+    GraphqlToElm.Optional.encodeObject
+        [ ( "inputs", (GraphqlToElm.Optional.map encodeOptionalInputs) inputs.inputs )
         ]
 
 
 type alias OptionalInputs =
-    { int : GraphqlToElm.OptionalInput.OptionalInput Int
-    , float : GraphqlToElm.OptionalInput.OptionalInput Float
-    , other : GraphqlToElm.OptionalInput.OptionalInput OtherInputs
+    { int : GraphqlToElm.Optional.Optional Int
+    , float : GraphqlToElm.Optional.Optional Float
+    , other : GraphqlToElm.Optional.Optional OtherInputs
     }
 
 
 encodeOptionalInputs : OptionalInputs -> Json.Encode.Value
 encodeOptionalInputs inputs =
-    GraphqlToElm.OptionalInput.encodeObject
-        [ ( "int", (GraphqlToElm.OptionalInput.map Json.Encode.int) inputs.int )
-        , ( "float", (GraphqlToElm.OptionalInput.map Json.Encode.float) inputs.float )
-        , ( "other", (GraphqlToElm.OptionalInput.map encodeOtherInputs) inputs.other )
+    GraphqlToElm.Optional.encodeObject
+        [ ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
+        , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
+        , ( "other", (GraphqlToElm.Optional.map encodeOtherInputs) inputs.other )
         ]
 
 

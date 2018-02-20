@@ -32,6 +32,7 @@ export interface QueryIntelItem {
   type: GraphQLOutputType;
   name: string;
   depth: number;
+  withDirective: boolean;
   children: number[];
 }
 
@@ -105,6 +106,7 @@ const queryVisitor = (
       type,
       name,
       depth: parent.depth + 1,
+      withDirective: false,
       children: []
     };
 
@@ -153,6 +155,7 @@ const queryVisitor = (
             type: "",
             name: "",
             depth: 0,
+            withDirective: false,
             children: []
           });
         }
@@ -170,6 +173,7 @@ const queryVisitor = (
           type: typeInfo.getType(),
           name: node.name && node.name.value,
           depth: intel.parentStack.length,
+          withDirective: node.directives && node.directives.length > 0,
           children: []
         };
 

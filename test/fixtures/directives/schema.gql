@@ -1,0 +1,13 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  name: String!
+  school: String!
+  city: String
+}

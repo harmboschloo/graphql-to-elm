@@ -46,5 +46,5 @@ decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map3 Data
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphqlToElm.Optional.fieldDecoder "school" Json.Decode.string |> Json.Decode.map GraphqlToElm.Optional.toMaybe)
+        (GraphqlToElm.Optional.nonNullfieldDecoder "school" Json.Decode.string)
         (GraphqlToElm.Optional.fieldDecoder "city" Json.Decode.string)

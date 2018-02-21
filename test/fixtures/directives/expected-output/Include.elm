@@ -7,9 +7,9 @@ module Include
         , decoder
         )
 
+import GraphqlToElm.Optional
 import Json.Decode
 import Json.Encode
-import GraphqlToElm.Optional
 
 
 query : String

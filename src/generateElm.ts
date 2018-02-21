@@ -77,6 +77,9 @@ const generateImports = (intel: ElmIntel): string => {
     imports["Json.Decode"] = true;
     addImportOf(item.type);
     addImportOf(item.decoder);
+    if (item.isOptional) {
+      imports["GraphqlToElm.Optional"] = true;
+    }
   });
 
   return Object.keys(imports)
@@ -102,13 +105,11 @@ const generateRecordTypeAndEncoder = (intel: ElmIntel) => (
     return "";
   }
 
-  const nullableType = "GraphqlToElm.Optional.Optional";
   const children = item.children.map(id => getEncodeItemChild(id, intel));
 
   return `${generateRecordTypeDeclaration(
     item,
-    children,
-    nullableType
+    children
   )}\n\n${generateRecordEncoder(item, children)}`;
 };
 
@@ -181,13 +182,11 @@ const generateRecordTypeAndDecoder = (intel: ElmIntel) => {
 
     generatedTypes[item.type] = true;
 
-    const nullableType = "Maybe.Maybe";
     const children = item.children.map(id => getDecodeItemChild(id, intel));
 
     return `${generateRecordTypeDeclaration(
       item,
-      children,
-      nullableType
+      children
     )}\n\n${generateRecordDecoder(item, children)}`;
   };
 };
@@ -201,7 +200,7 @@ const generateRecordDecoder = (
   const fieldDecoders = children
     .map(
       child =>
-        `        (Json.Decode.field "${child.name}" ${wrapDecoder(child)})`
+        `        (${fieldDecoder(child)} "${child.name}" ${wrapDecoder(child)})`
     )
     .join("\n");
 
@@ -209,6 +208,18 @@ const generateRecordDecoder = (
 ${item.decoder} =
     Json.Decode.map${map} ${item.type}
 ${fieldDecoders}`;
+};
+
+const fieldDecoder = (item: ElmIntelDecodeItem): string => {
+  if (item.isOptional) {
+    if (item.isNullable) {
+      return "GraphqlToElm.Optional.fieldDecoder";
+    } else {
+      return "GraphqlToElm.Optional.nonNullfieldDecoder";
+    }
+  } else {
+    return "Json.Decode.field";
+  }
 };
 
 const wrapDecoder = (item: ElmIntelDecodeItem): string => {
@@ -222,7 +233,7 @@ const wrapDecoder = (item: ElmIntelDecodeItem): string => {
     decoder = `(Json.Decode.list ${decoder})`;
   }
 
-  if (item.isNullable) {
+  if (item.isNullable && !item.isOptional) {
     decoder = `(Json.Decode.nullable ${decoder})`;
   }
 
@@ -231,11 +242,10 @@ const wrapDecoder = (item: ElmIntelDecodeItem): string => {
 
 const generateRecordTypeDeclaration = (
   item: ElmIntelItem,
-  children: ElmIntelItem[],
-  nullableType: string
+  children: ElmIntelItem[]
 ): string => {
   const fieldTypes = children
-    .map(child => `${child.fieldName} : ${wrapType(child, nullableType)}`)
+    .map(child => `${child.fieldName} : ${wrapType(child)}`)
     .join("\n    , ");
 
   return `type alias ${item.type} =
@@ -244,12 +254,15 @@ const generateRecordTypeDeclaration = (
 `;
 };
 
-const wrapType = (item: ElmIntelItem, nullableType: string): string => {
+const wrapType = (item: ElmIntelItem): string => {
   let signature = item.type;
   let wrap = x => x;
 
-  if (item.isListOfNullables) {
-    signature = `${nullableType} ${signature}`;
+  if (item.isListOfNullables && item.isListOfOptionals) {
+    signature = `GraphqlToElm.Optional.Optional ${signature}`;
+    wrap = withParentheses;
+  } else if (item.isListOfNullables || item.isListOfOptionals) {
+    signature = `Maybe.Maybe ${signature}`;
     wrap = withParentheses;
   }
 
@@ -258,8 +271,10 @@ const wrapType = (item: ElmIntelItem, nullableType: string): string => {
     wrap = withParentheses;
   }
 
-  if (item.isNullable) {
-    signature = `${nullableType} ${wrap(signature)}`;
+  if (item.isNullable && item.isOptional) {
+    signature = `GraphqlToElm.Optional.Optional ${wrap(signature)}`;
+  } else if (item.isNullable || item.isOptional) {
+    signature = `Maybe.Maybe ${wrap(signature)}`;
   }
 
   return signature;

@@ -50,6 +50,8 @@ export interface ElmIntelItem {
   fieldName: string;
   depth: number;
   children: number[];
+  isOptional: boolean;
+  isListOfOptionals: boolean;
   isNullable: boolean;
   isList: boolean;
   isListOfNullables: boolean;
@@ -121,6 +123,9 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   const item = getItemInfo(queryItem);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
 
+  item.isOptional = item.isNullable;
+  item.isListOfOptionals = item.isListOfNullables;
+
   let type;
   let encoder;
 
@@ -179,6 +184,8 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
 ): void => {
   const item = getItemInfo(queryItem);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
+
+  item.isOptional = queryItem.withDirective;
 
   let type;
   let decoder;
@@ -290,6 +297,8 @@ const getItemInfo = (queryItem: QueryIntelItem): ElmIntelItem => {
     fieldName: "",
     depth: queryItem.depth,
     children: queryItem.children,
+    isOptional: false,
+    isListOfOptionals: false,
     isNullable: isNullableType(queryItem.type),
     isList,
     isListOfNullables: isList && isNullableType(nullableType.ofType),

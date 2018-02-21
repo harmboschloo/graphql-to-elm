@@ -1,0 +1,10 @@
+query Union {
+  flip {
+    ... on Heads {
+      name
+    }
+    ... on Tails {
+      length
+    }
+  }
+}

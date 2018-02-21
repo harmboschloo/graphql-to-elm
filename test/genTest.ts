@@ -6,7 +6,7 @@ import { test } from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import { graphqlToElm } from "..";
 
-const fixtureId = "";
+const fixtureId = "inline-fragments";
 
 test("graphqlToElm generate test", t => {
   rimraf.sync(resolve(__dirname, "fixtures/**/generated*"));

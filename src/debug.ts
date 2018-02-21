@@ -1,5 +1,5 @@
 export const log = (message: string): void => {
-  // console.log("[Debug]", debugPadding(), message);
+  console.log("[Debug]", debugPadding(), message);
 };
 
 let debugIndent = 0;

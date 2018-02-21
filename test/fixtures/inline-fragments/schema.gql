@@ -1,0 +1,38 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  flip: Flip!
+  flips: [Flip!]!
+  animal: Animal!
+  animals: [Animal!]!
+}
+
+union Flip = Heads | Tails
+
+type Heads {
+  name: String!
+}
+
+type Tails {
+  length: Float!
+}
+
+interface Animal {
+  color: String!
+}
+
+type Dog implements Animal {
+  color: String!
+  hairy: Boolean!
+}
+
+type Dolphin implements Animal {
+  color: String!
+  fins: Int!
+}

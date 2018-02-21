@@ -9,6 +9,9 @@ import {
   TypeInfo,
   Kind,
   isCompositeType,
+  isUnionType,
+  isInterfaceType,
+  isObjectType,
   isListType,
   isLeafType,
   isInputObjectType,
@@ -114,6 +117,7 @@ const queryVisitor = (
     parent.children.push(item.id);
 
     const namedType = getNamedType(type);
+
     if (isInputObjectType(namedType)) {
       const fields = namedType.getFields();
       Object.keys(fields).forEach(fieldName =>
@@ -146,7 +150,26 @@ const queryVisitor = (
 
     enter(node, key, parent) {
       debug.addLogIndent(1);
-      debug.log(`enter ${node.kind} ${node.value}`);
+      debug.log(
+        `enter ${node.kind} ${node.value} ${typeInfo.getType() ||
+          typeInfo.getInputType()}`
+      );
+
+      // if (node.kind === Kind.SELECTION_SET) {
+      const namedType = getNamedType(typeInfo.getType());
+      debug.log(`isUnionType ${isUnionType(namedType)}`);
+      debug.log(
+        JSON.stringify(
+          isUnionType(namedType) && namedType.getTypes(),
+          null,
+          "  "
+        )
+      );
+      debug.log(`isInterfaceType ${isInterfaceType(namedType)}`);
+      debug.log(
+        `interfaces ${isObjectType(namedType) && namedType.getInterfaces()}`
+      );
+      // }
 
       if (node.kind === Kind.VARIABLE_DEFINITION) {
         if (intel.variables.length === 0) {

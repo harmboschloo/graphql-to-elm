@@ -1,0 +1,8 @@
+query Interface {
+  animal {
+    color
+    ... on Dog {
+      hairy
+    }
+  }
+}

@@ -1,0 +1,5 @@
+query Skip($withSchool: Boolean!, $withCity: Boolean!) {
+  name
+  school @skip(if: $withSchool)
+  city @skip(if: $withCity)
+}

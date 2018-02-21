@@ -108,7 +108,9 @@ const data: { [key: string]: FinalConfig } = {
       "lists.gql"
     ]
   }),
-  directives: create({ queries: ["include.gql"] })
+  directives: create({
+    queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
+  })
   // TODO
   // - endpoint
   // - field names

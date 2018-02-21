@@ -1,0 +1,5 @@
+query Mixed1($withSchool: Boolean!, $withCity: Boolean!) {
+  name
+  school @include(if: $withSchool)
+  city @skip(if: $withCity)
+}

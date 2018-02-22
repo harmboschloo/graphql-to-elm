@@ -32,9 +32,9 @@ const generateExports = (intel: ElmIntel): string => {
     }
   };
 
-  const addTypes = items =>
+  const addTypes = (items: ElmIntelItem[]) =>
     items
-      .filter(item => item.isRecordType)
+      .filter(item => item.kind === "record")
       .reverse()
       .forEach(addType);
 
@@ -101,7 +101,7 @@ const generateRecordTypesAndEncoders = (intel: ElmIntel): string => {
 const generateRecordTypeAndEncoder = (intel: ElmIntel) => (
   item: ElmIntelEncodeItem
 ): string => {
-  if (!item.isRecordType) {
+  if (item.kind !== "record") {
     return "";
   }
 
@@ -176,7 +176,7 @@ const generateRecordTypeAndDecoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
   return (item: ElmIntelDecodeItem): string => {
-    if (!item.isRecordType || generatedTypes[item.type]) {
+    if (item.kind !== "record" || generatedTypes[item.type]) {
       return "";
     }
 

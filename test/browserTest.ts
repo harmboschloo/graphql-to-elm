@@ -155,7 +155,7 @@ const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
     return `GraphqlToElm.Optional.Absent`;
   } else if (item.isList) {
     return "[]";
-  } else if (item.isRecordType) {
+  } else if (item.kind === "record") {
     const fields = item.children
       .map(id => getEncodeItemChild(id, intel))
       .map(

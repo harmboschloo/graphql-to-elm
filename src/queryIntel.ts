@@ -2,6 +2,7 @@ import {
   GraphQLSchema,
   GraphQLOutputType,
   GraphQLInputType,
+  GraphQLObjectType,
   validate,
   parse,
   visit,
@@ -26,8 +27,8 @@ export interface QueryIntel {
   src: string;
   query: string;
   variables: QueryIntelItem[];
-  items: QueryIntelItem[];
-  parentStack: QueryIntelItem[];
+  items: QueryIntelOutputItem[];
+  parentStack: QueryIntelOutputItem[];
 }
 
 export interface QueryIntelItem {
@@ -35,8 +36,14 @@ export interface QueryIntelItem {
   type: GraphQLOutputType;
   name: string;
   depth: number;
-  withDirective: boolean;
   children: number[];
+}
+
+export interface QueryIntelOutputItem extends QueryIntelItem {
+  withDirective: boolean;
+  isFragment: boolean;
+  fragmentChildren: number[];
+  possibleFragmentTypes: GraphQLObjectType[];
 }
 
 export const readQueryIntel = (
@@ -69,7 +76,7 @@ export const getQueryIntel = (
   }
 
   const typeInfo = new TypeInfo(schema);
-  const visitor = queryVisitor(query, typeInfo, options);
+  const visitor = queryVisitor(query, typeInfo, schema, options);
 
   visit(queryDocument, visitWithTypeInfo(typeInfo, visitor));
 
@@ -79,6 +86,7 @@ export const getQueryIntel = (
 const queryVisitor = (
   query: string,
   typeInfo: TypeInfo,
+  schema: GraphQLSchema,
   options: FinalOptions
 ) => {
   const intel: QueryIntel = {
@@ -109,7 +117,6 @@ const queryVisitor = (
       type,
       name,
       depth: parent.depth + 1,
-      withDirective: false,
       children: []
     };
 
@@ -130,18 +137,12 @@ const queryVisitor = (
     }
   };
 
-  const isItemNode = node => {
-    const { kind } = node;
-    const type = typeInfo.getType();
-    const nullableType = getNullableType(type);
-    const namedType = getNamedType(type);
-    return (
-      (kind === Kind.OPERATION_DEFINITION || kind === Kind.FIELD) &&
-      (isListType(nullableType) ||
-        isCompositeType(namedType) ||
-        isLeafType(namedType))
-    );
-  };
+  const isItemNode = node =>
+    node.kind === Kind.OPERATION_DEFINITION ||
+    node.kind === Kind.FIELD ||
+    isFragmentNode(node);
+
+  const isFragmentNode = node => node.kind === Kind.INLINE_FRAGMENT;
 
   return {
     intel() {
@@ -155,22 +156,6 @@ const queryVisitor = (
           typeInfo.getInputType()}`
       );
 
-      // if (node.kind === Kind.SELECTION_SET) {
-      const namedType = getNamedType(typeInfo.getType());
-      debug.log(`isUnionType ${isUnionType(namedType)}`);
-      debug.log(
-        JSON.stringify(
-          isUnionType(namedType) && namedType.getTypes(),
-          null,
-          "  "
-        )
-      );
-      debug.log(`isInterfaceType ${isInterfaceType(namedType)}`);
-      debug.log(
-        `interfaces ${isObjectType(namedType) && namedType.getInterfaces()}`
-      );
-      // }
-
       if (node.kind === Kind.VARIABLE_DEFINITION) {
         if (intel.variables.length === 0) {
           intel.variables.push({
@@ -178,7 +163,6 @@ const queryVisitor = (
             type: "",
             name: "",
             depth: 0,
-            withDirective: false,
             children: []
           });
         }
@@ -191,18 +175,28 @@ const queryVisitor = (
       }
 
       if (isItemNode(node)) {
+        const type = typeInfo.getType();
+        const namedType = getNamedType(type);
+
         const item = {
           id: intel.items.length,
-          type: typeInfo.getType(),
+          type,
           name: node.name && node.name.value,
           depth: intel.parentStack.length,
+          children: [],
           withDirective: node.directives && node.directives.length > 0,
-          children: []
+          isFragment: isFragmentNode(node),
+          fragmentChildren: [],
+          possibleFragmentTypes: schema.getPossibleTypes(namedType) || []
         };
 
         const parent = getParentItem();
         if (parent) {
           parent.children.push(item.id);
+
+          if (item.isFragment) {
+            parent.fragmentChildren.push(item.id);
+          }
         }
 
         intel.items.push(item);

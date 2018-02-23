@@ -15,8 +15,8 @@ import {
   generateElm,
   writeResult
 } from "..";
-import { validModuleName, writeFile } from "../src/utils";
-import { ElmIntelEncodeItem, findChildItemIn } from "../src/elmIntel";
+import { ElmIntelEncodeItem } from "../src/elmIntel";
+import { validModuleName, writeFile, findByIdIn } from "../src/utils";
 
 interface FixtureResult {
   fixture: Fixture;
@@ -157,7 +157,7 @@ const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
     return "[]";
   } else if (item.kind === "record") {
     const fields = item.children
-      .map(findChildItemIn(intel.encode.items))
+      .map(findByIdIn(intel.encode.items))
       .map(
         child => `${child.fieldName} = ${generateItemVariables(child, intel)}`
       );

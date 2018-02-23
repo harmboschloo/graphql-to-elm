@@ -11,6 +11,7 @@ type Query {
   flips: [Flip!]!
   animal: Animal!
   animals: [Animal!]!
+  info: Info
 }
 
 union Flip = Heads | Tails
@@ -35,4 +36,8 @@ type Dog implements Animal {
 type Dolphin implements Animal {
   color: String!
   fins: Int!
+}
+
+type Info {
+  description: String!
 }

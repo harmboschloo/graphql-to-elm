@@ -21,6 +21,7 @@ import {
 import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
 import {
   cachedValue,
+  findByIdIn,
   nextValidName,
   validNameUpper,
   validModuleName,
@@ -217,7 +218,7 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
       intel.recordsBySignature[""] = item.type;
       intel.decode.decodersByRecordName[item.type] = item.decoder;
       setRecordFieldNames(item, intel.decode.items);
-    } else if (queryItem.fragmentChildren.length > 0) {
+    } else if (queryItem.isFragmented) {
       item = {
         ...info,
         kind: "union",
@@ -366,7 +367,7 @@ const setRecordFieldNames = (item: ElmIntelItem, items: ElmIntelItem[]) => {
   }
 
   const usedFieldNames = [];
-  item.children.map(findChildItemIn(items)).forEach(child => {
+  item.children.map(findByIdIn(items)).forEach(child => {
     if (!child) {
       throw new Error(`Could not find child of elm intel item: ${item.type}`);
     }
@@ -381,7 +382,7 @@ const newRecordTypeName = (
   intel: ElmIntel
 ): string => {
   const propertySignatures = children
-    .map(findChildItemIn(items))
+    .map(findByIdIn(items))
     .map(item => `${item.name}:${item.type}`)
     .sort()
     .join(",");
@@ -402,13 +403,3 @@ const newRecordDecoderName = (type: string, intel: ElmIntel) =>
   cachedValue(type, intel.decode.decodersByRecordName, () =>
     newName(validVariableName(`${type}Decoder`), intel)
   );
-
-export const findChildItemIn = <T extends ElmIntelItem>(items: T[]) => (
-  childId: number
-): T => {
-  const child = items.find(item => item.id === childId);
-  if (!child) {
-    throw new Error(`Could not find elm intel child item with id: ${childId}`);
-  }
-  return child;
-};

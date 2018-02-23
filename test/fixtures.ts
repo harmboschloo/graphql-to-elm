@@ -121,6 +121,7 @@ const data: { [key: string]: FinalConfig } = {
   // "interface-list.gql",
   // "interface-partial.gql",
   // "interface-plain.gql"
+  // "object.gql"
   // ]
   // })
   // TODO

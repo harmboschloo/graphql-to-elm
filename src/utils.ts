@@ -23,6 +23,18 @@ export const cachedValue = (
   }
 };
 
+export const findByIdIn = <T extends { id: number }>(items: T[]) => (
+  id: number
+): T => {
+  const item = items.find(item => item.id === id);
+  if (!item) {
+    throw new Error(`Could not find item with id: ${id}`);
+  }
+  return item;
+};
+
+export const getId = <T extends { id: number }>(item: T) => item.id;
+
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
 

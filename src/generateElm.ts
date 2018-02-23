@@ -2,10 +2,14 @@ import {
   ElmIntel,
   ElmIntelItem,
   ElmIntelEncodeItem,
-  ElmIntelDecodeItem,
-  findChildItemIn
+  ElmIntelDecodeItem
 } from "./elmIntel";
-import { sortString, withParentheses, extractModule } from "./utils";
+import {
+  sortString,
+  withParentheses,
+  extractModule,
+  findByIdIn
+} from "./utils";
 
 export const generateElm = (intel: ElmIntel): string =>
   `module ${intel.module}
@@ -107,7 +111,7 @@ const generateRecordTypeAndEncoder = (intel: ElmIntel) => {
 
     generatedTypes[item.type] = true;
 
-    const children = item.children.map(findChildItemIn(intel.encode.items));
+    const children = item.children.map(findByIdIn(intel.encode.items));
 
     return `${generateRecordTypeDeclaration(
       item,
@@ -185,7 +189,7 @@ const generateRecordTypeAndDecoder = (intel: ElmIntel) => {
 
     generatedTypes[item.type] = true;
 
-    const children = item.children.map(findChildItemIn(intel.decode.items));
+    const children = item.children.map(findByIdIn(intel.decode.items));
 
     return `${generateRecordTypeDeclaration(
       item,

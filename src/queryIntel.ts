@@ -20,7 +20,7 @@ import {
   getNullableType
 } from "graphql";
 import { FinalOptions } from "./options";
-import { readFile } from "./utils";
+import { readFile, findByIdIn, getId } from "./utils";
 import * as debug from "./debug";
 
 export interface QueryIntel {
@@ -42,8 +42,7 @@ export interface QueryIntelItem {
 export interface QueryIntelOutputItem extends QueryIntelItem {
   withDirective: boolean;
   isFragment: boolean;
-  fragmentChildren: number[];
-  possibleFragmentTypes: GraphQLObjectType[];
+  isFragmented: boolean;
 }
 
 export const readQueryIntel = (
@@ -176,7 +175,6 @@ const queryVisitor = (
 
       if (isItemNode(node)) {
         const type = typeInfo.getType();
-        const namedType = getNamedType(type);
 
         const item = {
           id: intel.items.length,
@@ -186,8 +184,7 @@ const queryVisitor = (
           children: [],
           withDirective: node.directives && node.directives.length > 0,
           isFragment: isFragmentNode(node),
-          fragmentChildren: [],
-          possibleFragmentTypes: schema.getPossibleTypes(namedType) || []
+          isFragmented: false
         };
 
         const parent = getParentItem();
@@ -195,7 +192,7 @@ const queryVisitor = (
           parent.children.push(item.id);
 
           if (item.isFragment) {
-            parent.fragmentChildren.push(item.id);
+            parent.isFragmented = true;
           }
         }
 
@@ -208,7 +205,45 @@ const queryVisitor = (
       debug.log(`leave ${node.kind}`);
 
       if (isItemNode(node)) {
-        intel.parentStack.pop();
+        const item = intel.parentStack.pop();
+
+        if (item && item.isFragmented) {
+          const namedType = getNamedType(item.type);
+          const possibleFragmentTypes = schema.getPossibleTypes(namedType);
+          const children = item.children.map(findByIdIn(intel.items));
+          const fragments = children.filter(item => item.isFragment);
+
+          const nonFragmentIds = children
+            .filter(item => !item.isFragment)
+            .map(getId);
+
+          fragments.forEach(fragment =>
+            fragment.children.push(...nonFragmentIds)
+          );
+
+          item.children = fragments.map(getId);
+
+          const fragmentTypes = fragments.map(item => getNamedType(item.type));
+          const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
+            fragmentTypes.includes(type)
+          );
+
+          if (!hasAllPosibleTypes) {
+            const baseItem: QueryIntelOutputItem = {
+              id: intel.items.length,
+              type: item.type,
+              name: item.name,
+              depth: item.depth + 1,
+              children: nonFragmentIds,
+              withDirective: false,
+              isFragment: true,
+              isFragmented: false
+            };
+
+            intel.items.push(baseItem);
+            item.children.push(baseItem.id);
+          }
+        }
       }
 
       debug.addLogIndent(-1);

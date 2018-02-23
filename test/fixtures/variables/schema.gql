@@ -19,6 +19,8 @@ type Query {
 
   inputsMixed(inputs: MixedInputs!, inputs2: MixedInputs): String
 
+  inputsMultiple(inputs: Inputs!, inputs2: Inputs): String
+
   lists(
     ints: [Int!]
     floats: [Float]

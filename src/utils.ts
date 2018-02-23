@@ -9,6 +9,20 @@ export const writeFile = (dest: string, content: string): void => {
   writeFileSync(dest, content, "utf8");
 };
 
+export const cachedValue = (
+  key: string,
+  cache: { [key: string]: string },
+  newValue: () => string
+): string => {
+  if (cache[key]) {
+    return cache[key];
+  } else {
+    const value = newValue();
+    cache[key] = value;
+    return value;
+  }
+};
+
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
 

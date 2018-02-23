@@ -20,6 +20,7 @@ import {
 } from "./options";
 import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
 import {
+  cachedValue,
   nextValidName,
   validNameUpper,
   validModuleName,
@@ -33,13 +34,14 @@ export interface ElmIntel {
   module: string;
   query: string;
   usedNames: string[];
+  recordsBySignature: { [signature: string]: string };
   encode: {
     items: ElmIntelEncodeItem[];
+    encodersByRecordName: { [name: string]: string };
   };
   decode: {
     items: ElmIntelDecodeItem[];
-    recordNamesBySignature: {};
-    decoderNamesByRecordName: {};
+    decodersByRecordName: { [name: string]: string };
   };
 }
 
@@ -97,13 +99,14 @@ export const queryToElmIntel = (
     module,
     query: queryIntel.query,
     usedNames: getReservedNames(),
+    recordsBySignature: {},
     encode: {
-      items: []
+      items: [],
+      encodersByRecordName: {}
     },
     decode: {
       items: [],
-      recordNamesBySignature: {},
-      decoderNamesByRecordName: {}
+      decodersByRecordName: {}
     }
   };
 
@@ -138,7 +141,12 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
     };
     setRecordFieldNames(item, intel.encode.items);
   } else if (isInputObjectType(namedType)) {
-    const type = newEncodeRecordTypeName(namedType.name, intel);
+    const type = newRecordTypeName(
+      namedType.name,
+      info.children,
+      intel.encode.items,
+      intel
+    );
     item = {
       ...info,
       kind: "record",
@@ -206,9 +214,9 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
         type: "Data",
         decoder: "decoder"
       };
+      intel.recordsBySignature[""] = item.type;
+      intel.decode.decodersByRecordName[item.type] = item.decoder;
       setRecordFieldNames(item, intel.decode.items);
-      intel.decode.recordNamesBySignature[""] = item.type;
-      intel.decode.decoderNamesByRecordName[item.type] = item.decoder;
     } else if (queryItem.fragmentChildren.length > 0) {
       item = {
         ...info,
@@ -217,9 +225,10 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
         decoder: "FIXME"
       };
     } else {
-      const type = newDecodeRecordTypeName(
+      const type = newRecordTypeName(
         namedType.name,
         info.children,
+        intel.decode.items,
         intel
       );
       item = {
@@ -357,8 +366,7 @@ const setRecordFieldNames = (item: ElmIntelItem, items: ElmIntelItem[]) => {
   }
 
   const usedFieldNames = [];
-  const findItem = id => items.find(item => item.id === id);
-  item.children.map(findItem).forEach(child => {
+  item.children.map(findChildItemIn(items)).forEach(child => {
     if (!child) {
       throw new Error(`Could not find child of elm intel item: ${item.type}`);
     }
@@ -366,65 +374,41 @@ const setRecordFieldNames = (item: ElmIntelItem, items: ElmIntelItem[]) => {
   });
 };
 
-const newEncodeRecordTypeName = (type: string, intel: ElmIntel): string =>
-  newName(validTypeName(type), intel);
-
-const newRecordEncoderName = (type: string, intel: ElmIntel) =>
-  newName(`encode${validNameUpper(type)}`, intel);
-
-export const getEncodeItemChild = (
-  id: number,
-  intel: ElmIntel
-): ElmIntelEncodeItem => {
-  const child = intel.encode.items.find(item => item.id === id);
-  if (!child) {
-    throw new Error(
-      `Could not find elm intel encode item child with id: ${id}`
-    );
-  }
-  return child;
-};
-
-const newDecodeRecordTypeName = (
+const newRecordTypeName = (
   type: string,
   children: number[],
+  items: ElmIntelItem[],
   intel: ElmIntel
 ): string => {
-  const propertyNames = children
-    .map(id => getDecodeItemChild(id, intel).name)
+  const propertySignatures = children
+    .map(findChildItemIn(items))
+    .map(item => `${item.name}:${item.type}`)
     .sort()
     .join(",");
 
-  const signature = `${type}: ${propertyNames}`;
+  const signature = `${type}: ${propertySignatures}`;
 
-  if (intel.decode.recordNamesBySignature[signature]) {
-    return intel.decode.recordNamesBySignature[signature];
-  } else {
-    const name = newName(validTypeName(type), intel);
-    intel.decode.recordNamesBySignature[signature] = name;
-    return name;
-  }
+  return cachedValue(signature, intel.recordsBySignature, () =>
+    newName(validTypeName(type), intel)
+  );
 };
 
-const newRecordDecoderName = (type: string, intel: ElmIntel) => {
-  if (intel.decode.decoderNamesByRecordName[type]) {
-    return intel.decode.decoderNamesByRecordName[type];
-  } else {
-    const name = newName(validVariableName(`${type}Decoder`), intel);
-    intel.decode.decoderNamesByRecordName[type] = name;
-    return name;
-  }
-};
+const newRecordEncoderName = (type: string, intel: ElmIntel) =>
+  cachedValue(type, intel.encode.encodersByRecordName, () =>
+    newName(`encode${validNameUpper(type)}`, intel)
+  );
 
-export const getDecodeItemChild = (
-  id: number,
-  intel: ElmIntel
-): ElmIntelDecodeItem => {
-  const child = intel.decode.items.find(item => item.id === id);
+const newRecordDecoderName = (type: string, intel: ElmIntel) =>
+  cachedValue(type, intel.decode.decodersByRecordName, () =>
+    newName(validVariableName(`${type}Decoder`), intel)
+  );
+
+export const findChildItemIn = <T extends ElmIntelItem>(items: T[]) => (
+  childId: number
+): T => {
+  const child = items.find(item => item.id === childId);
   if (!child) {
-    throw new Error(
-      `Could not find elm intel decode item child with id: ${id}`
-    );
+    throw new Error(`Could not find elm intel child item with id: ${childId}`);
   }
   return child;
 };

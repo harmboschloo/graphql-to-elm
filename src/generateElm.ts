@@ -3,8 +3,7 @@ import {
   ElmIntelItem,
   ElmIntelEncodeItem,
   ElmIntelDecodeItem,
-  getEncodeItemChild,
-  getDecodeItemChild
+  findChildItemIn
 } from "./elmIntel";
 import { sortString, withParentheses, extractModule } from "./utils";
 
@@ -98,19 +97,23 @@ const generateRecordTypesAndEncoders = (intel: ElmIntel): string => {
   return typesAndEncoders ? `\n\n${typesAndEncoders}\n` : "";
 };
 
-const generateRecordTypeAndEncoder = (intel: ElmIntel) => (
-  item: ElmIntelEncodeItem
-): string => {
-  if (item.kind !== "record") {
-    return "";
-  }
+const generateRecordTypeAndEncoder = (intel: ElmIntel) => {
+  const generatedTypes = {};
 
-  const children = item.children.map(id => getEncodeItemChild(id, intel));
+  return (item: ElmIntelEncodeItem): string => {
+    if (item.kind !== "record" || generatedTypes[item.type]) {
+      return "";
+    }
 
-  return `${generateRecordTypeDeclaration(
-    item,
-    children
-  )}\n\n${generateRecordEncoder(item, children)}`;
+    generatedTypes[item.type] = true;
+
+    const children = item.children.map(findChildItemIn(intel.encode.items));
+
+    return `${generateRecordTypeDeclaration(
+      item,
+      children
+    )}\n\n${generateRecordEncoder(item, children)}`;
+  };
 };
 
 const generateRecordEncoder = (
@@ -182,7 +185,7 @@ const generateRecordTypeAndDecoder = (intel: ElmIntel) => {
 
     generatedTypes[item.type] = true;
 
-    const children = item.children.map(id => getDecodeItemChild(id, intel));
+    const children = item.children.map(findChildItemIn(intel.decode.items));
 
     return `${generateRecordTypeDeclaration(
       item,

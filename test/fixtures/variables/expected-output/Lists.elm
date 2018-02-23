@@ -3,7 +3,6 @@ module Lists
         ( Variables
         , Inputs
         , OptionalInputs
-        , OtherInputs2
         , OtherInputs
         , Data
         , query
@@ -49,7 +48,7 @@ encodeVariables inputs =
 type alias Inputs =
     { int : Int
     , float : Float
-    , other : OtherInputs2
+    , other : OtherInputs
     }
 
 
@@ -58,17 +57,17 @@ encodeInputs inputs =
     Json.Encode.object
         [ ( "int", Json.Encode.int inputs.int )
         , ( "float", Json.Encode.float inputs.float )
-        , ( "other", encodeOtherInputs2 inputs.other )
+        , ( "other", encodeOtherInputs inputs.other )
         ]
 
 
-type alias OtherInputs2 =
+type alias OtherInputs =
     { string : String
     }
 
 
-encodeOtherInputs2 : OtherInputs2 -> Json.Encode.Value
-encodeOtherInputs2 inputs =
+encodeOtherInputs : OtherInputs -> Json.Encode.Value
+encodeOtherInputs inputs =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs.string )
         ]
@@ -87,18 +86,6 @@ encodeOptionalInputs inputs =
         [ ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
         , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (GraphqlToElm.Optional.map encodeOtherInputs) inputs.other )
-        ]
-
-
-type alias OtherInputs =
-    { string : String
-    }
-
-
-encodeOtherInputs : OtherInputs -> Json.Encode.Value
-encodeOtherInputs inputs =
-    Json.Encode.object
-        [ ( "string", Json.Encode.string inputs.string )
         ]
 
 

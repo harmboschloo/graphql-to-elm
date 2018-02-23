@@ -1,9 +1,7 @@
 module InputsMixed
     exposing
         ( Variables
-        , MixedInputs2
         , MixedInputs
-        , OtherInputs2
         , OtherInputs
         , Data
         , query
@@ -24,7 +22,7 @@ query =
 
 
 type alias Variables =
-    { inputs : MixedInputs2
+    { inputs : MixedInputs
     , inputs2 : GraphqlToElm.Optional.Optional MixedInputs
     }
 
@@ -32,36 +30,8 @@ type alias Variables =
 encodeVariables : Variables -> Json.Encode.Value
 encodeVariables inputs =
     GraphqlToElm.Optional.encodeObject
-        [ ( "inputs", (encodeMixedInputs2 >> GraphqlToElm.Optional.Present) inputs.inputs )
+        [ ( "inputs", (encodeMixedInputs >> GraphqlToElm.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphqlToElm.Optional.map encodeMixedInputs) inputs.inputs2 )
-        ]
-
-
-type alias MixedInputs2 =
-    { int : Int
-    , float : GraphqlToElm.Optional.Optional Float
-    , other : OtherInputs2
-    }
-
-
-encodeMixedInputs2 : MixedInputs2 -> Json.Encode.Value
-encodeMixedInputs2 inputs =
-    GraphqlToElm.Optional.encodeObject
-        [ ( "int", (Json.Encode.int >> GraphqlToElm.Optional.Present) inputs.int )
-        , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
-        , ( "other", (encodeOtherInputs2 >> GraphqlToElm.Optional.Present) inputs.other )
-        ]
-
-
-type alias OtherInputs2 =
-    { string : String
-    }
-
-
-encodeOtherInputs2 : OtherInputs2 -> Json.Encode.Value
-encodeOtherInputs2 inputs =
-    Json.Encode.object
-        [ ( "string", Json.Encode.string inputs.string )
         ]
 
 

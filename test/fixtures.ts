@@ -105,6 +105,7 @@ const data: { [key: string]: FinalConfig } = {
       "inputs.gql",
       "inputs-optional.gql",
       "inputs-mixed.gql",
+      "inputs-multiple.gql",
       "lists.gql"
     ]
   }),

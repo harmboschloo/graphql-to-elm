@@ -1,4 +1,4 @@
-query Union {
+query UnionPartial {
   flip {
     ... on Heads {
       name

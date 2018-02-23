@@ -1,7 +1,0 @@
-query Union {
-  info {
-    ... on Info {
-      description
-    }
-  }
-}

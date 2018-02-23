@@ -1,9 +1,9 @@
-module Interface
+module InterfacePartial
     exposing
         ( Data
         , AnimalUnion(..)
         , Dog
-        , Dolphin
+        , Animal
         , query
         , decoder
         )
@@ -13,14 +13,11 @@ import Json.Decode
 
 query : String
 query =
-    """query Interface {
+    """query InterfacePartial {
   animal {
     color
     ... on Dog {
       hairy
-    }
-    ... on Dolphin {
-      fins
     }
   }
 }"""
@@ -39,14 +36,14 @@ decoder =
 
 type AnimalUnion
     = OnDog Dog
-    | OnDolphin Dolphin
+    | OnAnimal Animal
 
 
 animalUnionDecoder : Json.Decode.Decoder AnimalUnion
 animalUnionDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnDog dogDecoder
-        , Json.Decode.map OnDolphin dolphinDecoder
+        , Json.Decode.map OnAnimal animalDecoder
         ]
 
 
@@ -63,14 +60,12 @@ dogDecoder =
         (Json.Decode.field "color" Json.Decode.string)
 
 
-type alias Dolphin =
-    { fins : Int
-    , color : String
+type alias Animal =
+    { color : String
     }
 
 
-dolphinDecoder : Json.Decode.Decoder Dolphin
-dolphinDecoder =
-    Json.Decode.map2 Dolphin
-        (Json.Decode.field "fins" Json.Decode.int)
+animalDecoder : Json.Decode.Decoder Animal
+animalDecoder =
+    Json.Decode.map Animal
         (Json.Decode.field "color" Json.Decode.string)

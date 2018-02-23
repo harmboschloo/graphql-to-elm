@@ -1,4 +1,4 @@
-query Union {
+query UnionList {
   flips {
     ... on Heads {
       name

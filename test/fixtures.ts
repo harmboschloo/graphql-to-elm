@@ -111,25 +111,22 @@ const data: { [key: string]: FinalConfig } = {
   }),
   directives: create({
     queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
+  }),
+  "inline-fragments": create({
+    queries: [
+      "union.gql",
+      "union-list.gql",
+      "union-partial.gql",
+      "interface.gql",
+      "interface-list.gql",
+      "interface-partial.gql",
+      "interface-plain.gql"
+      // TODO same signature (... auto __typename)
+    ]
   })
-  // "inline-fragments": create({
-  // queries: [
-  // "union.gql",
-  // "union-list.gql",
-  // "union-partial.gql",
-  // "interface.gql"
-  // "interface-list.gql",
-  // "interface-partial.gql",
-  // "interface-plain.gql"
-  // "object.gql"
-  // ]
-  // })
   // TODO
+  // fragments
+  // operation names
   // - endpoint
-  // - field names
-  // - interfaces
-  // - directives
-  // - mutations
   // - swapi
-  // - unions
 };

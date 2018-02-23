@@ -1,5 +1,5 @@
-query Interface {
-  animal {
+query InterfaceList {
+  animals {
     color
     ... on Dog {
       hairy

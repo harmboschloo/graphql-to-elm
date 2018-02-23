@@ -1,4 +1,4 @@
-query Interface {
+query InterfacePlain {
   animal {
     color
   }

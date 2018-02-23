@@ -1,4 +1,4 @@
-module Union
+module UnionList
     exposing
         ( Data
         , FlipUnion(..)
@@ -13,8 +13,8 @@ import Json.Decode
 
 query : String
 query =
-    """query Union {
-  flip {
+    """query UnionList {
+  flips {
     ... on Heads {
       name
     }
@@ -26,14 +26,14 @@ query =
 
 
 type alias Data =
-    { flip : FlipUnion
+    { flips : List FlipUnion
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map Data
-        (Json.Decode.field "flip" flipUnionDecoder)
+        (Json.Decode.field "flips" (Json.Decode.list flipUnionDecoder))
 
 
 type FlipUnion

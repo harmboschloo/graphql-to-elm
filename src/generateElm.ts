@@ -3,7 +3,7 @@ import {
   ElmIntelItem,
   ElmIntelEncodeItem,
   ElmIntelDecodeItem
-} from "./elmIntel";
+} from "./elmIntelTypes";
 import {
   sortString,
   withParentheses,
@@ -23,23 +23,29 @@ ${generateImports(intel)}
 query : String
 query =
     """${intel.query}"""
-${generateRecordTypesAndEncoders(intel)}${generateRecordTypesAndDecoders(intel)}
+${generateTypesAndEncoders(intel)}${generateTypesAndDecoders(intel)}
 `;
 
 const generateExports = (intel: ElmIntel): string => {
   const types: string[] = [];
 
-  const addType = ({ type }) => {
-    if (!types.includes(type)) {
-      types.push(type);
+  const addType = (value: string) => {
+    if (!types.includes(value)) {
+      types.push(value);
     }
   };
 
   const addTypes = (items: ElmIntelItem[]) =>
     items
-      .filter(item => item.kind === "record")
+      .slice()
       .reverse()
-      .forEach(addType);
+      .forEach(item => {
+        if (item.kind === "record") {
+          addType(item.type);
+        } else if (item.kind === "union") {
+          addType(`${item.type}(..)`);
+        }
+      });
 
   addTypes(intel.encode.items);
   addTypes(intel.decode.items);
@@ -91,32 +97,35 @@ const generateImports = (intel: ElmIntel): string => {
     .join("\n");
 };
 
-const generateRecordTypesAndEncoders = (intel: ElmIntel): string => {
+const generateTypesAndEncoders = (intel: ElmIntel): string => {
   const typesAndEncoders = intel.encode.items
     .sort((a, b) => a.id - b.id)
-    .map(generateRecordTypeAndEncoder(intel))
+    .map(generateTypeAndEncoder(intel))
     .filter(x => !!x)
     .join("\n\n\n");
 
   return typesAndEncoders ? `\n\n${typesAndEncoders}\n` : "";
 };
 
-const generateRecordTypeAndEncoder = (intel: ElmIntel) => {
+const generateTypeAndEncoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
   return (item: ElmIntelEncodeItem): string => {
-    if (item.kind !== "record" || generatedTypes[item.type]) {
+    if (generatedTypes[item.type]) {
       return "";
     }
-
     generatedTypes[item.type] = true;
 
-    const children = item.children.map(findByIdIn(intel.encode.items));
+    if (item.kind === "record") {
+      const children = item.children.map(findByIdIn(intel.encode.items));
 
-    return `${generateRecordTypeDeclaration(
-      item,
-      children
-    )}\n\n${generateRecordEncoder(item, children)}`;
+      return `${generateRecordTypeDeclaration(
+        item,
+        children
+      )}\n\n\n${generateRecordEncoder(item, children)}`;
+    }
+
+    return "";
   };
 };
 
@@ -169,52 +178,134 @@ const wrapEncoder = (
   return encoder;
 };
 
-const generateRecordTypesAndDecoders = (intel: ElmIntel): string => {
+const generateTypesAndDecoders = (intel: ElmIntel): string => {
   const typesAndDecoders = intel.decode.items
     .sort((a, b) => a.id - b.id)
-    .map(generateRecordTypeAndDecoder(intel))
+    .map(generateTypeAndDecoder(intel))
     .filter(x => !!x)
     .join("\n\n\n");
 
   return typesAndDecoders ? `\n\n${typesAndDecoders}` : "";
 };
 
-const generateRecordTypeAndDecoder = (intel: ElmIntel) => {
+const generateTypeAndDecoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
   return (item: ElmIntelDecodeItem): string => {
-    if (item.kind !== "record" || generatedTypes[item.type]) {
+    if (generatedTypes[item.type]) {
       return "";
     }
-
     generatedTypes[item.type] = true;
 
-    const children = item.children.map(findByIdIn(intel.decode.items));
+    if (item.kind === "record") {
+      const children = item.children.map(findByIdIn(intel.decode.items));
 
-    return `${generateRecordTypeDeclaration(
-      item,
-      children
-    )}\n\n${generateRecordDecoder(item, children)}`;
+      return `${generateRecordTypeDeclaration(
+        item,
+        children
+      )}\n\n\n${generateRecordDecoder(item, children)}`;
+    } else if (item.kind === "union") {
+      const children = item.children
+        .map(findByIdIn(intel.decode.items))
+        .sort((a, b) => b.children.length - a.children.length);
+
+      const constructors = children.map(
+        child => `On${child.type} ${child.type}`
+      );
+      const typeDeclaration = `type ${item.type}\n    = ${constructors.join(
+        "\n    | "
+      )}`;
+
+      const decoderDeclaration = `${item.decoder} : Json.Decode.Decoder ${
+        item.type
+      }`;
+      const childDecoders = children.map(
+        child => `Json.Decode.map On${child.type} ${child.decoder}`
+      );
+      const decoder = `${
+        item.decoder
+      } =\n    Json.Decode.oneOf\n        [ ${childDecoders.join(
+        "\n        , "
+      )}\n        ]`;
+
+      return `${typeDeclaration}\n\n\n${decoderDeclaration}\n${decoder}`;
+    }
+
+    return "";
   };
+};
+
+const generateRecordTypeDeclaration = (
+  item: ElmIntelItem,
+  children: ElmIntelItem[]
+): string => {
+  if (children.length > 0) {
+    const fieldTypes = children.map(
+      child => `${child.fieldName} : ${wrapType(child)}`
+    );
+
+    return `type alias ${item.type} =\n    { ${fieldTypes.join(
+      "\n    , "
+    )}\n    }`;
+  } else {
+    return `type alias ${item.type} =\n    {}`;
+  }
+};
+
+export const wrapType = (item: ElmIntelItem): string => {
+  let signature = item.type;
+  let wrap = x => x;
+
+  if (item.isListOfNullables && item.isListOfOptionals) {
+    signature = `GraphqlToElm.Optional.Optional ${signature}`;
+    wrap = withParentheses;
+  } else if (item.isListOfNullables || item.isListOfOptionals) {
+    signature = `Maybe.Maybe ${signature}`;
+    wrap = withParentheses;
+  }
+
+  if (item.isList) {
+    signature = `List ${wrap(signature)}`;
+    wrap = withParentheses;
+  }
+
+  if (item.isNullable && item.isOptional) {
+    signature = `GraphqlToElm.Optional.Optional ${wrap(signature)}`;
+  } else if (item.isNullable || item.isOptional) {
+    signature = `Maybe.Maybe ${wrap(signature)}`;
+  }
+
+  return signature;
 };
 
 const generateRecordDecoder = (
   item: ElmIntelDecodeItem,
   children: ElmIntelDecodeItem[]
 ): string => {
-  const map = children.length > 1 ? children.length : "";
+  const declaration = `${item.decoder} : Json.Decode.Decoder ${item.type}`;
 
-  const fieldDecoders = children
-    .map(
+  if (children.length > 0) {
+    const map = children.length > 1 ? children.length : "";
+
+    const fieldDecoders = children.map(
       child =>
         `        (${fieldDecoder(child)} "${child.name}" ${wrapDecoder(child)})`
-    )
-    .join("\n");
+    );
 
-  return `${item.decoder} : Json.Decode.Decoder ${item.type}
-${item.decoder} =
-    Json.Decode.map${map} ${item.type}
-${fieldDecoders}`;
+    return `${declaration}\n${item.decoder} =\n    Json.Decode.map${map} ${
+      item.type
+    }\n${fieldDecoders.join("\n")}`;
+  } else {
+    return `${declaration}\n${item.decoder} =
+    Json.Decode.keyValuePairs Json.Decode.value
+        |> Json.Decode.andThen
+            (\\pairs ->
+                if List.isEmpty pairs then
+                    Json.Decode.succeed Flip
+                else
+                    Json.Decode.fail "expected empty object"
+            )`;
+  }
 };
 
 const fieldDecoder = (item: ElmIntelDecodeItem): string => {
@@ -245,44 +336,4 @@ const wrapDecoder = (item: ElmIntelDecodeItem): string => {
   }
 
   return decoder;
-};
-
-const generateRecordTypeDeclaration = (
-  item: ElmIntelItem,
-  children: ElmIntelItem[]
-): string => {
-  const fieldTypes = children
-    .map(child => `${child.fieldName} : ${wrapType(child)}`)
-    .join("\n    , ");
-
-  return `type alias ${item.type} =
-    { ${fieldTypes}
-    }
-`;
-};
-
-const wrapType = (item: ElmIntelItem): string => {
-  let signature = item.type;
-  let wrap = x => x;
-
-  if (item.isListOfNullables && item.isListOfOptionals) {
-    signature = `GraphqlToElm.Optional.Optional ${signature}`;
-    wrap = withParentheses;
-  } else if (item.isListOfNullables || item.isListOfOptionals) {
-    signature = `Maybe.Maybe ${signature}`;
-    wrap = withParentheses;
-  }
-
-  if (item.isList) {
-    signature = `List ${wrap(signature)}`;
-    wrap = withParentheses;
-  }
-
-  if (item.isNullable && item.isOptional) {
-    signature = `GraphqlToElm.Optional.Optional ${wrap(signature)}`;
-  } else if (item.isNullable || item.isOptional) {
-    signature = `Maybe.Maybe ${wrap(signature)}`;
-  }
-
-  return signature;
 };

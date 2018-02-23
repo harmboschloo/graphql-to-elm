@@ -18,7 +18,6 @@ import {
   TypeDecoders,
   TypeDecoder
 } from "./options";
-import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
 import {
   cachedValue,
   findByIdIn,
@@ -29,47 +28,14 @@ import {
   validVariableName,
   validFieldName
 } from "./utils";
-
-export interface ElmIntel {
-  dest: string;
-  module: string;
-  query: string;
-  usedNames: string[];
-  recordsBySignature: { [signature: string]: string };
-  encode: {
-    items: ElmIntelEncodeItem[];
-    encodersByRecordName: { [name: string]: string };
-  };
-  decode: {
-    items: ElmIntelDecodeItem[];
-    decodersByRecordName: { [name: string]: string };
-  };
-}
-
-export interface ElmIntelItem {
-  id: number;
-  name: string;
-  fieldName: string;
-  depth: number;
-  children: number[];
-  isOptional: boolean;
-  isListOfOptionals: boolean;
-  isNullable: boolean;
-  isList: boolean;
-  isListOfNullables: boolean;
-  type: string;
-  kind: ElmIntelItemKind;
-}
-
-export type ElmIntelItemKind = "record" | "union" | "enum" | "scalar";
-
-export interface ElmIntelEncodeItem extends ElmIntelItem {
-  encoder: string;
-}
-
-export interface ElmIntelDecodeItem extends ElmIntelItem {
-  decoder: string;
-}
+import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
+import { wrapType } from "./generateElm";
+import {
+  ElmIntel,
+  ElmIntelItem,
+  ElmIntelEncodeItem,
+  ElmIntelDecodeItem
+} from "./elmIntelTypes";
 
 export const queryToElmIntel = (
   queryIntel: QueryIntel,
@@ -100,14 +66,14 @@ export const queryToElmIntel = (
     module,
     query: queryIntel.query,
     usedNames: getReservedNames(),
-    recordsBySignature: {},
+    typesBySignature: {},
     encode: {
       items: [],
-      encodersByRecordName: {}
+      encodersByType: {}
     },
     decode: {
       items: [],
-      decodersByRecordName: {}
+      decodersByType: {}
     }
   };
 
@@ -134,15 +100,16 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   let item: ElmIntelEncodeItem;
 
   if (info.id === 0) {
+    setFieldNames(info.children, intel.encode.items);
     item = {
       ...info,
       kind: "record",
       type: "Variables",
       encoder: "encodeVariables"
     };
-    setRecordFieldNames(item, intel.encode.items);
   } else if (isInputObjectType(namedType)) {
-    const type = newRecordTypeName(
+    setFieldNames(info.children, intel.encode.items);
+    const type = newRecordType(
       namedType.name,
       info.children,
       intel.encode.items,
@@ -152,9 +119,8 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
       ...info,
       kind: "record",
       type,
-      encoder: newRecordEncoderName(type, intel)
+      encoder: newEncoderName(type, intel)
     };
-    setRecordFieldNames(item, intel.encode.items);
   } else if (isScalarType(namedType)) {
     const scalarEncoder: TypeEncoder | undefined =
       options.scalarEncoders[namedType.name] ||
@@ -209,24 +175,40 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
 
   if (isCompositeType(namedType)) {
     if (info.id === 0) {
+      setFieldNames(info.children, intel.decode.items);
       item = {
         ...info,
         kind: "record",
         type: "Data",
         decoder: "decoder"
       };
-      intel.recordsBySignature[""] = item.type;
-      intel.decode.decodersByRecordName[item.type] = item.decoder;
-      setRecordFieldNames(item, intel.decode.items);
+      intel.typesBySignature[""] = item.type;
+      intel.decode.decodersByType[item.type] = item.decoder;
     } else if (queryItem.isFragmented) {
+      const children = info.children.map(findByIdIn(intel.decode.items));
+      const childSignatures = children.map(item =>
+        getRecordFieldsSignature(item.children, intel.decode.items)
+      );
+      childSignatures.forEach((signatue, index) => {
+        if (childSignatures.indexOf(signatue) !== index) {
+          throw new Error(
+            `multiple union constructors for ${
+              namedType.name
+            } with the same signature: ${signatue}`
+          );
+        }
+      });
+
+      const type = newUnionType(namedType.name, intel);
       item = {
         ...info,
         kind: "union",
-        type: "FIXME",
-        decoder: "FIXME"
+        type,
+        decoder: newDecoderName(type, intel)
       };
     } else {
-      const type = newRecordTypeName(
+      setFieldNames(info.children, intel.decode.items);
+      const type = newRecordType(
         namedType.name,
         info.children,
         intel.decode.items,
@@ -236,9 +218,8 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
         ...info,
         kind: "record",
         type,
-        decoder: newRecordDecoderName(type, intel)
+        decoder: newDecoderName(type, intel)
       };
-      setRecordFieldNames(item, intel.decode.items);
     }
   } else if (isScalarType(namedType)) {
     const scalarDecoder: TypeDecoder | undefined =
@@ -361,45 +342,64 @@ const getReservedNames = () => [...reservedNames];
 const newName = (name: string, intel: ElmIntel): string =>
   nextValidName(name, intel.usedNames);
 
-const setRecordFieldNames = (item: ElmIntelItem, items: ElmIntelItem[]) => {
-  if (item.children.length === 0) {
-    throw new Error(`record item ${item.type} should have children`);
-  }
-
+const setFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
   const usedFieldNames = [];
-  item.children.map(findByIdIn(items)).forEach(child => {
-    if (!child) {
-      throw new Error(`Could not find child of elm intel item: ${item.type}`);
+  fieldItems.map(findByIdIn(items)).forEach(item => {
+    if (!item.name) {
+      throw new Error(`Elm intel field item ${item.type} does not have a name`);
     }
-    child.fieldName = nextValidName(validFieldName(child.name), usedFieldNames);
+    item.fieldName = nextValidName(validFieldName(item.name), usedFieldNames);
   });
 };
 
-const newRecordTypeName = (
-  type: string,
+const getRecordFieldsSignature = (
+  children: number[],
+  items: ElmIntelItem[]
+): string => {
+  return children
+    .map(findByIdIn(items))
+    .map(item => {
+      if (!item.fieldName) {
+        throw new Error(
+          `Elm intel field item ${item.type} does not have a fieldName`
+        );
+      }
+      return `${item.fieldName} : ${wrapType(item)}`;
+    })
+    .sort()
+    .join(", ");
+};
+
+const newRecordType = (
+  graphqlType: string,
   children: number[],
   items: ElmIntelItem[],
   intel: ElmIntel
 ): string => {
-  const propertySignatures = children
-    .map(findByIdIn(items))
-    .map(item => `${item.name}:${item.type}`)
-    .sort()
-    .join(",");
+  let signature = `${graphqlType}: ${getRecordFieldsSignature(
+    children,
+    items
+  )}`;
 
-  const signature = `${type}: ${propertySignatures}`;
-
-  return cachedValue(signature, intel.recordsBySignature, () =>
-    newName(validTypeName(type), intel)
+  return cachedValue(signature, intel.typesBySignature, () =>
+    newName(validTypeName(graphqlType), intel)
   );
 };
 
-const newRecordEncoderName = (type: string, intel: ElmIntel) =>
-  cachedValue(type, intel.encode.encodersByRecordName, () =>
+const newUnionType = (graphqlType: string, intel: ElmIntel): string => {
+  const signature = graphqlType;
+
+  return cachedValue(signature, intel.typesBySignature, () =>
+    newName(validTypeName(`${graphqlType}Union`), intel)
+  );
+};
+
+const newEncoderName = (type: string, intel: ElmIntel) =>
+  cachedValue(type, intel.encode.encodersByType, () =>
     newName(`encode${validNameUpper(type)}`, intel)
   );
 
-const newRecordDecoderName = (type: string, intel: ElmIntel) =>
-  cachedValue(type, intel.decode.decodersByRecordName, () =>
+const newDecoderName = (type: string, intel: ElmIntel) =>
+  cachedValue(type, intel.decode.decodersByType, () =>
     newName(validVariableName(`${type}Decoder`), intel)
   );

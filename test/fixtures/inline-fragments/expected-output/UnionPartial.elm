@@ -1,9 +1,9 @@
-module Union
+module UnionPartial
     exposing
         ( Data
         , FlipUnion(..)
         , Heads
-        , Tails
+        , Flip
         , query
         , decoder
         )
@@ -13,13 +13,10 @@ import Json.Decode
 
 query : String
 query =
-    """query Union {
+    """query UnionPartial {
   flip {
     ... on Heads {
       name
-    }
-    ... on Tails {
-      length
     }
   }
 }"""
@@ -38,14 +35,14 @@ decoder =
 
 type FlipUnion
     = OnHeads Heads
-    | OnTails Tails
+    | OnFlip Flip
 
 
 flipUnionDecoder : Json.Decode.Decoder FlipUnion
 flipUnionDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads headsDecoder
-        , Json.Decode.map OnTails tailsDecoder
+        , Json.Decode.map OnFlip flipDecoder
         ]
 
 
@@ -60,12 +57,17 @@ headsDecoder =
         (Json.Decode.field "name" Json.Decode.string)
 
 
-type alias Tails =
-    { length : Float
-    }
+type alias Flip =
+    {}
 
 
-tailsDecoder : Json.Decode.Decoder Tails
-tailsDecoder =
-    Json.Decode.map Tails
-        (Json.Decode.field "length" Json.Decode.float)
+flipDecoder : Json.Decode.Decoder Flip
+flipDecoder =
+    Json.Decode.keyValuePairs Json.Decode.value
+        |> Json.Decode.andThen
+            (\pairs ->
+                if List.isEmpty pairs then
+                    Json.Decode.succeed Flip
+                else
+                    Json.Decode.fail "expected empty object"
+            )

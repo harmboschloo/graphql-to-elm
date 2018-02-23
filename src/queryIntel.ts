@@ -34,7 +34,7 @@ export interface QueryIntel {
 export interface QueryIntelItem {
   id: number;
   type: GraphQLOutputType;
-  name: string;
+  name: string | undefined;
   depth: number;
   children: number[];
 }
@@ -213,9 +213,9 @@ const queryVisitor = (
           const children = item.children.map(findByIdIn(intel.items));
           const fragments = children.filter(item => item.isFragment);
 
-          const nonFragmentIds = children
-            .filter(item => !item.isFragment)
-            .map(getId);
+          const nonFragments = children.filter(item => !item.isFragment);
+          nonFragments.forEach(item => (item.depth = item.depth + 1));
+          const nonFragmentIds = nonFragments.map(getId);
 
           fragments.forEach(fragment =>
             fragment.children.push(...nonFragmentIds)
@@ -223,7 +223,7 @@ const queryVisitor = (
 
           item.children = fragments.map(getId);
 
-          const fragmentTypes = fragments.map(item => getNamedType(item.type));
+          const fragmentTypes = fragments.map(item => item.type);
           const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
             fragmentTypes.includes(type)
           );
@@ -232,7 +232,7 @@ const queryVisitor = (
             const baseItem: QueryIntelOutputItem = {
               id: intel.items.length,
               type: item.type,
-              name: item.name,
+              name: undefined,
               depth: item.depth + 1,
               children: nonFragmentIds,
               withDirective: false,

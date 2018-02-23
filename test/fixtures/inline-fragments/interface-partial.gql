@@ -1,4 +1,4 @@
-query Interface {
+query InterfacePartial {
   animal {
     color
     ... on Dog {

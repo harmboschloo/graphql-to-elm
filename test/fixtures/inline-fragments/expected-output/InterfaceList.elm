@@ -1,4 +1,4 @@
-module Interface
+module InterfaceList
     exposing
         ( Data
         , AnimalUnion(..)
@@ -13,8 +13,8 @@ import Json.Decode
 
 query : String
 query =
-    """query Interface {
-  animal {
+    """query InterfaceList {
+  animals {
     color
     ... on Dog {
       hairy
@@ -27,14 +27,14 @@ query =
 
 
 type alias Data =
-    { animal : AnimalUnion
+    { animals : List AnimalUnion
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map Data
-        (Json.Decode.field "animal" animalUnionDecoder)
+        (Json.Decode.field "animals" (Json.Decode.list animalUnionDecoder))
 
 
 type AnimalUnion

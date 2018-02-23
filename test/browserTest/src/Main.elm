@@ -5,9 +5,19 @@ import Html exposing (Html)
 import GraphqlToElm.Http exposing (Response(..), send, post)
 
 
+numberOfRounds : Int
+numberOfRounds =
+    100
+
+
+testsLength : Int
+testsLength =
+    List.length tests
+
+
 numberOfTests : Int
 numberOfTests =
-    List.length tests
+    numberOfRounds * testsLength
 
 
 
@@ -25,10 +35,18 @@ init =
     let
         _ =
             Debug.log "[Start Test]"
-                ("number of tests: " ++ toString numberOfTests)
+                ("number of tests: "
+                    ++ toString testsLength
+                    ++ " x "
+                    ++ toString numberOfRounds
+                )
     in
         ( Model 0 0
-        , Cmd.batch (List.map sendTest tests)
+        , tests
+            |> List.repeat numberOfRounds
+            |> List.concat
+            |> List.map sendTest
+            |> Cmd.batch
         )
 
 

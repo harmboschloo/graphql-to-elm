@@ -7,6 +7,9 @@
   "dependencies": {
     "mkdirp": "^0.5.1"
   },
+  "peerDependencies": {
+    "graphql": "^0.12.3"
+  },
   "devDependencies": {
     "@types/node": "^9.4.6",
     "body-parser": "^1.18.2",
@@ -23,9 +26,6 @@
     "tape": "^4.9.0",
     "ts-node": "^5.0.0",
     "typescript": "^2.7.2"
-  },
-  "peerDependencies": {
-    "graphql": "^0.12.3"
   },
   "scripts": {
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",

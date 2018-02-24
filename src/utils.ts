@@ -1,3 +1,4 @@
+import { EOL } from "os";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname } from "path";
 import * as mkdirp from "mkdirp";
@@ -6,6 +7,7 @@ export const readFile = (path: string): string => readFileSync(path, "utf8");
 
 export const writeFile = (dest: string, content: string): void => {
   mkdirp.sync(dirname(dest));
+  content = content.replace(/\r?\n|\r/g, EOL);
   writeFileSync(dest, content, "utf8");
 };
 

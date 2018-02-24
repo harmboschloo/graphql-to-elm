@@ -1,1 +1,3 @@
-This is a prerelease, it's not stable yet.
+**Experimental package**
+
+Validates graphql queries and converts them to elm code.

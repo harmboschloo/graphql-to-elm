@@ -8,21 +8,21 @@
     "mkdirp": "^0.5.1"
   },
   "devDependencies": {
-    "@types/node": "^9.3.0",
+    "@types/node": "^9.4.6",
     "body-parser": "^1.18.2",
-    "chokidar": "^2.0.0",
+    "chokidar": "^2.0.2",
     "elm": "^0.18.0",
     "express": "^4.16.2",
     "glob": "^7.1.2",
-    "graphql": "^0.12.3",
+    "graphql": "^0.13.1",
     "graphql-server-express": "^1.3.2",
-    "graphql-tools": "^2.20.0",
+    "graphql-tools": "^2.21.0",
     "phantom": "^4.0.12",
     "rimraf": "^2.6.2",
     "tap-diff": "^0.1.1",
-    "tape": "^4.8.0",
-    "ts-node": "^4.1.0",
-    "typescript": "^2.6.2"
+    "tape": "^4.9.0",
+    "ts-node": "^5.0.0",
+    "typescript": "^2.7.2"
   },
   "peerDependencies": {
     "graphql": "^0.12.3"
@@ -34,10 +34,8 @@
     "test:gen-watch": "ts-node test/genWatch.ts",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "start": "npm run test:gen-watch",
-    "clean:test": "rimraf test/*.js",
-    "pretest": "npm run clean:test && tsc --lib es2017 test/index.ts",
-    "test": "tape test/index.js | tap-diff",
-    "build": "rimraf lib && tsc --lib es2017 --outDir lib src/index.ts"
+    "test": "tape -r ts-node/register test/index.ts | tap-diff",
+    "build": "rimraf lib && tsc"
   },
   "author": "Harm Boschloo",
   "repository": {

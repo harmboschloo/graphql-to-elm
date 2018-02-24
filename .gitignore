@@ -1,6 +1,4 @@
 node_modules
 elm-stuff
 generated*
-/build
 /lib
-*.js

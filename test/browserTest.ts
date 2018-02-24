@@ -204,10 +204,9 @@ export const elmInstall = t => {
 
 export const elmMake = t => {
   t.comment("running elm-make");
-  const log = execSync(
-    `elm-make src/Main.elm --output generated/index.html --yes`,
-    { cwd: basePath }
-  );
+  const log = execSync(`elm-make src/Main.elm --output generated/index.html`, {
+    cwd: basePath
+  });
   t.comment(log.toString());
 };
 

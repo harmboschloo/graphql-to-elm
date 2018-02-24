@@ -2,8 +2,8 @@
   "name": "graphql-to-elm",
   "version": "0.0.0",
   "description": "Validates graphql queries and converts them to elm code",
-  "files": ["index.js"],
-  "main": "index.js",
+  "files": ["elm", "lib", "src"],
+  "main": "lib/index.js",
   "dependencies": {
     "mkdirp": "^0.5.1"
   },
@@ -28,21 +28,23 @@
     "graphql": "^0.12.3"
   },
   "scripts": {
-    "test":
-      "tape -r ts-node/register test/genTest.ts test/browserTest.ts | tap-diff",
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
     "test:gen-update":
       "tape -r ts-node/register test/genTest.ts --update | tap-diff",
     "test:gen-watch": "ts-node test/genWatch.ts",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
-    "start": "npm run test:gen-watch"
+    "start": "npm run test:gen-watch",
+    "clean:test": "rimraf test/*.js",
+    "pretest": "npm run clean:test && tsc --lib es2017 test/index.ts",
+    "test": "tape test/index.js | tap-diff",
+    "build": "rimraf lib && tsc --lib es2017 --outDir lib src/index.ts"
   },
   "author": "Harm Boschloo",
   "repository": {
     "type": "git",
-    "url": "git://github.com/harmboschloo/graphql2elm.git"
+    "url": "git://github.com/harmboschloo/graphql-to-elm.git"
   },
-  "homepage": "https://github.com/harmboschloo/graphql2elm",
+  "homepage": "https://github.com/harmboschloo/graphql-to-elm",
   "keywords": ["graphql", "elm"],
   "license": "BSD3"
 }

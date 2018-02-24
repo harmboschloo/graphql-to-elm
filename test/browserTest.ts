@@ -14,7 +14,7 @@ import {
   getGraphqlToElm,
   generateElm,
   writeResult
-} from "..";
+} from "../src";
 import { ElmIntelEncodeItem } from "../src/elmIntelTypes";
 import { validModuleName, writeFile, findByIdIn } from "../src/utils";
 

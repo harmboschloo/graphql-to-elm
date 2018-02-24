@@ -28,7 +28,8 @@ const generatePath = resolve(basePath, "generated");
 
 test("graphqlToElm browser test", t => {
   generateTestFiles(t);
-  makeElm(t);
+  elmInstall(t);
+  // elmMake(t);
 
   // const killServer = runServer(t);
   // const killBrowser = openTestPage(t);
@@ -195,7 +196,13 @@ const writeSchemas = (fixtures: Fixture[]) => {
   writeFile(schemasPath, content);
 };
 
-export const makeElm = t => {
+export const elmInstall = t => {
+  t.comment("running elm-package install");
+  const log = execSync(`elm-package install --yes`, { cwd: basePath });
+  t.comment(log.toString());
+};
+
+export const elmMake = t => {
   t.comment("running elm-make");
   const log = execSync(
     `elm-make src/Main.elm --output generated/index.html --yes`,

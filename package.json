@@ -1,8 +1,12 @@
 {
   "name": "graphql-to-elm",
-  "version": "0.0.0",
+  "version": "1.0.0-alpha.1",
   "description": "Validates graphql queries and converts them to elm code",
-  "files": ["elm", "lib", "src"],
+  "files": [
+    "elm",
+    "lib",
+    "src"
+  ],
   "main": "lib/index.js",
   "dependencies": {
     "mkdirp": "^0.5.1"
@@ -29,8 +33,7 @@
   },
   "scripts": {
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
-    "test:gen-update":
-      "tape -r ts-node/register test/genTest.ts --update | tap-diff",
+    "test:gen-update": "tape -r ts-node/register test/genTest.ts --update | tap-diff",
     "test:gen-watch": "ts-node test/genWatch.ts",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "start": "npm run test:gen-watch",
@@ -44,6 +47,9 @@
     "url": "git://github.com/harmboschloo/graphql-to-elm.git"
   },
   "homepage": "https://github.com/harmboschloo/graphql-to-elm",
-  "keywords": ["graphql", "elm"],
+  "keywords": [
+    "graphql",
+    "elm"
+  ],
   "license": "BSD-3-Clause"
 }

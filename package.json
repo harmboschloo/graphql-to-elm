@@ -45,5 +45,5 @@
   },
   "homepage": "https://github.com/harmboschloo/graphql-to-elm",
   "keywords": ["graphql", "elm"],
-  "license": "BSD3"
+  "license": "BSD-3-Clause"
 }

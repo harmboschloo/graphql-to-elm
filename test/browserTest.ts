@@ -29,7 +29,7 @@ const generatePath = resolve(basePath, "generated");
 test("graphqlToElm browser test", t => {
   generateTestFiles(t);
   elmInstall(t);
-  // elmMake(t);
+  elmMake(t);
 
   // const killServer = runServer(t);
   // const killBrowser = openTestPage(t);

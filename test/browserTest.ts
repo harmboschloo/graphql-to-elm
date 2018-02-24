@@ -30,13 +30,13 @@ test("graphqlToElm browser test", t => {
   generateTestFiles(t);
   makeElm(t);
 
-  const killServer = runServer(t);
-  const killBrowser = openTestPage(t);
+  // const killServer = runServer(t);
+  // const killBrowser = openTestPage(t);
 
-  test.onFinish(() => {
-    killServer();
-    killBrowser();
-  });
+  // test.onFinish(() => {
+  //   killServer();
+  //   killBrowser();
+  // });
 });
 
 const generateTestFiles = t => {

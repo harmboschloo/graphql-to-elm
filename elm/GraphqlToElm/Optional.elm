@@ -107,7 +107,7 @@ valueToMaybeDecoder aDecoder value =
 
 
 encode : (a -> Decode.Value) -> Optional a -> Maybe Encode.Value
-encode encoder optional =
+encode encode optional =
     case optional of
         Present a ->
             Just (encoder a)

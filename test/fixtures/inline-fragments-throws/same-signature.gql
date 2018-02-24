@@ -1,0 +1,10 @@
+query Interface {
+  animal {
+    ... on Dog {
+      color
+    }
+    ... on Dolphin {
+      color
+    }
+  }
+}

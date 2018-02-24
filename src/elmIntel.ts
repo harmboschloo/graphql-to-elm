@@ -29,7 +29,7 @@ import {
   validFieldName
 } from "./utils";
 import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
-import { wrapType } from "./generateElm";
+import { wrappedType } from "./generateElm";
 import {
   ElmIntel,
   ElmIntelItem,
@@ -187,14 +187,14 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
     } else if (queryItem.isFragmented) {
       const children = info.children.map(findByIdIn(intel.decode.items));
       const childSignatures = children.map(item =>
-        getRecordFieldsSignature(item.children, intel.decode.items)
+        getRecordFieldsJsonSignature(item.children, intel.decode.items)
       );
       childSignatures.forEach((signatue, index) => {
         if (childSignatures.indexOf(signatue) !== index) {
           throw new Error(
             `multiple union constructors for ${
               namedType.name
-            } with the same signature: ${signatue}`
+            } with the same json signature: ${signatue}`
           );
         }
       });
@@ -352,24 +352,6 @@ const setFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
   });
 };
 
-const getRecordFieldsSignature = (
-  children: number[],
-  items: ElmIntelItem[]
-): string => {
-  return children
-    .map(findByIdIn(items))
-    .map(item => {
-      if (!item.fieldName) {
-        throw new Error(
-          `Elm intel field item ${item.type} does not have a fieldName`
-        );
-      }
-      return `${item.fieldName} : ${wrapType(item)}`;
-    })
-    .sort()
-    .join(", ");
-};
-
 const newRecordType = (
   graphqlType: string,
   children: number[],
@@ -386,6 +368,55 @@ const newRecordType = (
   );
 };
 
+const getRecordFieldsSignature = (
+  children: number[],
+  items: ElmIntelItem[]
+): string =>
+  children
+    .map(findByIdIn(items))
+    .map(item => {
+      if (!item.fieldName) {
+        throw new Error(
+          `Elm intel field item ${item.type} does not have a fieldName`
+        );
+      }
+      return `${item.fieldName} : ${wrappedType(item)}`;
+    })
+    .sort()
+    .join(", ");
+
+const getRecordFieldsJsonSignature = (
+  children: number[],
+  items: ElmIntelItem[]
+): string =>
+  children
+    .map(findByIdIn(items))
+    .map(item => getRecordFieldJsonSignature(item, items))
+    .sort()
+    .join(", ");
+
+const getRecordFieldJsonSignature = (
+  item: ElmIntelItem,
+  items: ElmIntelItem[]
+): string => {
+  if (!item.name) {
+    throw new Error(`Elm intel field item ${item.type} does not have a name`);
+  }
+
+  let signature;
+
+  if (item.kind === "record") {
+    signature = `{${getRecordFieldsJsonSignature(item.children, items)}}`;
+  } else {
+    signature = item.type;
+  }
+
+  if (item.isList) {
+    signature = `[${signature}]`;
+  }
+
+  return `${item.name} : ${signature}`;
+};
 const newUnionType = (graphqlType: string, intel: ElmIntel): string => {
   const signature = graphqlType;
 

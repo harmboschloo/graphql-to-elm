@@ -1,0 +1,23 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  animal: Animal!
+}
+
+interface Animal {
+  color: String!
+}
+
+type Dog implements Animal {
+  color: String!
+}
+
+type Dolphin implements Animal {
+  color: String!
+}

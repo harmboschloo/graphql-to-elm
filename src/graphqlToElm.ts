@@ -1,7 +1,8 @@
 import { GraphQLSchema, buildSchema } from "graphql";
 import { Options, FinalOptions, finalize } from "./options";
 import { QueryIntel, readQueryIntel } from "./queryIntel";
-import { ElmIntel, queryToElmIntel } from "./elmIntel";
+import { ElmIntel } from "./elmIntelTypes";
+import { queryToElmIntel } from "./elmIntel";
 import { generateElm } from "./generateElm";
 import { readFile, writeFile } from "./utils";
 

@@ -20,29 +20,40 @@ test("graphqlToElm generate test", t => {
   t.end(fixtureId ? "with fixture filter" : undefined);
 });
 
-const testFixture = t => ({ id, dir, options, expect }: Fixture) =>
+const testFixture = t => ({ id, dir, options, expect, throws }: Fixture) =>
   t.test(`== fixture ${id} ==`, t => {
     process.chdir(resolve(__dirname, dir));
 
+    const throwsTest = throws
+      ? (fn, msg) => {
+          try {
+            fn();
+            t.fail(`Expected error message: ${throws}`);
+          } catch (error) {
+            t.equal(error.message, throws, "Expected error message");
+          }
+        }
+      : t.doesNotThrow;
+
     if (process.argv.slice(2).includes("--update")) {
-      t.doesNotThrow(
+      throwsTest(
         () =>
           graphqlToElm({
             ...options,
             dest: expect,
             log: t.comment
           }),
-        "graphqlToElm UPDATE should not throw"
+        "graphqlToElm UPDATE"
       );
     }
 
-    t.doesNotThrow(
+    throwsTest(
       () =>
         graphqlToElm({
           ...options,
           log: t.comment
         }),
-      "graphqlToElm should not throw"
+      "graphqlToElm"
     );
 
     t.doesNotThrow(

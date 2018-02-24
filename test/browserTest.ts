@@ -15,7 +15,7 @@ import {
   generateElm,
   writeResult
 } from "..";
-import { ElmIntelEncodeItem } from "../src/elmIntel";
+import { ElmIntelEncodeItem } from "../src/elmIntelTypes";
 import { validModuleName, writeFile, findByIdIn } from "../src/utils";
 
 interface FixtureResult {
@@ -41,7 +41,7 @@ test("graphqlToElm browser test", t => {
 
 const generateTestFiles = t => {
   rimraf.sync(generatePath);
-  const fixtures = getFixtures();
+  const fixtures = getFixtures().filter(fixture => !fixture.throws);
   const results: FixtureResult[] = fixtures.map(writeQueries(t));
   writeTests(results);
   writeSchemas(fixtures);
@@ -159,7 +159,8 @@ const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
     const fields = item.children
       .map(findByIdIn(intel.encode.items))
       .map(
-        child => `${child.fieldName} = ${generateItemVariables(child, intel)}`
+        (child: ElmIntelEncodeItem) =>
+          `${child.fieldName} = ${generateItemVariables(child, intel)}`
       );
     return `{ ${fields.join(", ")} }`;
   } else {

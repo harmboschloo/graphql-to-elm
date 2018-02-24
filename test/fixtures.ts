@@ -5,6 +5,7 @@ export interface Fixture {
   dir: string;
   options: Options;
   expect: string;
+  throws?: string;
 }
 
 export const getFixtures = (fixtureId?: string): Fixture[] =>
@@ -24,11 +25,13 @@ interface Config {
   src?: string;
   dest?: string;
   expect?: string;
+  throws?: string;
 }
 
 interface FinalConfig {
   options: Options;
   expect: string;
+  throws?: string;
 }
 
 const create = ({
@@ -38,7 +41,8 @@ const create = ({
   enumDecoders,
   src,
   dest = "generated-output",
-  expect = "expected-output"
+  expect = "expected-output",
+  throws
 }: Config): FinalConfig => ({
   options: {
     schema,
@@ -48,7 +52,8 @@ const create = ({
     src,
     dest
   },
-  expect
+  expect,
+  throws
 });
 
 const data: { [key: string]: FinalConfig } = {
@@ -121,8 +126,13 @@ const data: { [key: string]: FinalConfig } = {
       "interface-list.gql",
       "interface-partial.gql",
       "interface-plain.gql"
-      // TODO same signature (... auto __typename)
+      // TODO same signature (... auto __typename?)
     ]
+  }),
+  "inline-fragments-throws": create({
+    queries: ["same-signature.gql"],
+    throws:
+      "multiple union constructors for Animal with the same json signature: color : String"
   })
   // TODO
   // fragments

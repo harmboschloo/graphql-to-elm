@@ -241,7 +241,7 @@ const generateRecordTypeDeclaration = (
 ): string => {
   if (children.length > 0) {
     const fieldTypes = children.map(
-      child => `${child.fieldName} : ${wrapType(child)}`
+      child => `${child.fieldName} : ${wrappedType(child)}`
     );
 
     return `type alias ${item.type} =\n    { ${fieldTypes.join(
@@ -252,7 +252,7 @@ const generateRecordTypeDeclaration = (
   }
 };
 
-export const wrapType = (item: ElmIntelItem): string => {
+export const wrappedType = (item: ElmIntelItem): string => {
   let signature = item.type;
   let wrap = x => x;
 

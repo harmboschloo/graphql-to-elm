@@ -35,7 +35,8 @@
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "start": "npm run test:gen-watch",
     "test": "tape -r ts-node/register test/index.ts | tap-diff",
-    "build": "rimraf lib && tsc"
+    "build": "rimraf lib && tsc",
+    "prepublishOnly": "npm test && npm run build"
   },
   "author": "Harm Boschloo",
   "repository": {

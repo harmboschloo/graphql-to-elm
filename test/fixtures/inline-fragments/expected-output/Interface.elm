@@ -4,11 +4,24 @@ module Interface
         , AnimalUnion(..)
         , Dog
         , Dolphin
+        , post
         , query
         , decoder
         )
 
+import GraphqlToElm.Http
 import Json.Decode
+import Json.Encode
+
+
+post : String -> GraphqlToElm.Http.Request Data
+post url =
+    GraphqlToElm.Http.post
+        url
+        { query = query
+        , variables = Json.Encode.null
+        }
+        decoder
 
 
 query : String

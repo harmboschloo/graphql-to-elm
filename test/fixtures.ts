@@ -134,8 +134,10 @@ const data: { [key: string]: FinalConfig } = {
       "multiple union constructors for Animal with the same json signature: color : String"
   })
   // TODO
-  // fragments
-  // operation names
+  // - fragments
+  // - operation names
   // - endpoint
   // - swapi
+  // - fix generate import using hardcoded names
+  //   (add variables encoder & data decoder to intel)
 };

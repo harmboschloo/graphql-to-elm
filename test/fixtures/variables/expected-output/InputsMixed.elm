@@ -4,14 +4,26 @@ module InputsMixed
         , MixedInputs
         , OtherInputs
         , Data
+        , post
         , query
         , encodeVariables
         , decoder
         )
 
+import GraphqlToElm.Http
 import GraphqlToElm.Optional
 import Json.Decode
 import Json.Encode
+
+
+post : String -> Variables -> GraphqlToElm.Http.Request Data
+post url variables =
+    GraphqlToElm.Http.post
+        url
+        { query = query
+        , variables = encodeVariables variables
+        }
+        decoder
 
 
 query : String

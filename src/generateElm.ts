@@ -20,6 +20,9 @@ export const generateElm = (intel: ElmIntel): string =>
 ${generateImports(intel)}
 
 
+${generatePost(intel)}
+
+
 query : String
 query =
     """${intel.query}"""
@@ -57,6 +60,7 @@ const generateExports = (intel: ElmIntel): string => {
   }
 
   if (intel.decode.items.length) {
+    variables.unshift("post");
     variables.push("decoder");
   }
 
@@ -64,7 +68,7 @@ const generateExports = (intel: ElmIntel): string => {
 };
 
 const generateImports = (intel: ElmIntel): string => {
-  const imports = {};
+  const imports = { "Json.Encode": true };
 
   const addImportOf = x => {
     const module = x && extractModule(x);
@@ -74,7 +78,6 @@ const generateImports = (intel: ElmIntel): string => {
   };
 
   intel.encode.items.forEach(item => {
-    imports["Json.Encode"] = true;
     addImportOf(item.type);
     addImportOf(item.encoder);
     if (item.isNullable || item.isListOfNullables) {
@@ -84,6 +87,7 @@ const generateImports = (intel: ElmIntel): string => {
 
   intel.decode.items.forEach(item => {
     imports["Json.Decode"] = true;
+    imports["GraphqlToElm.Http"] = true;
     addImportOf(item.type);
     addImportOf(item.decoder);
     if (item.isOptional) {
@@ -95,6 +99,37 @@ const generateImports = (intel: ElmIntel): string => {
     .sort()
     .map(name => `import ${name}`)
     .join("\n");
+};
+
+const generatePost = (intel: ElmIntel): string => {
+  const dataItem = intel.decode.items.find(item => item.id === 0);
+  if (!dataItem) {
+    return "";
+  }
+
+  const variablesItem = intel.encode.items.find(item => item.id === 0);
+
+  if (variablesItem) {
+    return `post : String -> ${
+      variablesItem.type
+    } -> GraphqlToElm.Http.Request ${dataItem.type}
+post url variables =
+    GraphqlToElm.Http.post
+        url
+        { query = query
+        , variables = ${variablesItem.encoder} variables
+        }
+        ${dataItem.decoder}`;
+  } else {
+    return `post : String -> GraphqlToElm.Http.Request ${dataItem.type}
+post url =
+    GraphqlToElm.Http.post
+        url
+        { query = query
+        , variables = Json.Encode.null
+        }
+        ${dataItem.decoder}`;
+  }
 };
 
 const generateTypesAndEncoders = (intel: ElmIntel): string => {

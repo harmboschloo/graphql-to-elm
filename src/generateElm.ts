@@ -93,6 +93,9 @@ const generateImports = (intel: ElmIntel): string => {
     if (item.isOptional) {
       imports["GraphqlToElm.Optional"] = true;
     }
+    if (item.kind === "record" && item.children.length > 8) {
+      imports["GraphqlToElm.DecodeHelpers"] = true;
+    }
   });
 
   return Object.keys(imports)
@@ -320,11 +323,16 @@ const generateRecordDecoder = (
   const declaration = `${item.decoder} : Json.Decode.Decoder ${item.type}`;
 
   if (children.length > 0) {
-    const map = children.length > 1 ? children.length : "";
+    const map = children.length > 1 ? Math.min(children.length, 8) : "";
+
+    const prefix = index =>
+      index >= 8 ? "|> GraphqlToElm.DecodeHelpers.andMap " : "";
 
     const fieldDecoders = children.map(
-      child =>
-        `        (${fieldDecoder(child)} "${child.name}" ${wrapDecoder(child)})`
+      (child, index) =>
+        `        ${prefix(index)}(${fieldDecoder(child)} "${
+          child.name
+        }" ${wrapDecoder(child)})`
     );
 
     return `${declaration}\n${item.decoder} =\n    Json.Decode.map${map} ${

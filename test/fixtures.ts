@@ -63,6 +63,7 @@ const data: { [key: string]: FinalConfig } = {
   objects: create({
     queries: [
       "basic.gql",
+      "big.gql",
       "nested.gql",
       "same-type-same-fields.gql",
       "same-type-same-fields-nullable.gql",
@@ -71,8 +72,6 @@ const data: { [key: string]: FinalConfig } = {
       "other-type-same-fields.gql",
       "other-type-other-fields.gql"
       // TODO
-      // - big objects (more than 8 fields, needs andMap)
-      //   - see also keywords
       // - resursive decoding? (using lazy)
     ]
   }),

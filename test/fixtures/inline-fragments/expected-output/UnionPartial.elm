@@ -9,6 +9,7 @@ module UnionPartial
         , decoder
         )
 
+import GraphqlToElm.DecodeHelpers
 import GraphqlToElm.Http
 import Json.Decode
 import Json.Encode
@@ -76,11 +77,4 @@ type alias Flip =
 
 flipDecoder : Json.Decode.Decoder Flip
 flipDecoder =
-    Json.Decode.keyValuePairs Json.Decode.value
-        |> Json.Decode.andThen
-            (\pairs ->
-                if List.isEmpty pairs then
-                    Json.Decode.succeed Flip
-                else
-                    Json.Decode.fail "expected empty object"
-            )
+    GraphqlToElm.DecodeHelpers.emptyObjectDecoder

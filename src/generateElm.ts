@@ -93,8 +93,10 @@ const generateImports = (intel: ElmIntel): string => {
     if (item.isOptional) {
       imports["GraphqlToElm.Optional"] = true;
     }
-    if (item.kind === "record" && item.children.length > 8) {
-      imports["GraphqlToElm.DecodeHelpers"] = true;
+    if (item.kind === "record") {
+      if (item.children.length === 0 || item.children.length > 8) {
+        imports["GraphqlToElm.DecodeHelpers"] = true;
+      }
     }
   });
 
@@ -339,15 +341,9 @@ const generateRecordDecoder = (
       item.type
     }\n${fieldDecoders.join("\n")}`;
   } else {
-    return `${declaration}\n${item.decoder} =
-    Json.Decode.keyValuePairs Json.Decode.value
-        |> Json.Decode.andThen
-            (\\pairs ->
-                if List.isEmpty pairs then
-                    Json.Decode.succeed Flip
-                else
-                    Json.Decode.fail "expected empty object"
-            )`;
+    return `${declaration}\n${
+      item.decoder
+    } =\n    GraphqlToElm.DecodeHelpers.emptyObjectDecoder`;
   }
 };
 

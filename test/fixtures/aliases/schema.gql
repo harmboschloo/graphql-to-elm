@@ -1,0 +1,18 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  user: User!
+  userOrNull: User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}

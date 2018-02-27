@@ -57,6 +57,49 @@ const create = ({
 });
 
 const data: { [key: string]: FinalConfig } = {
+  aliases: create({ queries: ["query.gql"] }),
+  customScalars: create({
+    queries: ["custom-scalar-types.gql", "custom-nullable-scalar-types.gql"],
+    scalarDecoders: {
+      ID: {
+        type: "Data.Id.Id",
+        decoder: "Data.Id.decoder"
+      },
+      Date: {
+        type: "Data.Date.Date",
+        decoder: "Data.Date.decoder"
+      }
+    }
+  }),
+  directives: create({
+    queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
+  }),
+  enums: create({
+    queries: ["enum.gql", "nullable-enum.gql"],
+    enumDecoders: {
+      Binary: {
+        type: "Data.Binary.Binary",
+        decoder: "Data.Binary.decoder"
+      }
+    }
+  }),
+  "inline-fragments": create({
+    queries: [
+      "union.gql",
+      "union-list.gql",
+      "union-partial.gql",
+      "interface.gql",
+      "interface-list.gql",
+      "interface-partial.gql",
+      "interface-plain.gql"
+      // TODO same signature (... auto __typename?)
+    ]
+  }),
+  "inline-fragments-throws": create({
+    queries: ["same-signature.gql"],
+    throws:
+      "multiple union constructors for Animal with the same json signature: color : String"
+  }),
   keywords: create({ queries: ["query.gql"] }),
   lists: create({ queries: ["list-of-objects.gql", "list-of-scalars.gql"] }),
   misc: create({ queries: ["query.gql"] }),
@@ -78,28 +121,6 @@ const data: { [key: string]: FinalConfig } = {
   scalars: create({
     queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"]
   }),
-  customScalars: create({
-    queries: ["custom-scalar-types.gql", "custom-nullable-scalar-types.gql"],
-    scalarDecoders: {
-      ID: {
-        type: "Data.Id.Id",
-        decoder: "Data.Id.decoder"
-      },
-      Date: {
-        type: "Data.Date.Date",
-        decoder: "Data.Date.decoder"
-      }
-    }
-  }),
-  enums: create({
-    queries: ["enum.gql", "nullable-enum.gql"],
-    enumDecoders: {
-      Binary: {
-        type: "Data.Binary.Binary",
-        decoder: "Data.Binary.decoder"
-      }
-    }
-  }),
   variables: create({
     queries: [
       "scalars.gql",
@@ -111,26 +132,6 @@ const data: { [key: string]: FinalConfig } = {
       "inputs-multiple.gql",
       "lists.gql"
     ]
-  }),
-  directives: create({
-    queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
-  }),
-  "inline-fragments": create({
-    queries: [
-      "union.gql",
-      "union-list.gql",
-      "union-partial.gql",
-      "interface.gql",
-      "interface-list.gql",
-      "interface-partial.gql",
-      "interface-plain.gql"
-      // TODO same signature (... auto __typename?)
-    ]
-  }),
-  "inline-fragments-throws": create({
-    queries: ["same-signature.gql"],
-    throws:
-      "multiple union constructors for Animal with the same json signature: color : String"
   })
   // TODO
   // - fragments

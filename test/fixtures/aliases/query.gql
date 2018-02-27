@@ -1,0 +1,26 @@
+query Aliases {
+  user1: user {
+    id
+    email
+  }
+  user2: user {
+    id
+    name
+  }
+  user3: user {
+    id
+    email
+  }
+  user4: userOrNull {
+    id
+    name
+  }
+  user {
+    id
+    email
+  }
+  userOrNull {
+    id
+    name
+  }
+}

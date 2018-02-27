@@ -179,7 +179,8 @@ const queryVisitor = (
         const item = {
           id: intel.items.length,
           type,
-          name: node.name && node.name.value,
+          name:
+            (node.alias && node.alias.value) || (node.name && node.name.value),
           depth: intel.parentStack.length,
           children: [],
           withDirective: node.directives && node.directives.length > 0,

@@ -50,7 +50,7 @@ const defaultOptions: {
   log: message => console.log(message)
 };
 
-export const finalize = (options: Options): FinalOptions => {
+export const finalizeOptions = (options: Options): FinalOptions => {
   const { schema, queries } = options;
   const scalarEncoders = withDefault({}, options.scalarEncoders);
   const enumEncoders = withDefault({}, options.enumEncoders);

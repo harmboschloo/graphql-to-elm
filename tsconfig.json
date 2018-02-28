@@ -4,7 +4,8 @@
     "module": "commonjs",
     "types": ["node"],
     "lib": ["es2017"],
-    "outDir": "lib"
+    "outDir": "lib",
+    "declaration": true
   },
   "files": ["src/index.ts"]
 }

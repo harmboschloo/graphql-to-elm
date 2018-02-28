@@ -37,6 +37,8 @@ import {
   ElmIntelDecodeItem
 } from "./elmIntelTypes";
 
+export * from "./elmIntelTypes";
+
 export const queryToElmIntel = (
   queryIntel: QueryIntel,
   options: FinalOptions

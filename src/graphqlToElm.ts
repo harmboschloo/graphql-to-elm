@@ -1,5 +1,5 @@
 import { GraphQLSchema, buildSchema } from "graphql";
-import { Options, FinalOptions, finalize } from "./options";
+import { Options, FinalOptions, finalizeOptions } from "./options";
 import { QueryIntel, readQueryIntel } from "./queryIntel";
 import { ElmIntel } from "./elmIntelTypes";
 import { queryToElmIntel } from "./elmIntel";
@@ -24,7 +24,7 @@ export const graphqlToElm = (options: Options): Result => {
 };
 
 export const getGraphqlToElm = (userOptions: Options): Result => {
-  const options: FinalOptions = finalize(userOptions);
+  const options: FinalOptions = finalizeOptions(userOptions);
 
   options.log(`reading schema ${options.schema}`);
   const schema = buildSchema(readFile(options.schema));

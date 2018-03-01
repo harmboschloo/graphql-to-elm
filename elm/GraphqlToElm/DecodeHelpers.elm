@@ -8,13 +8,13 @@ andMap =
     Decode.map2 (|>)
 
 
-emptyObjectDecoder : Decoder {}
-emptyObjectDecoder =
+emptyObjectDecoder : a -> Decoder a
+emptyObjectDecoder result =
     Decode.keyValuePairs Decode.value
         |> Decode.andThen
             (\pairs ->
                 if List.isEmpty pairs then
-                    Decode.succeed {}
+                    Decode.succeed result
                 else
                     Decode.fail "expected empty object"
             )

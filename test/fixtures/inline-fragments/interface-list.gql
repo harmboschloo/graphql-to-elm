@@ -1,11 +1,16 @@
 query InterfaceList {
   animals {
-    color
     ... on Dog {
+      color
       hairy
     }
     ... on Dolphin {
+      color
       fins
+    }
+    ... on Bird {
+      canFly
+      color
     }
   }
 }

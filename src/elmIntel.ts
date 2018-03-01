@@ -21,10 +21,12 @@ import {
 import {
   cachedValue,
   findByIdIn,
+  getMaxOrder,
   nextValidName,
   validNameUpper,
   validModuleName,
   validTypeName,
+  validTypeConstructorName,
   validVariableName,
   validFieldName
 } from "./utils";
@@ -80,12 +82,15 @@ export const queryToElmIntel = (
   };
 
   queryIntel.variables
-    .sort((a, b) => b.depth - a.depth || b.id - a.id)
+    .sort((a, b) => b.depth - a.depth || a.order - b.order)
     .forEach(addEncodeItem(intel, options));
 
+  let nextDecodeId = queryIntel.items.length;
+  const getNextDecodeId = () => ++nextDecodeId;
+
   queryIntel.items
-    .sort((a, b) => b.depth - a.depth || b.id - a.id)
-    .forEach(addDecodeItem(intel, options));
+    .sort((a, b) => b.depth - a.depth || a.order - b.order)
+    .forEach(addDecodeItem(intel, getNextDecodeId, options));
 
   return intel;
 };
@@ -102,7 +107,7 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   let item: ElmIntelEncodeItem;
 
   if (info.id === 0) {
-    setFieldNames(info.children, intel.encode.items);
+    setRecordFieldNames(info.children, intel.encode.items);
     item = {
       ...info,
       kind: "record",
@@ -110,7 +115,7 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
       encoder: "encodeVariables"
     };
   } else if (isInputObjectType(namedType)) {
-    setFieldNames(info.children, intel.encode.items);
+    setRecordFieldNames(info.children, intel.encode.items);
     const type = newRecordType(
       namedType.name,
       info.children,
@@ -165,9 +170,11 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   intel.encode.items.push(item);
 };
 
-const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
-  queryItem: QueryIntelOutputItem
-): void => {
+const addDecodeItem = (
+  intel: ElmIntel,
+  nextId: () => number,
+  options: FinalOptions
+) => (queryItem: QueryIntelOutputItem): void => {
   const info = getItemInfo(queryItem);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
 
@@ -177,50 +184,75 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
 
   if (isCompositeType(namedType)) {
     if (info.id === 0) {
-      setFieldNames(info.children, intel.decode.items);
+      setRecordFieldNames(info.children, intel.decode.items);
       item = {
         ...info,
         kind: "record",
         type: "Data",
-        decoder: "decoder"
+        decoder: "decoder",
+        unionConstructor: ""
       };
       intel.typesBySignature[""] = item.type;
       intel.decode.decodersByType[item.type] = item.decoder;
     } else if (queryItem.isFragmented) {
-      const children = info.children.map(findByIdIn(intel.decode.items));
-      const childSignatures = children.map(item =>
-        getRecordFieldsJsonSignature(item.children, intel.decode.items)
-      );
-      childSignatures.forEach((signatue, index) => {
-        if (childSignatures.indexOf(signatue) !== index) {
-          throw new Error(
-            `multiple union constructors for ${
-              namedType.name
-            } with the same json signature: ${signatue}`
-          );
-        }
-      });
+      checkUnionChildSignatures(queryItem.children, intel.decode.items);
 
-      const type = newUnionType(namedType.name, intel);
+      const prefix = queryItem.isFragmentedOn ? "On" : "";
+      const type = newUnionType(
+        `${prefix}${namedType.name}`,
+        info.children,
+        intel
+      );
+
       item = {
         ...info,
-        kind: "union",
+        kind: queryItem.isFragmentedOn ? "union-on" : "union",
         type,
-        decoder: newDecoderName(type, intel)
+        decoder: newDecoderName(type, intel),
+        unionConstructor: ""
       };
+
+      if (!queryItem.hasAllPosibleFragmentTypes) {
+        const children = item.children.map(findByIdIn(intel.decode.items));
+        const otherItem: ElmIntelDecodeItem = {
+          id: nextId(),
+          name: "",
+          fieldName: "",
+          order: getMaxOrder(children) + 0.5,
+          children: [],
+          isOptional: false,
+          isListOfOptionals: false,
+          isNullable: false,
+          isList: false,
+          isListOfNullables: false,
+          kind: "empty",
+          type: `Other${namedType.name}`,
+          decoder: queryItem.isFragmentedOn
+            ? "Json.Decode.succeed"
+            : "GraphqlToElm.DecodeHelpers.emptyObjectDecoder",
+          unionConstructor: ""
+        };
+
+        item.children.push(otherItem.id);
+        intel.decode.items.push(otherItem);
+      }
+
+      setUnionConstructorNames(item, intel);
     } else {
-      setFieldNames(info.children, intel.decode.items);
+      setRecordFieldNames(info.children, intel.decode.items);
       const type = newRecordType(
         namedType.name,
         info.children,
         intel.decode.items,
         intel
       );
+
       item = {
         ...info,
         kind: "record",
         type,
-        decoder: newDecoderName(type, intel)
+        decoder: newDecoderName(type, intel),
+        unionConstructor: ""
       };
     }
   } else if (isScalarType(namedType)) {
@@ -240,7 +272,8 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
       ...info,
       kind: "scalar",
       type: scalarDecoder.type,
-      decoder: scalarDecoder.decoder
+      decoder: scalarDecoder.decoder,
+      unionConstructor: ""
     };
   } else if (isEnumType(namedType)) {
     const typeName: string = namedType.name;
@@ -258,7 +291,8 @@ const addDecodeItem = (intel: ElmIntel, options: FinalOptions) => (
       ...info,
       kind: "enum",
       type: enumDecoder.type,
-      decoder: enumDecoder.decoder
+      decoder: enumDecoder.decoder,
+      unionConstructor: ""
     };
   } else {
     throw new Error(`Unhandled query output type: ${queryItem.type}`);
@@ -321,8 +355,8 @@ const getItemInfo = (queryItem: QueryIntelItem) => {
     id: queryItem.id,
     name: queryItem.name,
     fieldName: "",
-    depth: queryItem.depth,
-    children: queryItem.children,
+    order: queryItem.order,
+    children: queryItem.children.slice(),
     isOptional: false,
     isListOfOptionals: false,
     isNullable: isNullableType(queryItem.type),
@@ -344,7 +378,7 @@ const getReservedNames = () => [...reservedNames];
 const newName = (name: string, intel: ElmIntel): string =>
   nextValidName(name, intel.usedNames);
 
-const setFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
+const setRecordFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
   const usedFieldNames = [];
   fieldItems.map(findByIdIn(items)).forEach(item => {
     if (!item.name) {
@@ -419,13 +453,53 @@ const getRecordFieldJsonSignature = (
 
   return `${item.name} : ${signature}`;
 };
-const newUnionType = (graphqlType: string, intel: ElmIntel): string => {
-  const signature = graphqlType;
+
+const checkUnionChildSignatures = (
+  children: number[],
+  items: ElmIntelDecodeItem[]
+) => {
+  const childSignatures = children
+    .map(findByIdIn(items))
+    .map(item => getRecordFieldsJsonSignature(item.children, items));
+
+  childSignatures.forEach((signatue, index) => {
+    if (childSignatures.indexOf(signatue) !== index) {
+      throw Error(
+        `multiple union children with the same json signature: ${signatue}`
+      );
+    }
+  });
+};
+
+const newUnionType = (
+  type: string,
+  children: number[],
+  intel: ElmIntel
+): string => {
+  const childSignatures = children
+    .map(findByIdIn(intel.decode.items))
+    .map(item => item.type);
+
+  const signature = `${type}: ${childSignatures.join(", ")}`;
 
   return cachedValue(signature, intel.typesBySignature, () =>
-    newName(validTypeName(`${graphqlType}Union`), intel)
+    newName(validTypeName(type), intel)
   );
 };
+
+const setUnionConstructorNames = (item: ElmIntelDecodeItem, intel: ElmIntel) =>
+  item.children.map(findByIdIn(intel.decode.items)).forEach(child => {
+    child.unionConstructor = newUnionConstructor(item.type, child.type, intel);
+  });
+
+const newUnionConstructor = (
+  unionType: string,
+  constructorType: string,
+  intel: ElmIntel
+): string =>
+  cachedValue(`${unionType} On${constructorType}`, intel.typesBySignature, () =>
+    newName(validTypeConstructorName(`On${constructorType}`), intel)
+  );
 
 const newEncoderName = (type: string, intel: ElmIntel) =>
   cachedValue(type, intel.encode.encodersByType, () =>

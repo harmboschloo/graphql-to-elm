@@ -1,0 +1,31 @@
+query UnionMultiple {
+  flip1: flip {
+    ... on Heads {
+      name
+    }
+    ... on Tails {
+      length
+    }
+  }
+
+  flip2: flip {
+    ... on Heads {
+      name
+    }
+    ... on Tails {
+      length
+    }
+  }
+
+  flip3: flip {
+    ... on Heads {
+      name
+    }
+  }
+
+  flip4: flip {
+    ... on Tails {
+      length
+    }
+  }
+}

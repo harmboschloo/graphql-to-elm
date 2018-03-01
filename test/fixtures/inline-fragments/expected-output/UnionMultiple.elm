@@ -1,14 +1,17 @@
-module UnionList
+module UnionMultiple
     exposing
         ( Data
         , Flip(..)
         , Heads
         , Tails
+        , Flip2(..)
+        , Flip3(..)
         , post
         , query
         , decoder
         )
 
+import GraphqlToElm.DecodeHelpers
 import GraphqlToElm.Http
 import Json.Decode
 import Json.Encode
@@ -26,11 +29,32 @@ post url =
 
 query : String
 query =
-    """query UnionList {
-  flips {
+    """query UnionMultiple {
+  flip1: flip {
     ... on Heads {
       name
     }
+    ... on Tails {
+      length
+    }
+  }
+
+  flip2: flip {
+    ... on Heads {
+      name
+    }
+    ... on Tails {
+      length
+    }
+  }
+
+  flip3: flip {
+    ... on Heads {
+      name
+    }
+  }
+
+  flip4: flip {
     ... on Tails {
       length
     }
@@ -39,14 +63,20 @@ query =
 
 
 type alias Data =
-    { flips : List Flip
+    { flip1 : Flip
+    , flip2 : Flip
+    , flip3 : Flip2
+    , flip4 : Flip3
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
-    Json.Decode.map Data
-        (Json.Decode.field "flips" (Json.Decode.list flipDecoder))
+    Json.Decode.map4 Data
+        (Json.Decode.field "flip1" flipDecoder)
+        (Json.Decode.field "flip2" flipDecoder)
+        (Json.Decode.field "flip3" flip2Decoder)
+        (Json.Decode.field "flip4" flip3Decoder)
 
 
 type Flip
@@ -82,3 +112,29 @@ tailsDecoder : Json.Decode.Decoder Tails
 tailsDecoder =
     Json.Decode.map Tails
         (Json.Decode.field "length" Json.Decode.float)
+
+
+type Flip2
+    = OnHeads2 Heads
+    | OnOtherFlip
+
+
+flip2Decoder : Json.Decode.Decoder Flip2
+flip2Decoder =
+    Json.Decode.oneOf
+        [ Json.Decode.map OnHeads2 headsDecoder
+        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip
+        ]
+
+
+type Flip3
+    = OnTails2 Tails
+    | OnOtherFlip2
+
+
+flip3Decoder : Json.Decode.Decoder Flip3
+flip3Decoder =
+    Json.Decode.oneOf
+        [ Json.Decode.map OnTails2 tailsDecoder
+        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip2
+        ]

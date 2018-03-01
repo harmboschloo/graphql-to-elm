@@ -4,4 +4,9 @@ query UnionPartial {
       name
     }
   }
+  flipOrNull {
+    ... on Tails {
+      length
+    }
+  }
 }

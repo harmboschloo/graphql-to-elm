@@ -2,8 +2,8 @@ module Lists
     exposing
         ( Variables
         , Inputs
-        , OptionalInputs
         , OtherInputs
+        , OptionalInputs
         , Data
         , post
         , query

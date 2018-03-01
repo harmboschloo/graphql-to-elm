@@ -1,8 +1,8 @@
 module SameTypeOtherFields
     exposing
         ( Data
-        , Person2
         , Person
+        , Person2
         , post
         , query
         , decoder
@@ -38,33 +38,20 @@ query =
 
 
 type alias Data =
-    { i : Person2
-    , me : Person
+    { i : Person
+    , me : Person2
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map2 Data
-        (Json.Decode.field "i" person2Decoder)
-        (Json.Decode.field "me" personDecoder)
-
-
-type alias Person2 =
-    { name : String
-    , age : Maybe.Maybe Int
-    }
-
-
-person2Decoder : Json.Decode.Decoder Person2
-person2Decoder =
-    Json.Decode.map2 Person2
-        (Json.Decode.field "name" Json.Decode.string)
-        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+        (Json.Decode.field "i" personDecoder)
+        (Json.Decode.field "me" person2Decoder)
 
 
 type alias Person =
-    { email : Maybe.Maybe String
+    { name : String
     , age : Maybe.Maybe Int
     }
 
@@ -72,5 +59,18 @@ type alias Person =
 personDecoder : Json.Decode.Decoder Person
 personDecoder =
     Json.Decode.map2 Person
+        (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+
+
+type alias Person2 =
+    { email : Maybe.Maybe String
+    , age : Maybe.Maybe Int
+    }
+
+
+person2Decoder : Json.Decode.Decoder Person2
+person2Decoder =
+    Json.Decode.map2 Person2
         (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))
         (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))

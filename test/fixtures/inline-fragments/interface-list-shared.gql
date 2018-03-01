@@ -1,15 +1,13 @@
-query Interface {
-  animal {
+query InterfaceListShared {
+  animals {
+    color
     ... on Dog {
-      color
       hairy
     }
     ... on Dolphin {
-      color
       fins
     }
     ... on Bird {
-      color
       canFly
     }
   }

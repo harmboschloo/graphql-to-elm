@@ -1,9 +1,10 @@
 module UnionPartial
     exposing
         ( Data
-        , FlipUnion(..)
+        , Flip(..)
         , Heads
-        , Flip
+        , Flip2(..)
+        , Tails
         , post
         , query
         , decoder
@@ -33,30 +34,37 @@ query =
       name
     }
   }
+  flipOrNull {
+    ... on Tails {
+      length
+    }
+  }
 }"""
 
 
 type alias Data =
-    { flip : FlipUnion
+    { flip : Flip
+    , flipOrNull : Maybe.Maybe Flip2
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
-    Json.Decode.map Data
-        (Json.Decode.field "flip" flipUnionDecoder)
+    Json.Decode.map2 Data
+        (Json.Decode.field "flip" flipDecoder)
+        (Json.Decode.field "flipOrNull" (Json.Decode.nullable flip2Decoder))
 
 
-type FlipUnion
+type Flip
     = OnHeads Heads
-    | OnFlip Flip
+    | OnOtherFlip
 
 
-flipUnionDecoder : Json.Decode.Decoder FlipUnion
-flipUnionDecoder =
+flipDecoder : Json.Decode.Decoder Flip
+flipDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads headsDecoder
-        , Json.Decode.map OnFlip flipDecoder
+        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip
         ]
 
 
@@ -71,10 +79,25 @@ headsDecoder =
         (Json.Decode.field "name" Json.Decode.string)
 
 
-type alias Flip =
-    {}
+type Flip2
+    = OnTails Tails
+    | OnOtherFlip2
 
 
-flipDecoder : Json.Decode.Decoder Flip
-flipDecoder =
-    GraphqlToElm.DecodeHelpers.emptyObjectDecoder
+flip2Decoder : Json.Decode.Decoder Flip2
+flip2Decoder =
+    Json.Decode.oneOf
+        [ Json.Decode.map OnTails tailsDecoder
+        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip2
+        ]
+
+
+type alias Tails =
+    { length : Float
+    }
+
+
+tailsDecoder : Json.Decode.Decoder Tails
+tailsDecoder =
+    Json.Decode.map Tails
+        (Json.Decode.field "length" Json.Decode.float)

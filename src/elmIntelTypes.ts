@@ -16,9 +16,9 @@ export interface ElmIntel {
 
 export interface ElmIntelItem {
   id: number;
-  name: string | undefined;
+  name: string;
   fieldName: string;
-  depth: number;
+  order: number;
   children: number[];
   isOptional: boolean;
   isListOfOptionals: boolean;
@@ -29,7 +29,13 @@ export interface ElmIntelItem {
   kind: ElmIntelItemKind;
 }
 
-export type ElmIntelItemKind = "record" | "union" | "enum" | "scalar";
+export type ElmIntelItemKind =
+  | "record"
+  | "union"
+  | "union-on"
+  | "enum"
+  | "scalar"
+  | "empty";
 
 export interface ElmIntelEncodeItem extends ElmIntelItem {
   encoder: string;
@@ -37,4 +43,5 @@ export interface ElmIntelEncodeItem extends ElmIntelItem {
 
 export interface ElmIntelDecodeItem extends ElmIntelItem {
   decoder: string;
+  unionConstructor: string;
 }

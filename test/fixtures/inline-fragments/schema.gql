@@ -8,6 +8,7 @@ schema {
 
 type Query {
   flip: Flip!
+  flipOrNull: Flip
   flips: [Flip!]!
   animal: Animal!
   animals: [Animal!]!
@@ -36,6 +37,11 @@ type Dog implements Animal {
 type Dolphin implements Animal {
   color: String!
   fins: Int!
+}
+
+type Bird implements Animal {
+  color: String!
+  canFly: Boolean!
 }
 
 type Info {

@@ -1,14 +1,14 @@
-module InterfacePartial
+module InterfacePartialShared
     exposing
         ( Data
-        , Animal(..)
+        , Animal
+        , OnAnimal(..)
         , Dog
         , post
         , query
         , decoder
         )
 
-import GraphqlToElm.DecodeHelpers
 import GraphqlToElm.Http
 import Json.Decode
 import Json.Encode
@@ -26,10 +26,10 @@ post url =
 
 query : String
 query =
-    """query InterfacePartial {
+    """query InterfacePartialShared {
   animal {
+    color
     ... on Dog {
-      color
       hairy
     }
   }
@@ -47,27 +47,38 @@ decoder =
         (Json.Decode.field "animal" animalDecoder)
 
 
-type Animal
-    = OnDog Dog
-    | OnOtherAnimal
+type alias Animal =
+    { color : String
+    , on : OnAnimal
+    }
 
 
 animalDecoder : Json.Decode.Decoder Animal
 animalDecoder =
+    Json.Decode.map2 Animal
+        (Json.Decode.field "color" Json.Decode.string)
+        onAnimalDecoder
+
+
+type OnAnimal
+    = OnDog Dog
+    | OnOtherAnimal
+
+
+onAnimalDecoder : Json.Decode.Decoder OnAnimal
+onAnimalDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnDog dogDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherAnimal
+        , Json.Decode.succeed OnOtherAnimal
         ]
 
 
 type alias Dog =
-    { color : String
-    , hairy : Bool
+    { hairy : Bool
     }
 
 
 dogDecoder : Json.Decode.Decoder Dog
 dogDecoder =
-    Json.Decode.map2 Dog
-        (Json.Decode.field "color" Json.Decode.string)
+    Json.Decode.map Dog
         (Json.Decode.field "hairy" Json.Decode.bool)

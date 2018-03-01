@@ -11,8 +11,11 @@ import {
   findByIdIn
 } from "./utils";
 
-export const generateElm = (intel: ElmIntel): string =>
-  `module ${intel.module}
+export const generateElm = (intel: ElmIntel): string => {
+  intel.encode.items.sort((a, b) => a.order - b.order);
+  intel.decode.items.sort((a, b) => a.order - b.order);
+
+  return `module ${intel.module}
     exposing
         ( ${generateExports(intel)}
         )
@@ -28,6 +31,7 @@ query =
     """${intel.query}"""
 ${generateTypesAndEncoders(intel)}${generateTypesAndDecoders(intel)}
 `;
+};
 
 const generateExports = (intel: ElmIntel): string => {
   const types: string[] = [];
@@ -39,16 +43,13 @@ const generateExports = (intel: ElmIntel): string => {
   };
 
   const addTypes = (items: ElmIntelItem[]) =>
-    items
-      .slice()
-      .reverse()
-      .forEach(item => {
-        if (item.kind === "record") {
-          addType(item.type);
-        } else if (item.kind === "union") {
-          addType(`${item.type}(..)`);
-        }
-      });
+    items.forEach(item => {
+      if (item.kind === "record") {
+        addType(item.type);
+      } else if (item.kind === "union" || item.kind === "union-on") {
+        addType(`${item.type}(..)`);
+      }
+    });
 
   addTypes(intel.encode.items);
   addTypes(intel.decode.items);
@@ -139,7 +140,6 @@ post url =
 
 const generateTypesAndEncoders = (intel: ElmIntel): string => {
   const typesAndEncoders = intel.encode.items
-    .sort((a, b) => a.id - b.id)
     .map(generateTypeAndEncoder(intel))
     .filter(x => !!x)
     .join("\n\n\n");
@@ -220,7 +220,6 @@ const wrapEncoder = (
 
 const generateTypesAndDecoders = (intel: ElmIntel): string => {
   const typesAndDecoders = intel.decode.items
-    .sort((a, b) => a.id - b.id)
     .map(generateTypeAndDecoder(intel))
     .filter(x => !!x)
     .join("\n\n\n");
@@ -244,13 +243,16 @@ const generateTypeAndDecoder = (intel: ElmIntel) => {
         item,
         children
       )}\n\n\n${generateRecordDecoder(item, children)}`;
-    } else if (item.kind === "union") {
+    } else if (item.kind === "union" || item.kind === "union-on") {
       const children = item.children
         .map(findByIdIn(intel.decode.items))
         .sort((a, b) => b.children.length - a.children.length);
 
       const constructors = children.map(
-        child => `On${child.type} ${child.type}`
+        child =>
+          child.kind === "empty"
+            ? child.unionConstructor
+            : `${child.unionConstructor} ${child.type}`
       );
       const typeDeclaration = `type ${item.type}\n    = ${constructors.join(
         "\n    | "
@@ -260,7 +262,10 @@ const generateTypeAndDecoder = (intel: ElmIntel) => {
         item.type
       }`;
       const childDecoders = children.map(
-        child => `Json.Decode.map On${child.type} ${child.decoder}`
+        child =>
+          child.kind === "empty"
+            ? `${child.decoder} ${child.unionConstructor}`
+            : `Json.Decode.map ${child.unionConstructor} ${child.decoder}`
       );
       const decoder = `${
         item.decoder
@@ -332,9 +337,11 @@ const generateRecordDecoder = (
 
     const fieldDecoders = children.map(
       (child, index) =>
-        `        ${prefix(index)}(${fieldDecoder(child)} "${
-          child.name
-        }" ${wrapDecoder(child)})`
+        child.kind === "union-on"
+          ? `        ${prefix(index)}${child.decoder}`
+          : `        ${prefix(index)}(${fieldDecoder(child)} "${
+              child.name
+            }" ${wrapDecoder(child)})`
     );
 
     return `${declaration}\n${item.decoder} =\n    Json.Decode.map${map} ${

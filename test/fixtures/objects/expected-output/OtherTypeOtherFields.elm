@@ -1,10 +1,10 @@
 module OtherTypeOtherFields
     exposing
         ( Data
-        , Person3
         , Person
-        , Person2
         , Dog
+        , Person2
+        , Person22
         , post
         , query
         , decoder
@@ -43,28 +43,28 @@ query =
 
 
 type alias Data =
-    { i : Person3
-    , me : Person
-    , you : Person2
+    { i : Person
+    , me : Person2
+    , you : Person22
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map3 Data
-        (Json.Decode.field "i" person3Decoder)
-        (Json.Decode.field "me" personDecoder)
-        (Json.Decode.field "you" person2Decoder)
+        (Json.Decode.field "i" personDecoder)
+        (Json.Decode.field "me" person2Decoder)
+        (Json.Decode.field "you" person22Decoder)
 
 
-type alias Person3 =
+type alias Person =
     { dog : Maybe.Maybe Dog
     }
 
 
-person3Decoder : Json.Decode.Decoder Person3
-person3Decoder =
-    Json.Decode.map Person3
+personDecoder : Json.Decode.Decoder Person
+personDecoder =
+    Json.Decode.map Person
         (Json.Decode.field "dog" (Json.Decode.nullable dogDecoder))
 
 
@@ -79,23 +79,23 @@ dogDecoder =
         (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
 
 
-type alias Person =
-    { name : String
-    }
-
-
-personDecoder : Json.Decode.Decoder Person
-personDecoder =
-    Json.Decode.map Person
-        (Json.Decode.field "name" Json.Decode.string)
-
-
 type alias Person2 =
-    { email : Maybe.Maybe String
+    { name : String
     }
 
 
 person2Decoder : Json.Decode.Decoder Person2
 person2Decoder =
     Json.Decode.map Person2
+        (Json.Decode.field "name" Json.Decode.string)
+
+
+type alias Person22 =
+    { email : Maybe.Maybe String
+    }
+
+
+person22Decoder : Json.Decode.Decoder Person22
+person22Decoder =
+    Json.Decode.map Person22
         (Json.Decode.field "email" (Json.Decode.nullable Json.Decode.string))

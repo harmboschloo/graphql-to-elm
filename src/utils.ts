@@ -35,7 +35,12 @@ export const findByIdIn = <T extends { id: number }>(items: T[]) => (
   return item;
 };
 
-export const getId = <T extends { id: number }>(item: T) => item.id;
+export const getId = <T extends { id: number }>(a: T) => a.id;
+
+export const getOrder = <T extends { order: number }>(a: T) => a.order;
+
+export const getMaxOrder = <T extends { order: number }>(a: T[]) =>
+  a.map(getOrder).reduce((a, b) => Math.max(a, b));
 
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
@@ -54,6 +59,9 @@ export const withParentheses = (x: string): string => `(${x})`;
 export const validModuleName = (name: string): string => validNameUpper(name);
 
 export const validTypeName = (name: string): string => validNameUpper(name);
+
+export const validTypeConstructorName = (name: string): string =>
+  validNameUpper(name);
 
 export const validVariableName = (name: string): string => validNameLower(name);
 

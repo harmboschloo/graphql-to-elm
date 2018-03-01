@@ -3,6 +3,7 @@ import {
   GraphQLOutputType,
   GraphQLInputType,
   GraphQLObjectType,
+  GraphQLNonNull,
   validate,
   parse,
   visit,
@@ -20,7 +21,7 @@ import {
   getNullableType
 } from "graphql";
 import { FinalOptions } from "./options";
-import { readFile, findByIdIn, getId } from "./utils";
+import { readFile, findByIdIn, getId, getMaxOrder } from "./utils";
 import * as debug from "./debug";
 
 export interface QueryIntel {
@@ -34,8 +35,9 @@ export interface QueryIntel {
 export interface QueryIntelItem {
   id: number;
   type: GraphQLOutputType;
-  name: string | undefined;
+  name: string;
   depth: number;
+  order: number;
   children: number[];
 }
 
@@ -43,6 +45,8 @@ export interface QueryIntelOutputItem extends QueryIntelItem {
   withDirective: boolean;
   isFragment: boolean;
   isFragmented: boolean;
+  isFragmentedOn: boolean;
+  hasAllPosibleFragmentTypes: boolean;
 }
 
 export const readQueryIntel = (
@@ -79,6 +83,8 @@ export const getQueryIntel = (
 
   visit(queryDocument, visitWithTypeInfo(typeInfo, visitor));
 
+  // console.log("query intel", JSON.stringify(visitor.intel(), null, "  "));
+
   return visitor.intel();
 };
 
@@ -111,11 +117,13 @@ const queryVisitor = (
     name: string;
     parent: QueryIntelItem;
   }) => {
+    const id = intel.variables.length;
     const item = {
-      id: intel.variables.length,
+      id,
       type,
       name,
       depth: parent.depth + 1,
+      order: id,
       children: []
     };
 
@@ -162,6 +170,7 @@ const queryVisitor = (
             type: "",
             name: "",
             depth: 0,
+            order: 0,
             children: []
           });
         }
@@ -176,16 +185,22 @@ const queryVisitor = (
       if (isItemNode(node)) {
         const type = typeInfo.getType();
 
+        const id = intel.items.length;
         const item = {
-          id: intel.items.length,
+          id,
           type,
           name:
-            (node.alias && node.alias.value) || (node.name && node.name.value),
+            (node.alias && node.alias.value) ||
+            (node.name && node.name.value) ||
+            "",
           depth: intel.parentStack.length,
+          order: id,
           children: [],
           withDirective: node.directives && node.directives.length > 0,
           isFragment: isFragmentNode(node),
-          isFragmented: false
+          isFragmented: false,
+          isFragmentedOn: false,
+          hasAllPosibleFragmentTypes: false
         };
 
         const parent = getParentItem();
@@ -213,36 +228,34 @@ const queryVisitor = (
           const possibleFragmentTypes = schema.getPossibleTypes(namedType);
           const children = item.children.map(findByIdIn(intel.items));
           const fragments = children.filter(item => item.isFragment);
-
           const nonFragments = children.filter(item => !item.isFragment);
-          nonFragments.forEach(item => (item.depth = item.depth + 1));
-          const nonFragmentIds = nonFragments.map(getId);
-
-          fragments.forEach(fragment =>
-            fragment.children.push(...nonFragmentIds)
-          );
-
-          item.children = fragments.map(getId);
-
-          const fragmentTypes = fragments.map(item => item.type);
+          const fragmentTypes = fragments.map(item => getNamedType(item.type));
           const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
             fragmentTypes.includes(type)
           );
 
-          if (!hasAllPosibleTypes) {
-            const baseItem: QueryIntelOutputItem = {
+          if (nonFragments.length === 0) {
+            item.hasAllPosibleFragmentTypes = hasAllPosibleTypes;
+          } else {
+            const fragmentedItem: QueryIntelOutputItem = {
               id: intel.items.length,
-              type: item.type,
-              name: undefined,
-              depth: item.depth + 1,
-              children: nonFragmentIds,
+              type: new GraphQLNonNull(namedType),
+              name: "on",
+              depth: item.depth + 0.5,
+              order: getMaxOrder(nonFragments) + 0.5,
+              children: fragments.map(getId),
               withDirective: false,
-              isFragment: true,
-              isFragmented: false
+              isFragment: false,
+              isFragmented: true,
+              isFragmentedOn: true,
+              hasAllPosibleFragmentTypes: hasAllPosibleTypes
             };
 
-            intel.items.push(baseItem);
-            item.children.push(baseItem.id);
+            intel.items.push(fragmentedItem);
+
+            item.isFragmented = false;
+            item.children = nonFragments.map(getId);
+            item.children.push(fragmentedItem.id);
           }
         }
       }

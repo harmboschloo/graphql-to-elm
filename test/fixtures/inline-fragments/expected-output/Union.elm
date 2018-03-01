@@ -1,7 +1,7 @@
 module Union
     exposing
         ( Data
-        , FlipUnion(..)
+        , Flip(..)
         , Heads
         , Tails
         , post
@@ -39,23 +39,23 @@ query =
 
 
 type alias Data =
-    { flip : FlipUnion
+    { flip : Flip
     }
 
 
 decoder : Json.Decode.Decoder Data
 decoder =
     Json.Decode.map Data
-        (Json.Decode.field "flip" flipUnionDecoder)
+        (Json.Decode.field "flip" flipDecoder)
 
 
-type FlipUnion
+type Flip
     = OnHeads Heads
     | OnTails Tails
 
 
-flipUnionDecoder : Json.Decode.Decoder FlipUnion
-flipUnionDecoder =
+flipDecoder : Json.Decode.Decoder Flip
+flipDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads headsDecoder
         , Json.Decode.map OnTails tailsDecoder

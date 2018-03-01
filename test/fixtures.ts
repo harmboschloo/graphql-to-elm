@@ -88,17 +88,23 @@ const data: { [key: string]: FinalConfig } = {
       "union.gql",
       "union-list.gql",
       "union-partial.gql",
+      "union-multiple.gql",
       "interface.gql",
+      "interface-plain.gql",
       "interface-list.gql",
+      "interface-list-shared.gql",
+      "interface-shared.gql",
       "interface-partial.gql",
-      "interface-plain.gql"
+      "interface-partial-shared.gql"
+      // TODO multiple interfaces
+      // TODO normal object
       // TODO same signature (... auto __typename?)
     ]
   }),
   "inline-fragments-throws": create({
     queries: ["same-signature.gql"],
     throws:
-      "multiple union constructors for Animal with the same json signature: color : String"
+      "multiple union children with the same json signature: color : String"
   }),
   keywords: create({ queries: ["query.gql"] }),
   lists: create({ queries: ["list-of-objects.gql", "list-of-scalars.gql"] }),

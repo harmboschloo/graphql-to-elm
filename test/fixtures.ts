@@ -58,6 +58,7 @@ const create = ({
 
 const data: { [key: string]: FinalConfig } = {
   aliases: create({ queries: ["query.gql"] }),
+
   customScalars: create({
     queries: ["custom-scalar-types.gql", "custom-nullable-scalar-types.gql"],
     scalarDecoders: {
@@ -71,9 +72,11 @@ const data: { [key: string]: FinalConfig } = {
       }
     }
   }),
+
   directives: create({
     queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
   }),
+
   enums: create({
     queries: ["enum.gql", "nullable-enum.gql"],
     enumDecoders: {
@@ -83,6 +86,11 @@ const data: { [key: string]: FinalConfig } = {
       }
     }
   }),
+
+  fragments: create({
+    queries: ["query.gql"]
+  }),
+
   "inline-fragments": create({
     queries: [
       "union.gql",
@@ -103,14 +111,19 @@ const data: { [key: string]: FinalConfig } = {
       "typename-shared-more.gql"
     ]
   }),
+
   "inline-fragments-throws": create({
     queries: ["same-signature.gql"],
     throws:
       "multiple union children with the same json signature: color : String"
   }),
+
   keywords: create({ queries: ["query.gql"] }),
+
   lists: create({ queries: ["list-of-objects.gql", "list-of-scalars.gql"] }),
+
   misc: create({ queries: ["query.gql"] }),
+
   objects: create({
     queries: [
       "basic.gql",
@@ -124,9 +137,11 @@ const data: { [key: string]: FinalConfig } = {
       "other-type-other-fields.gql"
     ]
   }),
+
   scalars: create({
     queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"]
   }),
+
   variables: create({
     queries: [
       "scalars.gql",
@@ -138,9 +153,6 @@ const data: { [key: string]: FinalConfig } = {
       "inputs-multiple.gql",
       "lists.gql"
     ]
-  }),
-  fragments: create({
-    queries: ["query.gql"]
   })
 
   // TODO

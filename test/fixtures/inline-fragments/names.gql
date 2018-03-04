@@ -1,4 +1,4 @@
-query UnionMultiple {
+query Names {
   flip1: flip {
     ... on Heads {
       name

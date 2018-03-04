@@ -88,14 +88,14 @@ const data: { [key: string]: FinalConfig } = {
       "union.gql",
       "union-list.gql",
       "union-partial.gql",
-      "union-multiple.gql",
       "interface.gql",
       "interface-plain.gql",
       "interface-list.gql",
       "interface-list-shared.gql",
       "interface-shared.gql",
       "interface-partial.gql",
-      "interface-partial-shared.gql"
+      "interface-partial-shared.gql",
+      "names.gql",
       // TODO multiple interfaces
       // TODO normal object
       // TODO same signature (... auto __typename?)

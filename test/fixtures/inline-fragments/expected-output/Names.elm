@@ -1,4 +1,4 @@
-module UnionMultiple
+module Names
     exposing
         ( Data
         , Flip(..)
@@ -29,7 +29,7 @@ post url =
 
 query : String
 query =
-    """query UnionMultiple {
+    """query Names {
   flip1: flip {
     ... on Heads {
       name

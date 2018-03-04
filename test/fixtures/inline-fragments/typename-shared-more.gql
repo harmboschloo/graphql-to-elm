@@ -1,0 +1,15 @@
+query TypenameSharedMore {
+  animal {
+    __typename
+    size
+    ... on Dog {
+      color
+    }
+    ... on Dolphin {
+      color
+    }
+    ... on Bird {
+      color
+    }
+  }
+}

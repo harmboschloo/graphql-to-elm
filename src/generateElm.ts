@@ -99,6 +99,9 @@ const generateImports = (intel: ElmIntel): string => {
         imports["GraphqlToElm.DecodeHelpers"] = true;
       }
     }
+    if (item.name === "__typename") {
+      imports["GraphqlToElm.DecodeHelpers"] = true;
+    }
   });
 
   return Object.keys(imports)
@@ -341,7 +344,7 @@ const generateRecordDecoder = (
           ? `        ${prefix(index)}${child.decoder}`
           : `        ${prefix(index)}(${fieldDecoder(child)} "${
               child.name
-            }" ${wrapDecoder(child)})`
+            }" ${wrapDecoder(child, item)})`
     );
 
     return `${declaration}\n${item.decoder} =\n    Json.Decode.map${map} ${
@@ -366,8 +369,17 @@ const fieldDecoder = (item: ElmIntelDecodeItem): string => {
   }
 };
 
-const wrapDecoder = (item: ElmIntelDecodeItem): string => {
+const wrapDecoder = (
+  item: ElmIntelDecodeItem,
+  parent: ElmIntelDecodeItem
+): string => {
   let decoder = item.decoder;
+
+  if (item.name === "__typename") {
+    decoder = `(GraphqlToElm.DecodeHelpers.constantDecoder "${
+      parent.queryTypename
+    }" ${decoder})`;
+  }
 
   if (item.isListOfNullables) {
     decoder = `(Json.Decode.nullable ${decoder})`;

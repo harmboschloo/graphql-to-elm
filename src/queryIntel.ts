@@ -232,21 +232,32 @@ const queryVisitor = (
           const possibleFragmentTypes = schema.getPossibleTypes(namedType);
           const children = item.children.map(findByIdIn(intel.items));
           const fragments = children.filter(item => item.isFragment);
-          const nonFragments = children.filter(item => !item.isFragment);
+          let nonFragments = children.filter(item => !item.isFragment);
+          const typenames = children.filter(item => item.name === "__typename");
           const includedFragmentTypes = fragments
             .map(item => getNamedType(item.type))
             .reduce(getAllIncludedTypes(schema), []);
-
           const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
             includedFragmentTypes.includes(type)
           );
+
+          if (typenames.length > 0) {
+            typenames.forEach(item => (item.depth = item.depth + 1));
+            const typenameIds = typenames.map(getId);
+            item.children = item.children.filter(
+              id => !typenameIds.includes(id)
+            );
+            fragments.forEach(item => item.children.push(...typenameIds));
+            nonFragments = nonFragments.filter(
+              item => !typenameIds.includes(item.id)
+            );
+          }
 
           if (hasAllPosibleTypes && fragments.length <= 1) {
             const fragment = fragments[0];
             if (fragment) {
               fragment.isValid = false;
             }
-
             const fragmentChildren = fragment ? fragment.children : [];
             item.children = [...nonFragments.map(getId), ...fragmentChildren];
             item.isFragmented = false;

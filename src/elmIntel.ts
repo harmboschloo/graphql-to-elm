@@ -92,6 +92,8 @@ export const queryToElmIntel = (
     .sort((a, b) => b.depth - a.depth || a.order - b.order)
     .forEach(addDecodeItem(intel, getNextDecodeId, options));
 
+  // console.log("elm intel", JSON.stringify(intel, null, "  "));
+
   return intel;
 };
 
@@ -116,12 +118,7 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
     };
   } else if (isInputObjectType(namedType)) {
     setRecordFieldNames(info.children, intel.encode.items);
-    const type = newRecordType(
-      namedType.name,
-      info.children,
-      intel.encode.items,
-      intel
-    );
+    const type = newRecordType(info, intel.encode.items, intel);
     item = {
       ...info,
       kind: "record",
@@ -221,6 +218,7 @@ const addDecodeItem = (
         const otherItem: ElmIntelDecodeItem = {
           id: nextId(),
           name: "",
+          queryTypename: "",
           fieldName: "",
           order: getMaxOrder(children) + 0.5,
           children: [],
@@ -244,12 +242,7 @@ const addDecodeItem = (
       setUnionConstructorNames(item, intel);
     } else {
       setRecordFieldNames(info.children, intel.decode.items);
-      const type = newRecordType(
-        namedType.name,
-        info.children,
-        intel.decode.items,
-        intel
-      );
+      const type = newRecordType(info, intel.decode.items, intel);
 
       item = {
         ...info,
@@ -358,6 +351,7 @@ const getItemInfo = (queryItem: QueryIntelItem) => {
   return {
     id: queryItem.id,
     name: queryItem.name,
+    queryTypename: queryItem.type ? getNamedType(queryItem.type).name : "",
     fieldName: "",
     order: queryItem.order,
     children: queryItem.children.slice(),
@@ -393,50 +387,52 @@ const setRecordFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
 };
 
 const newRecordType = (
-  graphqlType: string,
-  children: number[],
+  item: { queryTypename: string; children: number[] },
   items: ElmIntelItem[],
   intel: ElmIntel
 ): string => {
-  let signature = `${graphqlType}: ${getRecordFieldsSignature(
-    children,
+  let signature = `${item.queryTypename}: ${getRecordFieldsSignature(
+    item,
     items
   )}`;
 
   return cachedValue(signature, intel.typesBySignature, () =>
-    newName(validTypeName(graphqlType), intel)
+    newName(validTypeName(item.queryTypename), intel)
   );
 };
 
 const getRecordFieldsSignature = (
-  children: number[],
+  item: { queryTypename: string; children: number[] },
   items: ElmIntelItem[]
 ): string =>
-  children
+  item.children
     .map(findByIdIn(items))
-    .map(item => {
-      if (!item.fieldName) {
+    .map(child => {
+      if (!child.fieldName) {
         throw new Error(
-          `Elm intel field item ${item.type} does not have a fieldName`
+          `Elm intel field item ${child.type} does not have a fieldName`
         );
       }
-      return `${item.fieldName} : ${wrappedType(item)}`;
+      return child.name === "__typename"
+        ? `${child.fieldName} : ${wrappedType(child)} ${item.queryTypename}`
+        : `${child.fieldName} : ${wrappedType(child)}`;
     })
     .sort()
     .join(", ");
 
 const getRecordFieldsJsonSignature = (
-  children: number[],
+  item: ElmIntelItem,
   items: ElmIntelItem[]
 ): string =>
-  children
+  item.children
     .map(findByIdIn(items))
-    .map(item => getRecordFieldJsonSignature(item, items))
+    .map(child => getRecordFieldJsonSignature(child, item, items))
     .sort()
     .join(", ");
 
 const getRecordFieldJsonSignature = (
   item: ElmIntelItem,
+  parent: ElmIntelItem,
   items: ElmIntelItem[]
 ): string => {
   if (!item.name) {
@@ -446,7 +442,9 @@ const getRecordFieldJsonSignature = (
   let signature;
 
   if (item.kind === "record") {
-    signature = `{${getRecordFieldsJsonSignature(item.children, items)}}`;
+    signature = `{${getRecordFieldsJsonSignature(item, items)}}`;
+  } else if (item.name === "__typename") {
+    signature = parent.type;
   } else {
     signature = item.type;
   }
@@ -464,7 +462,7 @@ const checkUnionChildSignatures = (
 ) => {
   const childSignatures = children
     .map(findByIdIn(items))
-    .map(item => getRecordFieldsJsonSignature(item.children, items));
+    .map(item => getRecordFieldsJsonSignature(item, items));
 
   childSignatures.forEach((signatue, index) => {
     if (childSignatures.indexOf(signatue) !== index) {

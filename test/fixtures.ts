@@ -97,8 +97,10 @@ const data: { [key: string]: FinalConfig } = {
       "interface-partial-shared.gql",
       "interface-multiple.gql",
       "names.gql",
-      "single.gql"
-      // TODO same signature (... auto __typename?)
+      "single.gql",
+      "typename.gql",
+      "typename-shared.gql",
+      "typename-shared-more.gql"
     ]
   }),
   "inline-fragments-throws": create({

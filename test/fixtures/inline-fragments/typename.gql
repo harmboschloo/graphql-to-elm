@@ -1,0 +1,15 @@
+query Typename {
+  animal {
+    ... on Dog {
+      __typename
+      color
+    }
+    ... on Dolphin {
+      __typename
+      color
+    }
+    ... on Bird {
+      color
+    }
+  }
+}

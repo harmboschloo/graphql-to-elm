@@ -17,6 +17,7 @@ export interface ElmIntel {
 export interface ElmIntelItem {
   id: number;
   name: string;
+  queryTypename: string;
   fieldName: string;
   order: number;
   children: number[];

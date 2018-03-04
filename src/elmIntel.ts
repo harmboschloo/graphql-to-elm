@@ -364,7 +364,10 @@ const getItemInfo = (queryItem: QueryIntelItem) => {
 };
 
 const reservedNames = [
+  "Int",
+  "Float",
   "Bool",
+  "String",
   "Variables",
   "Data",
   "query",

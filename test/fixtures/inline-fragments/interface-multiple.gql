@@ -1,0 +1,11 @@
+query InterfaceMultiple {
+  animal {
+    ... on Mammal {
+      subclass
+    }
+    ... on Bird {
+      color
+      canFly
+    }
+  }
+}

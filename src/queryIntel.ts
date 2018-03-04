@@ -2,8 +2,8 @@ import {
   GraphQLSchema,
   GraphQLOutputType,
   GraphQLInputType,
-  GraphQLObjectType,
   GraphQLNonNull,
+  GraphQLNamedType,
   validate,
   parse,
   visit,
@@ -229,9 +229,12 @@ const queryVisitor = (
           const children = item.children.map(findByIdIn(intel.items));
           const fragments = children.filter(item => item.isFragment);
           const nonFragments = children.filter(item => !item.isFragment);
-          const fragmentTypes = fragments.map(item => getNamedType(item.type));
+          const includedFragmentTypes = fragments
+            .map(item => getNamedType(item.type))
+            .reduce(getAllIncludedTypes(schema), []);
+
           const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
-            fragmentTypes.includes(type)
+            includedFragmentTypes.includes(type)
           );
 
           if (nonFragments.length === 0) {
@@ -263,4 +266,16 @@ const queryVisitor = (
       debug.addLogIndent(-1);
     }
   };
+};
+
+const getAllIncludedTypes = (schema: GraphQLSchema) => {
+  const getAllTypes = (
+    types: GraphQLNamedType[],
+    type: GraphQLNamedType
+  ): GraphQLNamedType[] =>
+    types.concat(
+      type,
+      ...(schema.getPossibleTypes(type) || []).reduce(getAllTypes, [])
+    );
+  return getAllTypes;
 };

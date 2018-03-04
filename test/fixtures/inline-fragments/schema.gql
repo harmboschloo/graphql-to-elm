@@ -29,14 +29,21 @@ interface Animal {
   color: String!
 }
 
-type Dog implements Animal {
+interface Mammal {
   color: String!
-  hairy: Boolean!
+  subclass: String!
 }
 
-type Dolphin implements Animal {
+type Dog implements Animal, Mammal {
+  color: String!
+  hairy: Boolean!
+  subclass: String!
+}
+
+type Dolphin implements Animal, Mammal {
   color: String!
   fins: Int!
+  subclass: String!
 }
 
 type Bird implements Animal {

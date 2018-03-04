@@ -96,8 +96,8 @@ const data: { [key: string]: FinalConfig } = {
       "interface-partial.gql",
       "interface-partial-shared.gql",
       "interface-multiple.gql",
-      "names.gql"
-      // TODO normal object
+      "names.gql",
+      "single.gql"
       // TODO same signature (... auto __typename?)
     ]
   }),

@@ -1,0 +1,14 @@
+query Single {
+  single: animal {
+    ... on Animal {
+      color
+      size
+    }
+  }
+  shared: animal {
+    size
+    ... on Animal {
+      color
+    }
+  }
+}

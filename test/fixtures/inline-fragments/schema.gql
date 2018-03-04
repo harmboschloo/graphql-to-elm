@@ -12,7 +12,6 @@ type Query {
   flips: [Flip!]!
   animal: Animal!
   animals: [Animal!]!
-  info: Info
 }
 
 union Flip = Heads | Tails
@@ -27,6 +26,7 @@ type Tails {
 
 interface Animal {
   color: String!
+  size: Float!
 }
 
 interface Mammal {
@@ -36,21 +36,20 @@ interface Mammal {
 
 type Dog implements Animal, Mammal {
   color: String!
+  size: Float!
   hairy: Boolean!
   subclass: String!
 }
 
 type Dolphin implements Animal, Mammal {
   color: String!
+  size: Float!
   fins: Int!
   subclass: String!
 }
 
 type Bird implements Animal {
   color: String!
+  size: Float!
   canFly: Boolean!
-}
-
-type Info {
-  description: String!
 }

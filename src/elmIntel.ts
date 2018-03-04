@@ -175,6 +175,10 @@ const addDecodeItem = (
   nextId: () => number,
   options: FinalOptions
 ) => (queryItem: QueryIntelOutputItem): void => {
+  if (!queryItem.isValid) {
+    return;
+  }
+
   const info = getItemInfo(queryItem);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
 

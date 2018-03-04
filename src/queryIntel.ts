@@ -39,6 +39,7 @@ export interface QueryIntelItem {
   depth: number;
   order: number;
   children: number[];
+  isValid: boolean; //FIXME
 }
 
 export interface QueryIntelOutputItem extends QueryIntelItem {
@@ -124,7 +125,8 @@ const queryVisitor = (
       name,
       depth: parent.depth + 1,
       order: id,
-      children: []
+      children: [],
+      isValid: true
     };
 
     intel.variables.push(item);
@@ -171,7 +173,8 @@ const queryVisitor = (
             name: "",
             depth: 0,
             order: 0,
-            children: []
+            children: [],
+            isValid: true
           });
         }
 
@@ -196,6 +199,7 @@ const queryVisitor = (
           depth: intel.parentStack.length,
           order: id,
           children: [],
+          isValid: true,
           withDirective: node.directives && node.directives.length > 0,
           isFragment: isFragmentNode(node),
           isFragmented: false,
@@ -237,9 +241,18 @@ const queryVisitor = (
             includedFragmentTypes.includes(type)
           );
 
-          if (nonFragments.length === 0) {
+          if (hasAllPosibleTypes && fragments.length <= 1) {
+            const fragment = fragments[0];
+            if (fragment) {
+              fragment.isValid = false;
+            }
+
+            const fragmentChildren = fragment ? fragment.children : [];
+            item.children = [...nonFragments.map(getId), ...fragmentChildren];
+            item.isFragmented = false;
+          } else if (nonFragments.length === 0) {
             item.hasAllPosibleFragmentTypes = hasAllPosibleTypes;
-          } else {
+          } else if (nonFragments.length > 0) {
             const fragmentedItem: QueryIntelOutputItem = {
               id: intel.items.length,
               type: new GraphQLNonNull(namedType),
@@ -247,6 +260,7 @@ const queryVisitor = (
               depth: item.depth + 0.5,
               order: getMaxOrder(nonFragments) + 0.5,
               children: fragments.map(getId),
+              isValid: true,
               withDirective: false,
               isFragment: false,
               isFragmented: true,

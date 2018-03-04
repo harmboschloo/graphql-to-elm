@@ -4,6 +4,7 @@ module Query
         , ElmKeywords
         , OtherElmKeywords
         , ElmBasics
+        , Bool2
         , GraphqlToElmReservedWords
         , Misc
         , post
@@ -71,6 +72,10 @@ query =
     True
   }
 
+  boolean {
+    is
+  }
+
   graphqlToElmReservedWords {
     Variables
     Data
@@ -93,6 +98,7 @@ type alias Data =
     { elmKeywords : ElmKeywords
     , otherElmKeywords : OtherElmKeywords
     , elmBasics : ElmBasics
+    , boolean : Bool2
     , graphqlToElmReservedWords : GraphqlToElmReservedWords
     , misc : Misc
     }
@@ -100,19 +106,20 @@ type alias Data =
 
 decoder : Json.Decode.Decoder Data
 decoder =
-    Json.Decode.map5 Data
+    Json.Decode.map6 Data
         (Json.Decode.field "elmKeywords" elmKeywordsDecoder)
         (Json.Decode.field "otherElmKeywords" otherElmKeywordsDecoder)
         (Json.Decode.field "elmBasics" elmBasicsDecoder)
+        (Json.Decode.field "boolean" bool2Decoder)
         (Json.Decode.field "graphqlToElmReservedWords" graphqlToElmReservedWordsDecoder)
         (Json.Decode.field "misc" miscDecoder)
 
 
 type alias ElmKeywords =
     { as_ : String
-    , case_ : String
-    , else_ : String
-    , exposing_ : String
+    , case_ : Bool
+    , else_ : Int
+    , exposing_ : Float
     , if_ : String
     , import_ : String
     , in_ : String
@@ -124,9 +131,9 @@ elmKeywordsDecoder : Json.Decode.Decoder ElmKeywords
 elmKeywordsDecoder =
     Json.Decode.map8 ElmKeywords
         (Json.Decode.field "as" Json.Decode.string)
-        (Json.Decode.field "case" Json.Decode.string)
-        (Json.Decode.field "else" Json.Decode.string)
-        (Json.Decode.field "exposing" Json.Decode.string)
+        (Json.Decode.field "case" Json.Decode.bool)
+        (Json.Decode.field "else" Json.Decode.int)
+        (Json.Decode.field "exposing" Json.Decode.float)
         (Json.Decode.field "if" Json.Decode.string)
         (Json.Decode.field "import" Json.Decode.string)
         (Json.Decode.field "in" Json.Decode.string)
@@ -181,6 +188,17 @@ elmBasicsDecoder =
         (Json.Decode.field "min" Json.Decode.string)
         (Json.Decode.field "Just" Json.Decode.string)
         (Json.Decode.field "True" Json.Decode.string)
+
+
+type alias Bool2 =
+    { is : Int
+    }
+
+
+bool2Decoder : Json.Decode.Decoder Bool2
+bool2Decoder =
+    Json.Decode.map Bool2
+        (Json.Decode.field "is" Json.Decode.int)
 
 
 type alias GraphqlToElmReservedWords =

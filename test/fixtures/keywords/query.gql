@@ -41,6 +41,10 @@
     True
   }
 
+  boolean {
+    is
+  }
+
   graphqlToElmReservedWords {
     Variables
     Data

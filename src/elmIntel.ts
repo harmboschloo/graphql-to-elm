@@ -364,6 +364,7 @@ const getItemInfo = (queryItem: QueryIntelItem) => {
 };
 
 const reservedNames = [
+  "Bool",
   "Variables",
   "Data",
   "query",

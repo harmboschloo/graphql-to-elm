@@ -15,7 +15,7 @@ import {
   generateElm,
   writeResult
 } from "../src";
-import { ElmIntelEncodeItem } from "../src/elmIntelTypes";
+import { ElmEncodeItem } from "../src/elmIntelTypes";
 import { validModuleName, writeFile, findByIdIn } from "../src/utils";
 
 interface FixtureResult {
@@ -150,7 +150,7 @@ const generateVariables = (intel: ElmIntel): string => {
   }
 };
 
-const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
+const generateItemVariables = (item: ElmEncodeItem, intel: ElmIntel) => {
   if (item.isNullable) {
     return `GraphqlToElm.Optional.Absent`;
   } else if (item.isList) {
@@ -159,7 +159,7 @@ const generateItemVariables = (item: ElmIntelEncodeItem, intel: ElmIntel) => {
     const fields = item.children
       .map(findByIdIn(intel.encode.items))
       .map(
-        (child: ElmIntelEncodeItem) =>
+        (child: ElmEncodeItem) =>
           `${child.fieldName} = ${generateItemVariables(child, intel)}`
       );
     return `{ ${fields.join(", ")} }`;

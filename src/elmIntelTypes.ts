@@ -5,16 +5,16 @@ export interface ElmIntel {
   usedNames: string[];
   typesBySignature: { [signature: string]: string };
   encode: {
-    items: ElmIntelEncodeItem[];
+    items: ElmEncodeItem[];
     encodersByType: { [type: string]: string };
   };
   decode: {
-    items: ElmIntelDecodeItem[];
+    items: ElmDecodeItem[];
     decodersByType: { [type: string]: string };
   };
 }
 
-export interface ElmIntelItem {
+export interface ElmItem {
   id: number;
   name: string;
   queryTypename: string;
@@ -38,11 +38,11 @@ export type ElmIntelItemKind =
   | "scalar"
   | "empty";
 
-export interface ElmIntelEncodeItem extends ElmIntelItem {
+export interface ElmEncodeItem extends ElmItem {
   encoder: string;
 }
 
-export interface ElmIntelDecodeItem extends ElmIntelItem {
+export interface ElmDecodeItem extends ElmItem {
   decoder: string;
   unionConstructor: string;
 }

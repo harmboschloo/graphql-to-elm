@@ -3,11 +3,11 @@ import {
   GraphQLNullableType,
   GraphQLNamedType,
   isCompositeType,
-  isInputObjectType,
-  isListType,
-  isScalarType,
-  isEnumType,
-  isNullableType,
+  GraphQLInputObjectType,
+  GraphQLList,
+  GraphQLScalarType,
+  GraphQLEnumType,
+  GraphQLNonNull,
   getNamedType,
   getNullableType
 } from "graphql";
@@ -30,13 +30,18 @@ import {
   validVariableName,
   validFieldName
 } from "./utils";
-import { QueryIntel, QueryIntelItem, QueryIntelOutputItem } from "./queryIntel";
+import {
+  QueryIntel,
+  QueryItem,
+  QueryInputItem,
+  QueryOutputItem
+} from "./queryIntel";
 import { wrappedType } from "./generateElm";
 import {
   ElmIntel,
-  ElmIntelItem,
-  ElmIntelEncodeItem,
-  ElmIntelDecodeItem
+  ElmItem,
+  ElmEncodeItem,
+  ElmDecodeItem
 } from "./elmIntelTypes";
 
 export * from "./elmIntelTypes";
@@ -81,14 +86,14 @@ export const queryToElmIntel = (
     }
   };
 
-  queryIntel.variables
+  queryIntel.inputs
     .sort((a, b) => b.depth - a.depth || a.order - b.order)
     .forEach(addEncodeItem(intel, options));
 
-  let nextDecodeId = queryIntel.items.length;
+  let nextDecodeId = queryIntel.outputs.length;
   const getNextDecodeId = () => ++nextDecodeId;
 
-  queryIntel.items
+  queryIntel.outputs
     .sort((a, b) => b.depth - a.depth || a.order - b.order)
     .forEach(addDecodeItem(intel, getNextDecodeId, options));
 
@@ -98,7 +103,7 @@ export const queryToElmIntel = (
 };
 
 const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
-  queryItem: QueryIntelItem
+  queryItem: QueryInputItem
 ): void => {
   const info = getItemInfo(queryItem);
   const namedType: GraphQLNamedType = getNamedType(queryItem.type);
@@ -106,17 +111,20 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
   info.isOptional = info.isNullable;
   info.isListOfOptionals = info.isListOfNullables;
 
-  let item: ElmIntelEncodeItem;
+  let item: ElmEncodeItem;
 
   if (info.id === 0) {
     setRecordFieldNames(info.children, intel.encode.items);
     item = {
       ...info,
+      isOptional: false,
+      isNullable: false,
+      isList: false,
       kind: "record",
       type: "Variables",
       encoder: "encodeVariables"
     };
-  } else if (isInputObjectType(namedType)) {
+  } else if (namedType instanceof GraphQLInputObjectType) {
     setRecordFieldNames(info.children, intel.encode.items);
     const type = newRecordType(info, intel.encode.items, intel);
     item = {
@@ -125,7 +133,7 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
       type,
       encoder: newEncoderName(type, intel)
     };
-  } else if (isScalarType(namedType)) {
+  } else if (namedType instanceof GraphQLScalarType) {
     const scalarEncoder: TypeEncoder | undefined =
       options.scalarEncoders[namedType.name] ||
       defaultScalarEncoders[namedType.name];
@@ -142,7 +150,7 @@ const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
       type: scalarEncoder.type,
       encoder: scalarEncoder.encoder
     };
-  } else if (isEnumType(namedType)) {
+  } else if (namedType instanceof GraphQLEnumType) {
     const typeName: string = namedType.name;
     const enumEncoder: TypeEncoder | undefined = options.enumEncoders[typeName];
 
@@ -171,7 +179,7 @@ const addDecodeItem = (
   intel: ElmIntel,
   nextId: () => number,
   options: FinalOptions
-) => (queryItem: QueryIntelOutputItem): void => {
+) => (queryItem: QueryOutputItem): void => {
   if (!queryItem.isValid) {
     return;
   }
@@ -181,7 +189,7 @@ const addDecodeItem = (
 
   info.isOptional = queryItem.withDirective;
 
-  let item: ElmIntelDecodeItem;
+  let item: ElmDecodeItem;
 
   if (isCompositeType(namedType)) {
     if (info.id === 0) {
@@ -215,7 +223,7 @@ const addDecodeItem = (
 
       if (!queryItem.hasAllPosibleFragmentTypes) {
         const children = item.children.map(findByIdIn(intel.decode.items));
-        const otherItem: ElmIntelDecodeItem = {
+        const otherItem: ElmDecodeItem = {
           id: nextId(),
           name: "",
           queryTypename: "",
@@ -252,7 +260,7 @@ const addDecodeItem = (
         unionConstructor: ""
       };
     }
-  } else if (isScalarType(namedType)) {
+  } else if (namedType instanceof GraphQLScalarType) {
     const scalarDecoder: TypeDecoder | undefined =
       options.scalarDecoders[namedType.name] ||
       defaultScalarDecoders[namedType.name];
@@ -272,7 +280,7 @@ const addDecodeItem = (
       decoder: scalarDecoder.decoder,
       unionConstructor: ""
     };
-  } else if (isEnumType(namedType)) {
+  } else if (namedType instanceof GraphQLEnumType) {
     const typeName: string = namedType.name;
     const enumDecoder: TypeDecoder | undefined = options.enumDecoders[typeName];
 
@@ -344,9 +352,8 @@ const defaultScalarDecoders: TypeDecoders = {
   }
 };
 
-const getItemInfo = (queryItem: QueryIntelItem) => {
+const getItemInfo = (queryItem: QueryItem) => {
   const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
-  const isList = isListType(nullableType);
 
   return {
     id: queryItem.id,
@@ -357,9 +364,11 @@ const getItemInfo = (queryItem: QueryIntelItem) => {
     children: queryItem.children.slice(),
     isOptional: false,
     isListOfOptionals: false,
-    isNullable: isNullableType(queryItem.type),
-    isList,
-    isListOfNullables: isList && isNullableType(nullableType.ofType)
+    isNullable: !(queryItem.type instanceof GraphQLNonNull),
+    isList: nullableType instanceof GraphQLList,
+    isListOfNullables:
+      nullableType instanceof GraphQLList &&
+      !(nullableType.ofType instanceof GraphQLNonNull)
   };
 };
 
@@ -381,7 +390,7 @@ const getReservedNames = () => [...reservedNames];
 const newName = (name: string, intel: ElmIntel): string =>
   nextValidName(name, intel.usedNames);
 
-const setRecordFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
+const setRecordFieldNames = (fieldItems: number[], items: ElmItem[]) => {
   const usedFieldNames = [];
   fieldItems.map(findByIdIn(items)).forEach(item => {
     if (!item.name) {
@@ -393,7 +402,7 @@ const setRecordFieldNames = (fieldItems: number[], items: ElmIntelItem[]) => {
 
 const newRecordType = (
   item: { queryTypename: string; children: number[] },
-  items: ElmIntelItem[],
+  items: ElmItem[],
   intel: ElmIntel
 ): string => {
   let signature = `${item.queryTypename}: ${getRecordFieldsSignature(
@@ -408,7 +417,7 @@ const newRecordType = (
 
 const getRecordFieldsSignature = (
   item: { queryTypename: string; children: number[] },
-  items: ElmIntelItem[]
+  items: ElmItem[]
 ): string =>
   item.children
     .map(findByIdIn(items))
@@ -426,8 +435,8 @@ const getRecordFieldsSignature = (
     .join(", ");
 
 const getRecordFieldsJsonSignature = (
-  item: ElmIntelItem,
-  items: ElmIntelItem[]
+  item: ElmItem,
+  items: ElmItem[]
 ): string =>
   item.children
     .map(findByIdIn(items))
@@ -436,9 +445,9 @@ const getRecordFieldsJsonSignature = (
     .join(", ");
 
 const getRecordFieldJsonSignature = (
-  item: ElmIntelItem,
-  parent: ElmIntelItem,
-  items: ElmIntelItem[]
+  item: ElmItem,
+  parent: ElmItem,
+  items: ElmItem[]
 ): string => {
   if (!item.name) {
     throw new Error(`Elm intel field item ${item.type} does not have a name`);
@@ -463,7 +472,7 @@ const getRecordFieldJsonSignature = (
 
 const checkUnionChildSignatures = (
   children: number[],
-  items: ElmIntelDecodeItem[]
+  items: ElmDecodeItem[]
 ) => {
   const childSignatures = children
     .map(findByIdIn(items))
@@ -494,7 +503,7 @@ const newUnionType = (
   );
 };
 
-const setUnionConstructorNames = (item: ElmIntelDecodeItem, intel: ElmIntel) =>
+const setUnionConstructorNames = (item: ElmDecodeItem, intel: ElmIntel) =>
   item.children.map(findByIdIn(intel.decode.items)).forEach(child => {
     child.unionConstructor = newUnionConstructor(item.type, child.type, intel);
   });

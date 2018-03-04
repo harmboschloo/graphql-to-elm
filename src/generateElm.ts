@@ -1,8 +1,8 @@
 import {
   ElmIntel,
-  ElmIntelItem,
-  ElmIntelEncodeItem,
-  ElmIntelDecodeItem
+  ElmItem,
+  ElmEncodeItem,
+  ElmDecodeItem
 } from "./elmIntelTypes";
 import {
   sortString,
@@ -42,7 +42,7 @@ const generateExports = (intel: ElmIntel): string => {
     }
   };
 
-  const addTypes = (items: ElmIntelItem[]) =>
+  const addTypes = (items: ElmItem[]) =>
     items.forEach(item => {
       if (item.kind === "record") {
         addType(item.type);
@@ -153,7 +153,7 @@ const generateTypesAndEncoders = (intel: ElmIntel): string => {
 const generateTypeAndEncoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
-  return (item: ElmIntelEncodeItem): string => {
+  return (item: ElmEncodeItem): string => {
     if (generatedTypes[item.type]) {
       return "";
     }
@@ -173,8 +173,8 @@ const generateTypeAndEncoder = (intel: ElmIntel) => {
 };
 
 const generateRecordEncoder = (
-  item: ElmIntelEncodeItem,
-  children: ElmIntelEncodeItem[]
+  item: ElmEncodeItem,
+  children: ElmEncodeItem[]
 ): string => {
   const hasNullables = children.some(child => child.isNullable);
 
@@ -199,7 +199,7 @@ ${item.encoder} inputs =
 };
 
 const wrapEncoder = (
-  item: ElmIntelEncodeItem,
+  item: ElmEncodeItem,
   parentHasNullables: boolean
 ): string => {
   let encoder = item.encoder;
@@ -233,7 +233,7 @@ const generateTypesAndDecoders = (intel: ElmIntel): string => {
 const generateTypeAndDecoder = (intel: ElmIntel) => {
   const generatedTypes = {};
 
-  return (item: ElmIntelDecodeItem): string => {
+  return (item: ElmDecodeItem): string => {
     if (generatedTypes[item.type]) {
       return "";
     }
@@ -284,8 +284,8 @@ const generateTypeAndDecoder = (intel: ElmIntel) => {
 };
 
 const generateRecordTypeDeclaration = (
-  item: ElmIntelItem,
-  children: ElmIntelItem[]
+  item: ElmItem,
+  children: ElmItem[]
 ): string => {
   if (children.length > 0) {
     const fieldTypes = children.map(
@@ -300,7 +300,7 @@ const generateRecordTypeDeclaration = (
   }
 };
 
-export const wrappedType = (item: ElmIntelItem): string => {
+export const wrappedType = (item: ElmItem): string => {
   let signature = item.type;
   let wrap = x => x;
 
@@ -327,8 +327,8 @@ export const wrappedType = (item: ElmIntelItem): string => {
 };
 
 const generateRecordDecoder = (
-  item: ElmIntelDecodeItem,
-  children: ElmIntelDecodeItem[]
+  item: ElmDecodeItem,
+  children: ElmDecodeItem[]
 ): string => {
   const declaration = `${item.decoder} : Json.Decode.Decoder ${item.type}`;
 
@@ -357,7 +357,7 @@ const generateRecordDecoder = (
   }
 };
 
-const fieldDecoder = (item: ElmIntelDecodeItem): string => {
+const fieldDecoder = (item: ElmDecodeItem): string => {
   if (item.isOptional) {
     if (item.isNullable) {
       return "GraphqlToElm.Optional.fieldDecoder";
@@ -369,10 +369,7 @@ const fieldDecoder = (item: ElmIntelDecodeItem): string => {
   }
 };
 
-const wrapDecoder = (
-  item: ElmIntelDecodeItem,
-  parent: ElmIntelDecodeItem
-): string => {
+const wrapDecoder = (item: ElmDecodeItem, parent: ElmDecodeItem): string => {
   let decoder = item.decoder;
 
   if (item.name === "__typename") {

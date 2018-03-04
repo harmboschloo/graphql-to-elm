@@ -45,6 +45,10 @@
     is
   }
 
+  list {
+    is
+  }
+
   graphqlToElmReservedWords {
     Variables
     Data

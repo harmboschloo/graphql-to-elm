@@ -368,6 +368,7 @@ const reservedNames = [
   "Float",
   "Bool",
   "String",
+  "List",
   "Variables",
   "Data",
   "query",

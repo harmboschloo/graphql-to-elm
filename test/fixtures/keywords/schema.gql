@@ -11,6 +11,7 @@ type Query {
   otherElmKeywords: OtherElmKeywords!
   elmBasics: ElmBasics!
   boolean: Bool!
+  list: [List!]!
   graphqlToElmReservedWords: GraphqlToElmReservedWords!
   misc: Misc!
 }
@@ -20,7 +21,7 @@ type ElmKeywords {
   case: Boolean!
   else: Int!
   exposing: Float!
-  if: String!
+  if: [String!]!
   import: String!
   in: String!
   let: String!
@@ -58,6 +59,10 @@ type ElmBasics {
 }
 
 type Bool {
+  is: Int!
+}
+
+type List {
   is: Int!
 }
 

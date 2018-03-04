@@ -122,8 +122,6 @@ const data: { [key: string]: FinalConfig } = {
       "same-type-other-fields.gql",
       "other-type-same-fields.gql",
       "other-type-other-fields.gql"
-      // TODO
-      // - resursive decoding? (using lazy)
     ]
   }),
   scalars: create({
@@ -140,11 +138,15 @@ const data: { [key: string]: FinalConfig } = {
       "inputs-multiple.gql",
       "lists.gql"
     ]
+  }),
+  fragments: create({
+    queries: ["query.gql"]
   })
+
   // TODO
-  // - fragments
   // - operation names
   // - endpoint
+  // - resursive decoding? (using lazy)
   // - swapi
   // - fix generate import using hardcoded names
   //   (add variables encoder & data decoder to intel)

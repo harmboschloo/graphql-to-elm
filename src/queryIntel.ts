@@ -5,6 +5,7 @@ import {
   GraphQLInputType,
   GraphQLInputObjectType,
   GraphQLOutputType,
+  ASTNode,
   TypeInfo,
   Kind,
   isAbstractType,
@@ -80,10 +81,21 @@ export const getQueryIntel = (
     throw errors[0];
   }
 
+  const fragments: { [name: string]: ASTNode } = {};
+  visit(queryDocument, {
+    FragmentDefinition(node) {
+      fragments[node.name.value] = node;
+    }
+  });
+  const newQueryDocument = visit(queryDocument, {
+    FragmentSpread(node) {
+      return fragments[node.name.value];
+    }
+  });
+
   const typeInfo = new TypeInfo(schema);
   const visitor = queryVisitor(query, typeInfo, schema, options);
-
-  visit(queryDocument, visitWithTypeInfo(typeInfo, visitor));
+  visit(newQueryDocument, visitWithTypeInfo(typeInfo, visitor));
 
   // console.log("query intel", JSON.stringify(visitor.intel(), null, "  "));
 
@@ -145,7 +157,9 @@ const queryVisitor = (
     node.kind === Kind.FIELD ||
     isFragmentNode(node);
 
-  const isFragmentNode = node => node.kind === Kind.INLINE_FRAGMENT;
+  const isFragmentNode = node =>
+    node.kind === Kind.INLINE_FRAGMENT ||
+    node.kind === Kind.FRAGMENT_DEFINITION;
 
   const parentStack: QueryOutputItem[] = [];
   const getParentItem = () => parentStack[parentStack.length - 1];

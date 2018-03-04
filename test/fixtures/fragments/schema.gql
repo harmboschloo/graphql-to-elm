@@ -1,0 +1,30 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  user: User!
+  userOrNull: User
+  userById(id: String!): User
+  flip: Flip!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+union Flip = Heads | Tails
+
+type Heads {
+  name: String!
+}
+
+type Tails {
+  length: Float!
+}

@@ -1,0 +1,30 @@
+query Fragments($id: String!) {
+  user1: user {
+    ...fields
+  }
+  user2: user {
+    ...fields
+  }
+  user3: userOrNull {
+    ...fields
+  }
+  user4: userById(id: $id) {
+    ...fields
+  }
+  flip {
+    ...heads
+    ... on Tails {
+      length
+    }
+  }
+}
+
+fragment fields on User {
+  id
+  name
+  email
+}
+
+fragment heads on Heads {
+  name
+}

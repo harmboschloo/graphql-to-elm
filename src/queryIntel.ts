@@ -5,7 +5,9 @@ import {
   GraphQLInputType,
   GraphQLInputObjectType,
   GraphQLOutputType,
-  ASTNode,
+  FragmentDefinitionNode,
+  FragmentSpreadNode,
+  InlineFragmentNode,
   TypeInfo,
   Kind,
   isAbstractType,
@@ -81,15 +83,22 @@ export const getQueryIntel = (
     throw errors[0];
   }
 
-  const fragments: { [name: string]: ASTNode } = {};
+  const fragments: { [name: string]: FragmentDefinitionNode } = {};
   visit(queryDocument, {
     FragmentDefinition(node) {
       fragments[node.name.value] = node;
     }
   });
   const newQueryDocument = visit(queryDocument, {
-    FragmentSpread(node) {
-      return fragments[node.name.value];
+    FragmentSpread(node: FragmentSpreadNode): InlineFragmentNode {
+      const fragment = fragments[node.name.value];
+      return {
+        kind: Kind.INLINE_FRAGMENT,
+        typeCondition: fragment.typeCondition,
+        directives: fragment.directives,
+        selectionSet: fragment.selectionSet,
+        loc: fragment.loc
+      };
     }
   });
 
@@ -157,9 +166,7 @@ const queryVisitor = (
     node.kind === Kind.FIELD ||
     isFragmentNode(node);
 
-  const isFragmentNode = node =>
-    node.kind === Kind.INLINE_FRAGMENT ||
-    node.kind === Kind.FRAGMENT_DEFINITION;
+  const isFragmentNode = node => node.kind === Kind.INLINE_FRAGMENT;
 
   const parentStack: QueryOutputItem[] = [];
   const getParentItem = () => parentStack[parentStack.length - 1];

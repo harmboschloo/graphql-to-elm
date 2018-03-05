@@ -158,8 +158,6 @@ const data: { [key: string]: FinalConfig } = {
 
   // TODO
   // - operation names
-  // - endpoint
-  // - swapi
   // - fix generate import using hardcoded names
   //   (add variables encoder & data decoder to intel)
 };

@@ -134,7 +134,8 @@ const data: { [key: string]: FinalConfig } = {
       "same-type-same-fields-list.gql",
       "same-type-other-fields.gql",
       "other-type-same-fields.gql",
-      "other-type-other-fields.gql"
+      "other-type-other-fields.gql",
+      "recursive.gql"
     ]
   }),
 
@@ -158,7 +159,6 @@ const data: { [key: string]: FinalConfig } = {
   // TODO
   // - operation names
   // - endpoint
-  // - resursive decoding? (using lazy)
   // - swapi
   // - fix generate import using hardcoded names
   //   (add variables encoder & data decoder to intel)

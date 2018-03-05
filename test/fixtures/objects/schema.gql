@@ -11,6 +11,7 @@ type Query {
   me: Person!
   you: Person2!
   youOrNull: Person2
+  comments: [Comment!]!
 }
 
 type Person {
@@ -47,4 +48,9 @@ type Intel {
   field10: [Int!]!
   field11: [String!]!
   field12: [Float!]!
+}
+
+type Comment {
+  message: String!
+  responses: [Comment!]!
 }

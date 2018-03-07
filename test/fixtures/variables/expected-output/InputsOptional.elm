@@ -1,46 +1,39 @@
 module InputsOptional
     exposing
-        ( Variables
+        ( InputsOptionalVariables
         , OptionalInputs
         , OtherInputs
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        , Query
+        , inputsOptional
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query InputsOptional($inputs: OptionalInputs) {
-  inputsOptional(inputs: $inputs)
+inputsOptional : InputsOptionalVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputsOptional variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query InputsOptional($inputs: OptionalInputs) {
+inputsOptional(inputs: $inputs)
 }"""
+        (Maybe.Just <| encodeInputsOptionalVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias InputsOptionalVariables =
     { inputs : GraphqlToElm.Optional.Optional OptionalInputs
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
-    GraphqlToElm.Optional.encodeObject
+encodeInputsOptionalVariables : InputsOptionalVariables -> Json.Encode.Value
+encodeInputsOptionalVariables inputs =
+    GraphqlToElm.Optional.Encode.object
         [ ( "inputs", (GraphqlToElm.Optional.map encodeOptionalInputs) inputs.inputs )
         ]
 
@@ -54,7 +47,7 @@ type alias OptionalInputs =
 
 encodeOptionalInputs : OptionalInputs -> Json.Encode.Value
 encodeOptionalInputs inputs =
-    GraphqlToElm.Optional.encodeObject
+    GraphqlToElm.Optional.Encode.object
         [ ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
         , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (GraphqlToElm.Optional.map encodeOtherInputs) inputs.other )
@@ -73,12 +66,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Data =
+type alias Query =
     { inputsOptional : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "inputsOptional" (Json.Decode.nullable Json.Decode.string))

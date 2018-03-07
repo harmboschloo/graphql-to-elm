@@ -1,51 +1,43 @@
 module Union
     exposing
-        ( Data
+        ( Query
         , Flip(..)
         , Heads
         , Tails
-        , post
-        , query
-        , decoder
+        , union
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query Union {
-  flip {
-    ... on Heads {
-      name
-    }
-    ... on Tails {
-      length
-    }
-  }
+union : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+union =
+    GraphqlToElm.Graphql.Operation.query
+        """query Union {
+flip {
+... on Heads {
+name
+}
+... on Tails {
+length
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { flip : Flip
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "flip" flipDecoder)
 
 

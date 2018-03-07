@@ -1,59 +1,51 @@
 module Big
     exposing
-        ( Data
+        ( Query
         , Person
         , Intel
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.DecodeHelpers
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Helpers.Decode
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  i {
-    intel {
-      field1
-      field2
-      field3
-      field4
-      field5
-      field6
-      field7
-      field8
-      field9
-      field10
-      field11
-      field12
-    }
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+i {
+intel {
+field1
+field2
+field3
+field4
+field5
+field6
+field7
+field8
+field9
+field10
+field11
+field12
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { i : Person
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "i" personDecoder)
 
 
@@ -95,7 +87,7 @@ intelDecoder =
         (Json.Decode.field "field6" (Json.Decode.list Json.Decode.float))
         (Json.Decode.field "field7" Json.Decode.int)
         (Json.Decode.field "field8" Json.Decode.string)
-        |> GraphqlToElm.DecodeHelpers.andMap (Json.Decode.field "field9" Json.Decode.float)
-        |> GraphqlToElm.DecodeHelpers.andMap (Json.Decode.field "field10" (Json.Decode.list Json.Decode.int))
-        |> GraphqlToElm.DecodeHelpers.andMap (Json.Decode.field "field11" (Json.Decode.list Json.Decode.string))
-        |> GraphqlToElm.DecodeHelpers.andMap (Json.Decode.field "field12" (Json.Decode.list Json.Decode.float))
+        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field9" Json.Decode.float)
+        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field10" (Json.Decode.list Json.Decode.int))
+        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field11" (Json.Decode.list Json.Decode.string))
+        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field12" (Json.Decode.list Json.Decode.float))

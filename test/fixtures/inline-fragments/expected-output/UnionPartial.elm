@@ -1,56 +1,48 @@
 module UnionPartial
     exposing
-        ( Data
+        ( Query
         , Flip(..)
         , Heads
         , Flip2(..)
         , Tails
-        , post
-        , query
-        , decoder
+        , unionPartial
         )
 
-import GraphqlToElm.DecodeHelpers
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Helpers.Decode
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query UnionPartial {
-  flip {
-    ... on Heads {
-      name
-    }
-  }
-  flipOrNull {
-    ... on Tails {
-      length
-    }
-  }
+unionPartial : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+unionPartial =
+    GraphqlToElm.Graphql.Operation.query
+        """query UnionPartial {
+flip {
+... on Heads {
+name
+}
+}
+flipOrNull {
+... on Tails {
+length
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { flip : Flip
     , flipOrNull : Maybe.Maybe Flip2
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map2 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map2 Query
         (Json.Decode.field "flip" flipDecoder)
         (Json.Decode.field "flipOrNull" (Json.Decode.nullable flip2Decoder))
 
@@ -64,7 +56,7 @@ flipDecoder : Json.Decode.Decoder Flip
 flipDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads headsDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip
+        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip
         ]
 
 
@@ -88,7 +80,7 @@ flip2Decoder : Json.Decode.Decoder Flip2
 flip2Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnTails tailsDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip2
+        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip2
         ]
 
 

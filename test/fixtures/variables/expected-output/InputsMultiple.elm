@@ -1,47 +1,40 @@
 module InputsMultiple
     exposing
-        ( Variables
+        ( InputsMultipleVariables
         , Inputs
         , OtherInputs
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        , Query
+        , inputsMultiple
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query InputsMultiple($inputs: Inputs!, $inputs2: Inputs) {
-  inputsMultiple(inputs: $inputs, inputs2: $inputs2)
+inputsMultiple : InputsMultipleVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputsMultiple variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query InputsMultiple($inputs: Inputs!, $inputs2: Inputs) {
+inputsMultiple(inputs: $inputs, inputs2: $inputs2)
 }"""
+        (Maybe.Just <| encodeInputsMultipleVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias InputsMultipleVariables =
     { inputs : Inputs
     , inputs2 : GraphqlToElm.Optional.Optional Inputs
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
-    GraphqlToElm.Optional.encodeObject
+encodeInputsMultipleVariables : InputsMultipleVariables -> Json.Encode.Value
+encodeInputsMultipleVariables inputs =
+    GraphqlToElm.Optional.Encode.object
         [ ( "inputs", (encodeInputs >> GraphqlToElm.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphqlToElm.Optional.map encodeInputs) inputs.inputs2 )
         ]
@@ -75,12 +68,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Data =
+type alias Query =
     { inputsMultiple : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "inputsMultiple" (Json.Decode.nullable Json.Decode.string))

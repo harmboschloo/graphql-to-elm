@@ -1,59 +1,51 @@
 module Query
     exposing
-        ( Data
+        ( Query
         , User
         , User2
-        , post
-        , query
-        , decoder
+        , aliases
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query Aliases {
-  user1: user {
-    id
-    email
-  }
-  user2: user {
-    id
-    name
-  }
-  user3: user {
-    id
-    email
-  }
-  user4: userOrNull {
-    id
-    name
-  }
-  user {
-    id
-    email
-  }
-  userOrNull {
-    id
-    name
-  }
+aliases : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+aliases =
+    GraphqlToElm.Graphql.Operation.query
+        """query Aliases {
+user1: user {
+id
+email
+}
+user2: user {
+id
+name
+}
+user3: user {
+id
+email
+}
+user4: userOrNull {
+id
+name
+}
+user {
+id
+email
+}
+userOrNull {
+id
+name
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { user1 : User
     , user2 : User2
     , user3 : User
@@ -63,9 +55,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map6 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map6 Query
         (Json.Decode.field "user1" userDecoder)
         (Json.Decode.field "user2" user2Decoder)
         (Json.Decode.field "user3" userDecoder)

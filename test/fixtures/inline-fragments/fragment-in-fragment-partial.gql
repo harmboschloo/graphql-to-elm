@@ -1,0 +1,10 @@
+query FragmentInFragmentPartial {
+  animal {
+    color
+    ... on Mammal {
+      ... on Dog {
+        hairy
+      }
+    }
+  }
+}

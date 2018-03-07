@@ -1,44 +1,36 @@
 module InterfacePlain
     exposing
-        ( Data
+        ( Query
         , Animal
-        , post
-        , query
-        , decoder
+        , interfacePlain
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query InterfacePlain {
-  animal {
-    color
-  }
+interfacePlain : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfacePlain =
+    GraphqlToElm.Graphql.Operation.query
+        """query InterfacePlain {
+animal {
+color
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { animal : Animal
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "animal" animalDecoder)
 
 

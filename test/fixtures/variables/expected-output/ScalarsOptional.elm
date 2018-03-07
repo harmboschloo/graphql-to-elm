@@ -1,56 +1,49 @@
 module ScalarsOptional
     exposing
-        ( Variables
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        ( ScalarsOptionalVariables
+        , Query
+        , scalarsOptional
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query ScalarsOptional($string: String, $int: Int) {
-  scalarsOptional(string: $string, int: $int)
+scalarsOptional : ScalarsOptionalVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+scalarsOptional variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query ScalarsOptional($string: String, $int: Int) {
+scalarsOptional(string: $string, int: $int)
 }"""
+        (Maybe.Just <| encodeScalarsOptionalVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias ScalarsOptionalVariables =
     { string : GraphqlToElm.Optional.Optional String
     , int : GraphqlToElm.Optional.Optional Int
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
-    GraphqlToElm.Optional.encodeObject
+encodeScalarsOptionalVariables : ScalarsOptionalVariables -> Json.Encode.Value
+encodeScalarsOptionalVariables inputs =
+    GraphqlToElm.Optional.Encode.object
         [ ( "string", (GraphqlToElm.Optional.map Json.Encode.string) inputs.string )
         , ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
         ]
 
 
-type alias Data =
+type alias Query =
     { scalarsOptional : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "scalarsOptional" (Json.Decode.nullable Json.Decode.string))

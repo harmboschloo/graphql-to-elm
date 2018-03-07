@@ -1,3 +1,5 @@
+import { withDefault } from "./utils";
+
 export interface Options {
   schema: string;
   queries: string[];
@@ -5,8 +7,10 @@ export interface Options {
   enumEncoders?: TypeEncoders;
   scalarDecoders?: TypeDecoders;
   enumDecoders?: TypeDecoders;
+  errorsDecoder?: TypeDecoder;
   src?: string;
   dest?: string;
+  operationType?: "query" | "named";
   log?: (message: string) => void;
 }
 
@@ -17,8 +21,10 @@ export interface FinalOptions {
   enumEncoders: TypeEncoders;
   scalarDecoders: TypeDecoders;
   enumDecoders: TypeDecoders;
+  errorsDecoder: TypeDecoder;
   src: string;
   dest: string;
+  operationType: "query" | "named";
   log: (message: string) => void;
 }
 
@@ -40,24 +46,76 @@ export interface TypeDecoder {
   decoder: string;
 }
 
-const defaultOptions: {
-  src: string;
-  dest: string;
-  log: (message: string) => void;
-} = {
-  src: ".",
-  dest: ".",
-  log: message => console.log(message)
+const defaultScalarEncoders: TypeEncoders = {
+  Int: {
+    type: "Int",
+    encoder: "Json.Encode.int"
+  },
+  Float: {
+    type: "Float",
+    encoder: "Json.Encode.float"
+  },
+  Boolean: {
+    type: "Bool",
+    encoder: "Json.Encode.bool"
+  },
+  String: {
+    type: "String",
+    encoder: "Json.Encode.string"
+  },
+  ID: {
+    type: "String",
+    encoder: "Json.Encode.string"
+  }
+};
+
+const defaultScalarDecoders: TypeDecoders = {
+  Int: {
+    type: "Int",
+    decoder: "Json.Decode.int"
+  },
+  Float: {
+    type: "Float",
+    decoder: "Json.Decode.float"
+  },
+  Boolean: {
+    type: "Bool",
+    decoder: "Json.Decode.bool"
+  },
+  String: {
+    type: "String",
+    decoder: "Json.Decode.string"
+  },
+  ID: {
+    type: "String",
+    decoder: "Json.Decode.string"
+  }
+};
+
+const defaultErrorsDecoder: TypeDecoder = {
+  type: "GraphqlToElm.Graphql.Errors.Errors",
+  decoder: "GraphqlToElm.Graphql.Errors.decoder"
 };
 
 export const finalizeOptions = (options: Options): FinalOptions => {
   const { schema, queries } = options;
-  const scalarEncoders = withDefault({}, options.scalarEncoders);
+  const scalarEncoders = {
+    ...defaultScalarEncoders,
+    ...withDefault({}, options.scalarEncoders)
+  };
   const enumEncoders = withDefault({}, options.enumEncoders);
-  const scalarDecoders = withDefault({}, options.scalarDecoders);
+  const scalarDecoders = {
+    ...defaultScalarDecoders,
+    ...withDefault({}, options.scalarDecoders)
+  };
   const enumDecoders = withDefault({}, options.enumDecoders);
+  const errorsDecoder = withDefault(
+    defaultErrorsDecoder,
+    options.errorsDecoder
+  );
   const src = withDefault(".", options.src);
   const dest = withDefault(src, options.dest);
+  const operationType = withDefault("query", options.operationType);
   const log =
     typeof options.log !== "undefined"
       ? options.log || (x => {})
@@ -70,11 +128,10 @@ export const finalizeOptions = (options: Options): FinalOptions => {
     enumEncoders,
     scalarDecoders,
     enumDecoders,
+    errorsDecoder,
     src,
     dest,
+    operationType,
     log
   };
 };
-
-const withDefault = (defaultValue, value) =>
-  value !== null && typeof value !== "undefined" ? value : defaultValue;

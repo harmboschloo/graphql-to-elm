@@ -1,8 +1,9 @@
-module GraphqlToElm.DecodeHelpers
+module GraphqlToElm.Helpers.Decode
     exposing
         ( andMap
-        , emptyObjectDecoder
-        , constantDecoder
+        , fromResult
+        , emptyObject
+        , constant
         )
 
 import Json.Decode as Decode exposing (Decoder)
@@ -13,8 +14,16 @@ andMap =
     Decode.map2 (|>)
 
 
-emptyObjectDecoder : a -> Decoder a
-emptyObjectDecoder result =
+fromResult : Result String a -> Decoder a
+fromResult result =
+    case result of
+        Err error ->
+            Decode.fail error
+        Ok value ->
+            Decode.succeed value
+
+emptyObject : a -> Decoder a
+emptyObject result =
     Decode.keyValuePairs Decode.value
         |> Decode.andThen
             (\pairs ->
@@ -25,16 +34,16 @@ emptyObjectDecoder result =
             )
 
 
-constantDecoder : a -> Decoder a -> Decoder a
-constantDecoder constant =
+constant : a -> Decoder a -> Decoder a
+constant constantValue =
     Decode.andThen
         (\value ->
-            if value == constant then
+            if value == constantValue then
                 Decode.succeed value
             else
                 Decode.fail <|
                     "expected '"
-                        ++ toString constant
+                        ++ toString constantValue
                         ++ "' but got '"
                         ++ toString value
                         ++ "`"

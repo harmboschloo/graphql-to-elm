@@ -1,57 +1,49 @@
 module OtherTypeOtherFields
     exposing
-        ( Data
+        ( Query
         , Person
         , Dog
         , Person2
         , Person22
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  i {
-    dog {
-      name
-    }
-  }
-  me {
-    name
-  }
-  you {
-    email
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+i {
+dog {
+name
+}
+}
+me {
+name
+}
+you {
+email
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { i : Person
     , me : Person2
     , you : Person22
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map3 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map3 Query
         (Json.Decode.field "i" personDecoder)
         (Json.Decode.field "me" person2Decoder)
         (Json.Decode.field "you" person22Decoder)

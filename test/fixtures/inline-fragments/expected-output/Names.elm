@@ -1,68 +1,57 @@
 module Names
     exposing
-        ( Data
+        ( Query
         , Flip(..)
         , Heads
         , Tails
         , Flip2(..)
         , Flip3(..)
-        , post
-        , query
-        , decoder
+        , names
         )
 
-import GraphqlToElm.DecodeHelpers
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Helpers.Decode
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query Names {
-  flip1: flip {
-    ... on Heads {
-      name
-    }
-    ... on Tails {
-      length
-    }
-  }
-
-  flip2: flip {
-    ... on Heads {
-      name
-    }
-    ... on Tails {
-      length
-    }
-  }
-
-  flip3: flip {
-    ... on Heads {
-      name
-    }
-  }
-
-  flip4: flip {
-    ... on Tails {
-      length
-    }
-  }
+names : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+names =
+    GraphqlToElm.Graphql.Operation.query
+        """query Names {
+flip1: flip {
+... on Heads {
+name
+}
+... on Tails {
+length
+}
+}
+flip2: flip {
+... on Heads {
+name
+}
+... on Tails {
+length
+}
+}
+flip3: flip {
+... on Heads {
+name
+}
+}
+flip4: flip {
+... on Tails {
+length
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { flip1 : Flip
     , flip2 : Flip
     , flip3 : Flip2
@@ -70,9 +59,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map4 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map4 Query
         (Json.Decode.field "flip1" flipDecoder)
         (Json.Decode.field "flip2" flipDecoder)
         (Json.Decode.field "flip3" flip2Decoder)
@@ -123,7 +112,7 @@ flip2Decoder : Json.Decode.Decoder Flip2
 flip2Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads2 headsDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip
+        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip
         ]
 
 
@@ -136,5 +125,5 @@ flip3Decoder : Json.Decode.Decoder Flip3
 flip3Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnTails2 tailsDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherFlip2
+        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip2
         ]

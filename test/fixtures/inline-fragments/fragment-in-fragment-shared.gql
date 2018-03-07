@@ -1,0 +1,17 @@
+query FragmentInFragmentShared {
+  animal {
+    color
+    ... on Mammal {
+      subclass
+      ... on Dog {
+        hairy
+      }
+      ... on Dolphin {
+        fins
+      }
+    }
+    ... on Bird {
+      canFly
+    }
+  }
+}

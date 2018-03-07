@@ -1,96 +1,61 @@
 module GraphqlToElm.Http
     exposing
-        ( Query
-        , Request
-        , Response(Data, Errors, HttpError)
-        , Error
-        , Location
+        ( Request
+        , Response
+        , Error(GraphqlError, HttpError)
+        , get
         , post
         , send
         )
 
 import Http
-import Json.Decode exposing (Decoder)
-import Json.Encode
+import GraphqlToElm.Graphql.Response as GraphqlResponse
+import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
+import GraphqlToElm.Optional exposing (Optional)
+import GraphqlToElm.Helpers.Url as Url
 
 
-type alias Query =
-    { query : String
-    , variables : Json.Encode.Value
-    }
+type alias Request e a =
+    Http.Request (GraphqlResponse.Response e a)
 
 
-encodeQuery : Query -> Json.Encode.Value
-encodeQuery { query, variables } =
-    Json.Encode.object
-        [ ( "query", Json.Encode.string query )
-        , ( "variables", variables )
-        ]
+type alias Response e a =
+    Result (Error e a) a
 
 
-type Request a
-    = Request (Http.Request (Response a))
-
-
-type Response a
-    = Data a
-    | Errors (List Error) (Maybe a)
+type Error e a
+    = GraphqlError e (Optional a)
     | HttpError Http.Error
 
 
-type alias Error =
-    { message : String
-    , locations : List Location
-    }
+get : String -> Operation e a -> Request e a
+get url operation =
+    Http.get
+        (Url.withParameters url <| Operation.encodeParameters operation)
+        (GraphqlResponse.decoder operation)
 
 
-type alias Location =
-    { line : Int
-    , column : Int
-    }
+post : String -> Operation e a -> Request e a
+post url operation =
+    Http.post
+        url
+        (Http.jsonBody <| Operation.encode operation)
+        (GraphqlResponse.decoder operation)
 
 
-responseDecoder : Decoder a -> Decoder (Response a)
-responseDecoder dataDecoder =
-    Json.Decode.oneOf
-        [ Json.Decode.map2 Errors
-            (Json.Decode.field "errors" <| Json.Decode.list errorDecoder)
-            (Json.Decode.maybe <| Json.Decode.field "data" dataDecoder)
-        , Json.Decode.map Data <| Json.Decode.field "data" dataDecoder
-        ]
-
-
-errorDecoder : Decoder Error
-errorDecoder =
-    Json.Decode.map2 Error
-        (Json.Decode.field "message" Json.Decode.string)
-        (Json.Decode.field "locations" <|
-            Json.Decode.list <|
-                Json.Decode.map2 Location
-                    (Json.Decode.field "line" Json.Decode.int)
-                    (Json.Decode.field "columnline" Json.Decode.int)
-        )
-
-
-post : String -> Query -> Decoder a -> Request a
-post url query dataDecoder =
-    Request <|
-        Http.post
-            url
-            (Http.jsonBody <| encodeQuery query)
-            (responseDecoder dataDecoder)
-
-
-send : (Response a -> msg) -> Request a -> Cmd msg
-send responseMsg (Request request) =
+send : (Response e a -> msg) -> Request e a -> Cmd msg
+send responseMsg request =
     Http.send (toResponse >> responseMsg) request
 
 
-toResponse : Result Http.Error (Response a) -> Response a
+toResponse : Result Http.Error (GraphqlResponse.Response e a) -> Response e a
 toResponse result =
     case result of
         Err error ->
-            HttpError error
+            Err (HttpError error)
 
-        Ok response ->
-            response
+        Ok (GraphqlResponse.Errors errors data) ->
+            Err (GraphqlError errors data)
+
+        Ok (GraphqlResponse.Data data) ->
+            Ok data

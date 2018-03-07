@@ -1,44 +1,36 @@
 module CustomScalarTypes
     exposing
-        ( Data
-        , post
+        ( Query
         , query
-        , decoder
         )
 
 import Data.Date
 import Data.Id
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  id
-  date
+    GraphqlToElm.Graphql.Operation.query
+        """{
+id
+date
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { id : Data.Id.Id
     , date : Data.Date.Date
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map2 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map2 Query
         (Json.Decode.field "id" Data.Id.decoder)
         (Json.Decode.field "date" Data.Date.decoder)

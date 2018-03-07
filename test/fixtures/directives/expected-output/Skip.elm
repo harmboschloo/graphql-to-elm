@@ -1,62 +1,55 @@
 module Skip
     exposing
-        ( Variables
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        ( SkipVariables
+        , Query
+        , skip
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Decode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query Skip($withSchool: Boolean!, $withCity: Boolean!) {
-  name
-  school @skip(if: $withSchool)
-  city @skip(if: $withCity)
+skip : SkipVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+skip variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query Skip($withSchool: Boolean!, $withCity: Boolean!) {
+name
+school @skip(if: $withSchool)
+city @skip(if: $withCity)
 }"""
+        (Maybe.Just <| encodeSkipVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias SkipVariables =
     { withSchool : Bool
     , withCity : Bool
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
+encodeSkipVariables : SkipVariables -> Json.Encode.Value
+encodeSkipVariables inputs =
     Json.Encode.object
         [ ( "withSchool", Json.Encode.bool inputs.withSchool )
         , ( "withCity", Json.Encode.bool inputs.withCity )
         ]
 
 
-type alias Data =
+type alias Query =
     { name : String
     , school : Maybe.Maybe String
     , city : GraphqlToElm.Optional.Optional String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map3 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map3 Query
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphqlToElm.Optional.nonNullfieldDecoder "school" Json.Decode.string)
-        (GraphqlToElm.Optional.fieldDecoder "city" Json.Decode.string)
+        (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
+        (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)

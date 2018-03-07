@@ -1,44 +1,36 @@
 module Inputs
     exposing
-        ( Variables
+        ( InputsVariables
         , Inputs
         , OtherInputs
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        , Query
+        , inputs
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query Inputs($inputs: Inputs!) {
-  inputs(inputs: $inputs)
+inputs : InputsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputs variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query Inputs($inputs: Inputs!) {
+inputs(inputs: $inputs)
 }"""
+        (Maybe.Just <| encodeInputsVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias InputsVariables =
     { inputs : Inputs
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
+encodeInputsVariables : InputsVariables -> Json.Encode.Value
+encodeInputsVariables inputs =
     Json.Encode.object
         [ ( "inputs", encodeInputs inputs.inputs )
         ]
@@ -72,12 +64,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Data =
+type alias Query =
     { inputs : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "inputs" (Json.Decode.nullable Json.Decode.string))

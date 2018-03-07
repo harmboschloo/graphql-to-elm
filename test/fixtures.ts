@@ -24,6 +24,7 @@ interface Config {
   enumDecoders?: TypeDecoders;
   src?: string;
   dest?: string;
+  operationType?: "query" | "named";
   expect?: string;
   throws?: string;
 }
@@ -41,6 +42,7 @@ const create = ({
   enumDecoders,
   src,
   dest = "generated-output",
+  operationType,
   expect = "expected-output",
   throws
 }: Config): FinalConfig => ({
@@ -50,7 +52,8 @@ const create = ({
     scalarDecoders,
     enumDecoders,
     src,
-    dest
+    dest,
+    operationType
   },
   expect,
   throws
@@ -108,14 +111,17 @@ const data: { [key: string]: FinalConfig } = {
       "single.gql",
       "typename.gql",
       "typename-shared.gql",
-      "typename-shared-more.gql"
+      "typename-shared-more.gql",
+      "fragment-in-fragment.gql",
+      "fragment-in-fragment-shared.gql",
+      "fragment-in-fragment-partial.gql"
     ]
   }),
 
   "inline-fragments-throws": create({
     queries: ["same-signature.gql"],
     throws:
-      "multiple union children with the same json signature: color : String"
+      "multiple union constructors with the same decode signature: color : String"
   }),
 
   keywords: create({ queries: ["query.gql"] }),
@@ -139,6 +145,20 @@ const data: { [key: string]: FinalConfig } = {
     ]
   }),
 
+  operations: create({
+    queries: [
+      "anonymous-query.gql",
+      "anonymous-mutation.gql",
+      "multiple.gql",
+      "multiple-fragments.gql"
+    ]
+  }),
+
+  "operations-named": create({
+    queries: ["query.gql"],
+    operationType: "named"
+  }),
+
   scalars: create({
     queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"]
   }),
@@ -155,9 +175,4 @@ const data: { [key: string]: FinalConfig } = {
       "lists.gql"
     ]
   })
-
-  // TODO
-  // - operation names
-  // - fix generate import using hardcoded names
-  //   (add variables encoder & data decoder to intel)
 };

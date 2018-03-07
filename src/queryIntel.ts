@@ -1,58 +1,69 @@
 import {
   GraphQLSchema,
+  GraphQLType,
   GraphQLNonNull,
+  GraphQLList,
+  GraphQLScalarType,
+  GraphQLEnumType,
   GraphQLNamedType,
+  GraphQLCompositeType,
+  GraphQLObjectType,
   GraphQLInputType,
   GraphQLInputObjectType,
-  GraphQLOutputType,
+  GraphQLInputFieldMap,
+  GraphQLInputField,
+  DocumentNode,
+  OperationDefinitionNode,
   FragmentDefinitionNode,
   FragmentSpreadNode,
   InlineFragmentNode,
+  FieldNode,
+  VariableDefinitionNode,
+  Location,
   TypeInfo,
   Kind,
+  isCompositeType,
+  assertCompositeType,
   isAbstractType,
+  assertInputType,
   getNamedType,
+  getNullableType,
+  typeFromAST,
   parse,
   visit,
   visitWithTypeInfo,
   validate
 } from "graphql";
 import { FinalOptions } from "./options";
-import { readFile, findByIdIn, getId, getMaxOrder } from "./utils";
-import * as debug from "./debug";
+import { readFile, removeIndents, assertOk, addOnce } from "./utils";
 
 export interface QueryIntel {
   src: string;
   query: string;
-  inputs: QueryInputItem[];
-  outputs: QueryOutputItem[];
+  fragments: QueryFragment[];
+  operations: QueryOperation[];
 }
 
-export type QueryItem = QueryInputItem | QueryOutputItem;
-
-export interface QueryInputItem {
-  id: number;
+export interface QueryFragment {
   name: string;
-  depth: number;
-  order: number;
-  children: number[];
-  type: GraphQLInputType;
+  query: string;
 }
 
-export interface QueryOutputItem {
-  id: number;
-  name: string;
-  depth: number;
-  order: number;
-  children: number[];
-  type: GraphQLOutputType;
-  withDirective: boolean;
-  isFragment: boolean;
-  isFragmented: boolean;
-  isFragmentedOn: boolean;
-  hasAllPosibleFragmentTypes: boolean;
-  isValid: boolean; //FIXME
+interface OperationNodeInfo {
+  query: string;
+  fragmentNames: string[];
+  node: OperationDefinitionNode;
 }
+
+export interface QueryOperation {
+  name: string;
+  query: string;
+  fragmentNames: string[];
+  inputs: QueryObjectInput | undefined;
+  outputs: QueryRootOutput;
+}
+
+export type QueryRootOutput = QueryObjectOutput | QueryFragmentedOutput;
 
 export const readQueryIntel = (
   src: string,
@@ -66,250 +77,676 @@ export const readQueryIntel = (
     .replace(/\r\n/g, "\n");
 
   return {
-    ...getQueryIntel(query, schema, options),
+    ...getQueryIntel(query, schema),
     src
   };
 };
 
 export const getQueryIntel = (
   query: string,
-  schema: GraphQLSchema,
-  options: FinalOptions
+  schema: GraphQLSchema
 ): QueryIntel => {
-  const queryDocument = parse(query);
+  const { operationsInfo, fragments } = getOperationsInfo(query, schema);
 
-  const errors = validate(schema, queryDocument);
+  const operations: QueryOperation[] = operationsInfo.map(getOperation(schema));
+
+  const intel: QueryIntel = {
+    src: "",
+    query,
+    fragments,
+    operations
+  };
+
+  // console.log("query intel", JSON.stringify(intel, null, "  "));
+
+  return intel;
+};
+
+const getOperationsInfo = (
+  query: string,
+  schema: GraphQLSchema
+): {
+  operationsInfo: OperationNodeInfo[];
+  fragments: QueryFragment[];
+} => {
+  const queryDocument = parseAndValidate(query, schema);
+
+  const fragmentNodes: { [name: string]: FragmentDefinitionNode } = {};
+  const fragments: QueryFragment[] = [];
+  visit(queryDocument, {
+    FragmentDefinition(node: FragmentDefinitionNode) {
+      const location = assertLocation(node.loc);
+      fragmentNodes[node.name.value] = node;
+      fragments.push({
+        name: node.name.value,
+        query: removeIndents(query.substring(location.start, location.end))
+      });
+    }
+  });
+
+  const operationsInfo: OperationNodeInfo[] = [];
+  visit(queryDocument, {
+    OperationDefinition(node: OperationDefinitionNode) {
+      const location = assertLocation(node.loc);
+      operationsInfo.push({
+        query: removeIndents(query.substring(location.start, location.end)),
+        node: node,
+        fragmentNames: []
+      });
+    }
+  });
+
+  operationsInfo.forEach((info: OperationNodeInfo) => {
+    info.node = visit(info.node, {
+      FragmentSpread(node: FragmentSpreadNode): InlineFragmentNode {
+        addOnce(node.name.value, info.fragmentNames);
+        const fragmentNode = fragmentNodes[node.name.value];
+        return {
+          kind: Kind.INLINE_FRAGMENT,
+          typeCondition: fragmentNode.typeCondition,
+          directives: fragmentNode.directives,
+          selectionSet: fragmentNode.selectionSet,
+          loc: fragmentNode.loc
+        };
+      }
+    });
+  });
+
+  const findFragmentByName = (name: string): QueryFragment =>
+    assertOk(fragments.find(fragment => fragment.name === name));
+
+  operationsInfo.forEach(info => {
+    const fragmentQueries: string[] = info.fragmentNames
+      .map(findFragmentByName)
+      .map(fragment => fragment.query);
+    const query = `${info.query}${fragmentQueries.join("")}`;
+    parseAndValidate(query, schema);
+  });
+
+  return { operationsInfo, fragments };
+};
+
+const getOperation = (schema: GraphQLSchema) => (
+  info: OperationNodeInfo
+): QueryOperation => ({
+  name: info.node.name ? info.node.name.value : info.node.operation,
+  query: info.query,
+  fragmentNames: info.fragmentNames,
+  inputs: getInputs(info.node, schema),
+  outputs: getOutputs(info.node, schema)
+});
+
+const assertLocation = (location: Location | undefined): Location =>
+  assertOk(location, "no query location");
+
+const parseAndValidate = (query: string, schema: GraphQLSchema) => {
+  const document: DocumentNode = parse(query);
+
+  const errors = validate(schema, document);
   if (errors.length > 0) {
     throw errors[0];
   }
 
-  const fragments: { [name: string]: FragmentDefinitionNode } = {};
-  visit(queryDocument, {
-    FragmentDefinition(node) {
-      fragments[node.name.value] = node;
-    }
-  });
-  const newQueryDocument = visit(queryDocument, {
-    FragmentSpread(node: FragmentSpreadNode): InlineFragmentNode {
-      const fragment = fragments[node.name.value];
-      return {
-        kind: Kind.INLINE_FRAGMENT,
-        typeCondition: fragment.typeCondition,
-        directives: fragment.directives,
-        selectionSet: fragment.selectionSet,
-        loc: fragment.loc
-      };
-    }
-  });
-
-  const typeInfo = new TypeInfo(schema);
-  const visitor = queryVisitor(query, typeInfo, schema, options);
-  visit(newQueryDocument, visitWithTypeInfo(typeInfo, visitor));
-
-  // console.log("query intel", JSON.stringify(visitor.intel(), null, "  "));
-
-  return visitor.intel();
+  return document;
 };
 
-const queryVisitor = (
-  query: string,
-  typeInfo: TypeInfo,
-  schema: GraphQLSchema,
-  options: FinalOptions
-) => {
-  const intel: QueryIntel = {
-    src: "",
-    query,
-    inputs: [],
-    outputs: []
-  };
+//
+// INPUTS
+//
 
-  const addInput = ({
-    type,
-    name,
-    parent
-  }: {
-    type: GraphQLInputType;
-    name: string;
-    parent: QueryInputItem;
-  }) => {
-    const id = intel.inputs.length;
-    const item = {
-      id,
-      type,
-      name,
-      depth: parent.depth + 1,
-      order: id,
-      children: [],
-      isValid: true
+export type QueryInput = QueryObjectInput | QueryScalarInput | QueryEnumInput;
+
+export interface QueryObjectInput {
+  kind: "object";
+  typeName: string;
+  fields: QueryInputField[];
+}
+
+export interface QueryInputField {
+  name: string;
+  value: QueryInput;
+  valueWrapper: false | "optional";
+  valueListItemWrapper: false | "non-null" | "optional";
+}
+
+export interface QueryScalarInput {
+  kind: "scalar";
+  typeName: string;
+}
+
+export interface QueryEnumInput {
+  kind: "enum";
+  typeName: string;
+}
+
+const getInputs = (
+  node: OperationDefinitionNode,
+  schema: GraphQLSchema
+): QueryObjectInput | undefined =>
+  node.variableDefinitions && node.variableDefinitions.length > 0
+    ? {
+        typeName: `${node.name ? node.name.value : ""}Variables`,
+        kind: "object",
+        fields: node.variableDefinitions.map(node =>
+          nodeToInputField(node, schema)
+        )
+      }
+    : undefined;
+
+const nodeToInputField = (
+  node: VariableDefinitionNode,
+  schema: GraphQLSchema
+): QueryInputField =>
+  mapInputField(
+    {
+      name: node.variable.name.value,
+      type: getInputType(node, schema)
+    },
+    schema
+  );
+
+const mapInputField = (
+  field: GraphQLInputField,
+  schema: GraphQLSchema
+): QueryInputField => {
+  const namedType: GraphQLNamedType = getNamedType(field.type);
+  const nullableType = getNullableType(field.type);
+  const typeName = namedType.name;
+
+  let value: QueryInput | undefined = undefined;
+
+  if (namedType instanceof GraphQLInputObjectType) {
+    const fields: GraphQLInputFieldMap = namedType.getFields();
+    value = {
+      kind: "object",
+      typeName,
+      fields: Object.keys(fields).map(key => mapInputField(fields[key], schema))
     };
-
-    intel.inputs.push(item);
-    parent.children.push(item.id);
-
-    const namedType = getNamedType(type);
-
-    if (namedType instanceof GraphQLInputObjectType) {
-      const fields = namedType.getFields();
-      Object.keys(fields).forEach(fieldName =>
-        addInput({
-          type: fields[fieldName].type,
-          name: fieldName,
-          parent: item
-        })
-      );
-    }
-  };
-
-  const isOutputItemNode = node =>
-    node.kind === Kind.OPERATION_DEFINITION ||
-    node.kind === Kind.FIELD ||
-    isFragmentNode(node);
-
-  const isFragmentNode = node => node.kind === Kind.INLINE_FRAGMENT;
-
-  const parentStack: QueryOutputItem[] = [];
-  const getParentItem = () => parentStack[parentStack.length - 1];
+  } else if (namedType instanceof GraphQLScalarType) {
+    value = {
+      kind: "scalar",
+      typeName
+    };
+  } else if (namedType instanceof GraphQLEnumType) {
+    value = {
+      kind: "enum",
+      typeName
+    };
+  }
 
   return {
-    intel() {
-      return intel;
+    name: field.name,
+    value: assertOk(value, `unhandled query input of type ${field.type}`),
+    valueWrapper: field.type instanceof GraphQLNonNull ? false : "optional",
+    valueListItemWrapper:
+      nullableType instanceof GraphQLList
+        ? nullableType.ofType instanceof GraphQLNonNull
+          ? "non-null"
+          : "optional"
+        : false
+  };
+};
+
+const getInputType = (
+  node: VariableDefinitionNode,
+  schema: GraphQLSchema
+): GraphQLInputType => assertInputType(typeFromAST(schema, node.type));
+
+//
+// OUTPUTS
+//
+
+export type QueryOutput = QueryNonFragmentOutput | QueryFragmentOutput;
+
+export type QueryNonFragmentOutput =
+  | QueryCompositeNonFragmentOutput
+  | QueryScalarOutput
+  | QueryEnumOutput
+  | QueryTypenameOutput;
+
+export type QueryCompositeNonFragmentOutput =
+  | QueryObjectOutput
+  | QueryFragmentedOutput
+  | QueryFragmentedOnOutput;
+
+export interface QueryObjectOutput {
+  kind: "object";
+  typeName: string;
+  fields: QueryOutputField[];
+}
+
+export interface QueryOutputField {
+  name: string;
+  value: QueryNonFragmentOutput;
+  valueWrapper: false | "nullable" | "optional" | "non-null-optional";
+  valueListItemWrapper: false | "non-null" | "nullable";
+}
+
+export interface QueryFragmentedOutput {
+  kind: "fragmented";
+  typeName: string;
+  fragments: QueryFragmentOutput[];
+}
+
+export interface QueryFragmentedOnOutput {
+  kind: "fragmented-on";
+  typeName: string;
+  fragments: QueryFragmentOutput[];
+}
+
+export interface QueryScalarOutput {
+  kind: "scalar";
+  typeName: string;
+}
+
+export interface QueryEnumOutput {
+  kind: "enum";
+  typeName: string;
+}
+
+export interface QueryTypenameOutput {
+  kind: "typename";
+  typeName: string;
+}
+
+export type QueryFragmentOutput =
+  | QueryCompositeFragmentOutput
+  | QueryEmptyFragmentOutput
+  | QueryOtherFragmentOutput;
+
+export type QueryCompositeFragmentOutput =
+  | QueryObjectFragmentOutput
+  | QueryFragmentedFragmentOutput;
+
+export interface QueryObjectFragmentOutput {
+  kind: "object-fragment";
+  type: GraphQLCompositeType;
+  typeName: string;
+  fields: QueryOutputField[];
+}
+
+export interface QueryFragmentedFragmentOutput {
+  kind: "fragmented-fragment";
+  type: GraphQLCompositeType;
+  typeName: string;
+  fragments: QueryFragmentOutput[];
+}
+
+export interface QueryEmptyFragmentOutput {
+  kind: "empty-fragment";
+  typeName: string;
+}
+
+export interface QueryOtherFragmentOutput {
+  kind: "other-fragment";
+  typeName: string;
+}
+
+type OutputNode = OperationDefinitionNode | FieldNode | InlineFragmentNode;
+
+export const isFragmentOutput = (
+  output: QueryOutput
+): output is QueryFragmentOutput => {
+  switch (output.kind) {
+    case "object":
+    case "fragmented":
+    case "fragmented-on":
+    case "scalar":
+    case "enum":
+    case "typename":
+      return false;
+    case "object-fragment":
+    case "fragmented-fragment":
+    case "empty-fragment":
+    case "other-fragment":
+      return true;
+  }
+};
+
+export const isNonFragmentOutput = (
+  output: QueryOutput
+): output is QueryNonFragmentOutput => !isFragmentOutput(output);
+
+export const isTypenameOutput = (
+  output: QueryOutput
+): output is QueryTypenameOutput => output.kind === "typename";
+
+export const isObjectFragmentOutput = (
+  output: QueryOutput
+): output is QueryObjectFragmentOutput => output.kind === "object-fragment";
+
+export const assertNonFragmentOutput = (
+  output: QueryOutput
+): QueryNonFragmentOutput => {
+  if (!isNonFragmentOutput(output)) {
+    throw Error("not a QueryNonFragmentOutput");
+  }
+  return output;
+};
+
+export const assertObjectFragmentOutput = (
+  output: QueryOutput
+): QueryObjectFragmentOutput => {
+  if (!isObjectFragmentOutput(output)) {
+    throw Error("not a QueryObjectFragmentOutput");
+  }
+  return output;
+};
+
+const getOutputs = (
+  node: OperationDefinitionNode,
+  schema: GraphQLSchema
+): QueryRootOutput => {
+  let rootOutput: QueryRootOutput | undefined = undefined;
+
+  type NodeInfo = {
+    fields: QueryOutputField[];
+    fragments: QueryCompositeFragmentOutput[];
+  };
+
+  const nodeInfoStack: NodeInfo[] = [];
+
+  const getNodeInfo = () => nodeInfoStack[nodeInfoStack.length - 1];
+
+  const addFieldToParent = (
+    node: OutputNode,
+    name: string,
+    type: GraphQLType,
+    output: QueryNonFragmentOutput
+  ) => {
+    const parentNodeInfo = getNodeInfo();
+
+    if (!parentNodeInfo) {
+      throw Error(`can not add output field to parent`);
+    }
+
+    const nullableType = getNullableType(type);
+    const hasDirective = node.directives ? node.directives.length > 0 : false;
+
+    const field: QueryOutputField = {
+      name,
+      value: output,
+      valueWrapper:
+        type instanceof GraphQLNonNull
+          ? hasDirective ? "non-null-optional" : false
+          : hasDirective ? "optional" : "nullable",
+      valueListItemWrapper:
+        nullableType instanceof GraphQLList
+          ? nullableType.ofType instanceof GraphQLNonNull
+            ? "non-null"
+            : "nullable"
+          : false
+    };
+
+    parentNodeInfo.fields.push(field);
+  };
+
+  const addFragmentToParent = (output: QueryCompositeFragmentOutput) => {
+    const parentNodeInfo = getNodeInfo();
+
+    if (!parentNodeInfo) {
+      throw Error(`can not add output fragment to parent`);
+    }
+
+    parentNodeInfo.fragments.push(output);
+  };
+
+  const typeInfo = new TypeInfo(schema);
+
+  const pushNodeInfo = () => {
+    nodeInfoStack.push({
+      fields: [],
+      fragments: []
+    });
+  };
+
+  const popNodeInfo = (): NodeInfo => assertOk(nodeInfoStack.pop());
+
+  const visitor = {
+    enter: {
+      OperationDefinition() {
+        pushNodeInfo();
+      },
+      Field() {
+        pushNodeInfo();
+      },
+      InlineFragment() {
+        pushNodeInfo();
+      }
     },
-
-    enter(node, key, parent) {
-      debug.addLogIndent(1);
-      debug.log(
-        `enter ${node.kind} ${node.value} ${typeInfo.getType() ||
-          typeInfo.getInputType()}`
-      );
-
-      if (node.kind === Kind.VARIABLE_DEFINITION) {
-        if (intel.inputs.length === 0) {
-          intel.inputs.push({
-            id: 0,
-            type: typeInfo.getInputType(),
-            name: "",
-            depth: 0,
-            order: 0,
-            children: []
+    leave: {
+      OperationDefinition() {
+        const nodeInfo: NodeInfo = popNodeInfo();
+        const name: string = "";
+        const type: GraphQLCompositeType = assertCompositeType(
+          typeInfo.getType()
+        );
+        rootOutput = getCompositeOutput(
+          name,
+          type,
+          nodeInfo.fields,
+          nodeInfo.fragments,
+          schema
+        );
+      },
+      Field(node) {
+        const nodeInfo: NodeInfo = popNodeInfo();
+        const name: string = node.alias ? node.alias.value : node.name.value;
+        const type: GraphQLType = typeInfo.getType();
+        const output: QueryNonFragmentOutput = getOutput(
+          name,
+          type,
+          nodeInfo.fields,
+          nodeInfo.fragments,
+          schema
+        );
+        addFieldToParent(node, name, type, output);
+      },
+      InlineFragment() {
+        const nodeInfo: NodeInfo = popNodeInfo();
+        const type: GraphQLCompositeType = assertCompositeType(
+          typeInfo.getType()
+        );
+        const typeName: string = type.name;
+        const result = getFieldsOrFragments(
+          schema,
+          type,
+          nodeInfo.fields,
+          nodeInfo.fragments
+        );
+        if ("fields" in result) {
+          addFragmentToParent({
+            kind: "object-fragment",
+            type,
+            typeName,
+            fields: result.fields
+          });
+        } else {
+          addFragmentToParent({
+            kind: "fragmented-fragment",
+            type,
+            typeName,
+            fragments: result.fragments
           });
         }
-
-        addInput({
-          type: typeInfo.getInputType(),
-          name: node.variable.name.value,
-          parent: intel.inputs[0]
-        });
       }
-
-      if (isOutputItemNode(node)) {
-        const type = typeInfo.getType();
-
-        const id = intel.outputs.length;
-        const item = {
-          id,
-          type,
-          name:
-            (node.alias && node.alias.value) ||
-            (node.name && node.name.value) ||
-            "",
-          depth: parentStack.length,
-          order: id,
-          children: [],
-          isValid: true,
-          withDirective: node.directives && node.directives.length > 0,
-          isFragment: isFragmentNode(node),
-          isFragmented: false,
-          isFragmentedOn: false,
-          hasAllPosibleFragmentTypes: false
-        };
-
-        const parent = getParentItem();
-        if (parent) {
-          parent.children.push(item.id);
-
-          if (item.isFragment) {
-            parent.isFragmented = true;
-          }
-        }
-
-        intel.outputs.push(item);
-        parentStack.push(item);
-      }
-    },
-
-    leave(node) {
-      debug.log(`leave ${node.kind}`);
-
-      if (isOutputItemNode(node)) {
-        const item = parentStack.pop();
-
-        if (item && item.isFragmented) {
-          const namedType = getNamedType(item.type);
-          const possibleFragmentTypes = isAbstractType(namedType)
-            ? schema.getPossibleTypes(namedType)
-            : [];
-          const children = item.children.map(findByIdIn(intel.outputs));
-          const fragments = children.filter(item => item.isFragment);
-          let nonFragments = children.filter(item => !item.isFragment);
-          const typenames = children.filter(item => item.name === "__typename");
-          const includedFragmentTypes = fragments
-            .map(item => getNamedType(item.type))
-            .reduce(getAllIncludedTypes(schema), []);
-          const hasAllPosibleTypes = possibleFragmentTypes.every(type =>
-            includedFragmentTypes.includes(type)
-          );
-
-          if (typenames.length > 0) {
-            typenames.forEach(item => (item.depth = item.depth + 1));
-            const typenameIds = typenames.map(getId);
-            item.children = item.children.filter(
-              id => !typenameIds.includes(id)
-            );
-            fragments.forEach(item => item.children.push(...typenameIds));
-            nonFragments = nonFragments.filter(
-              item => !typenameIds.includes(item.id)
-            );
-          }
-
-          if (hasAllPosibleTypes && fragments.length <= 1) {
-            const fragment = fragments[0];
-            if (fragment) {
-              fragment.isValid = false;
-            }
-            const fragmentChildren = fragment ? fragment.children : [];
-            item.children = [...nonFragments.map(getId), ...fragmentChildren];
-            item.isFragmented = false;
-          } else if (nonFragments.length === 0) {
-            item.hasAllPosibleFragmentTypes = hasAllPosibleTypes;
-          } else if (nonFragments.length > 0) {
-            const fragmentedItem: QueryOutputItem = {
-              id: intel.outputs.length,
-              type: new GraphQLNonNull(namedType),
-              name: "on",
-              depth: item.depth + 0.5,
-              order: getMaxOrder(nonFragments) + 0.5,
-              children: fragments.map(getId),
-              isValid: true,
-              withDirective: false,
-              isFragment: false,
-              isFragmented: true,
-              isFragmentedOn: true,
-              hasAllPosibleFragmentTypes: hasAllPosibleTypes
-            };
-
-            intel.outputs.push(fragmentedItem);
-
-            item.isFragmented = false;
-            item.children = nonFragments.map(getId);
-            item.children.push(fragmentedItem.id);
-          }
-        }
-      }
-
-      debug.addLogIndent(-1);
     }
   };
+
+  visit(node, visitWithTypeInfo(typeInfo, visitor));
+
+  return assertOk<QueryRootOutput>(rootOutput, "no root output");
+};
+
+const getOutput = (
+  name: String,
+  type: GraphQLType,
+  fields: QueryOutputField[],
+  fragments: QueryCompositeFragmentOutput[],
+  schema: GraphQLSchema
+): QueryNonFragmentOutput => {
+  const namedType = getNamedType(type);
+  const typeName = namedType.name;
+
+  if (isCompositeType(namedType)) {
+    return getCompositeOutput(name, namedType, fields, fragments, schema);
+  } else if (namedType instanceof GraphQLScalarType) {
+    if (name === "__typename") {
+      return {
+        typeName,
+        kind: "typename"
+      };
+    } else {
+      return {
+        typeName,
+        kind: "scalar"
+      };
+    }
+  } else if (namedType instanceof GraphQLEnumType) {
+    return {
+      typeName,
+      kind: "enum"
+    };
+  }
+
+  throw Error(`unhandled query output of type ${type}`);
+};
+
+const getCompositeOutput = (
+  name: String,
+  type: GraphQLCompositeType,
+  fields: QueryOutputField[],
+  fragments: QueryCompositeFragmentOutput[],
+  schema: GraphQLSchema
+): QueryObjectOutput | QueryFragmentedOutput => {
+  const typeName = type.name;
+  const result = getFieldsOrFragments(schema, type, fields, fragments);
+
+  if ("fields" in result) {
+    return {
+      kind: "object",
+      typeName,
+      fields: result.fields
+    };
+  } else {
+    return {
+      kind: "fragmented",
+      typeName,
+      fragments: result.fragments
+    };
+  }
+};
+
+const getFragment = (
+  type: GraphQLCompositeType,
+  fields: QueryOutputField[],
+  fragments: QueryCompositeFragmentOutput[],
+  schema: GraphQLSchema
+): QueryCompositeFragmentOutput => {
+  const namedType = getNamedType(type);
+  const typeName = namedType.name;
+  const result = getFieldsOrFragments(schema, type, fields, fragments);
+  if ("fields" in result) {
+    return {
+      kind: "object-fragment",
+      type,
+      typeName,
+      fields: result.fields
+    };
+  } else {
+    return {
+      kind: "fragmented-fragment",
+      type,
+      typeName,
+      fragments: result.fragments
+    };
+  }
+};
+
+const getFieldsOrFragments = (
+  schema: GraphQLSchema,
+  type: GraphQLCompositeType,
+  fields: QueryOutputField[],
+  inFragments: QueryCompositeFragmentOutput[]
+): { fields: QueryOutputField[] } | { fragments: QueryFragmentOutput[] } => {
+  const typeName = type.name;
+
+  const typenameFields: QueryOutputField[] = fields.filter(field =>
+    isTypenameOutput(field.value)
+  );
+
+  if (typenameFields.length > 0 && inFragments.length > 0) {
+    fields = fields.filter(field => !typenameFields.includes(field));
+    inFragments.forEach(fragment => {
+      if (fragment.kind === "object-fragment") {
+        fragment.fields.push(...typenameFields);
+      }
+    });
+  }
+
+  const possibleFragmentTypes: GraphQLObjectType[] = isAbstractType(type)
+    ? schema.getPossibleTypes(type)
+    : [];
+
+  const includedFragmentTypes: GraphQLNamedType[] = inFragments
+    .map(fragment => fragment.type)
+    .reduce(getAllIncludedTypes(schema), []);
+
+  const hasAllPossibleTypes: boolean = possibleFragmentTypes.every(type =>
+    includedFragmentTypes.includes(type)
+  );
+
+  if (inFragments.length === 1 && hasAllPossibleTypes) {
+    const fragment = inFragments[0];
+    if (fragment.kind === "object-fragment") {
+      fields = [...fields, ...fragment.fields];
+      inFragments = [];
+    }
+  }
+
+  let fragments: QueryFragmentOutput[] = inFragments;
+
+  if (fields.length === 0 && fragments.length > 0) {
+    if (!hasAllPossibleTypes) {
+      fragments.push({
+        kind: "empty-fragment",
+        typeName
+      });
+    }
+  }
+
+  if (fields.length > 0 && fragments.length > 0) {
+    if (!hasAllPossibleTypes) {
+      fragments.push({
+        kind: "other-fragment",
+        typeName
+      });
+    }
+
+    const onField: QueryOutputField = {
+      name: "on",
+      value: {
+        kind: "fragmented-on",
+        typeName: `On${typeName}`,
+        fragments
+      },
+      valueWrapper: false,
+      valueListItemWrapper: false
+    };
+
+    fields = [...fields, onField];
+    fragments = [];
+  }
+
+  if (fields.length > 0 && fragments.length === 0) {
+    return { fields };
+  }
+
+  if (fields.length === 0 && fragments.length > 0) {
+    return { fragments };
+  }
+
+  throw Error("no fields or fragments");
 };
 
 const getAllIncludedTypes = (schema: GraphQLSchema) => {

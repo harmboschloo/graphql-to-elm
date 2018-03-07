@@ -1,56 +1,48 @@
 module Recursive
     exposing
-        ( Data
+        ( Query
         , Comment4
         , Comment3
         , Comment2
         , Comment
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  comments {
-    message
-    responses {
-      message
-      responses {
-        message
-        responses {
-          message
-        }
-      }
-    }
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+comments {
+message
+responses {
+message
+responses {
+message
+responses {
+message
+}
+}
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { comments : List Comment4
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "comments" (Json.Decode.list comment4Decoder))
 
 

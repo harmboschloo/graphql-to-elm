@@ -1,40 +1,29 @@
 module ListOfScalars
     exposing
-        ( Data
-        , post
+        ( Query
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  pets_pet
-
-  pets_petOrNull
-
-  petsOrNull_pet
-
-  petsOrNull_petOrNull
+    GraphqlToElm.Graphql.Operation.query
+        """{
+pets_pet
+pets_petOrNull
+petsOrNull_pet
+petsOrNull_petOrNull
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { pets_pet : List String
     , pets_petOrNull : List (Maybe.Maybe String)
     , petsOrNull_pet : Maybe.Maybe (List String)
@@ -42,9 +31,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map4 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map4 Query
         (Json.Decode.field "pets_pet" (Json.Decode.list Json.Decode.string))
         (Json.Decode.field "pets_petOrNull" (Json.Decode.list (Json.Decode.nullable Json.Decode.string)))
         (Json.Decode.field "petsOrNull_pet" (Json.Decode.nullable (Json.Decode.list Json.Decode.string)))

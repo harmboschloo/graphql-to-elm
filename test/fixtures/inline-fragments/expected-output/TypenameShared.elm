@@ -1,57 +1,49 @@
 module TypenameShared
     exposing
-        ( Data
+        ( Query
         , Animal(..)
         , Dog
         , Dolphin
         , Bird
-        , post
-        , query
-        , decoder
+        , typenameShared
         )
 
-import GraphqlToElm.DecodeHelpers
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Helpers.Decode
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query TypenameShared {
-  animal {
-    __typename
-    ... on Dog {
-      color
-    }
-    ... on Dolphin {
-      color
-    }
-    ... on Bird {
-      color
-    }
-  }
+typenameShared : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+typenameShared =
+    GraphqlToElm.Graphql.Operation.query
+        """query TypenameShared {
+animal {
+__typename
+... on Dog {
+color
+}
+... on Dolphin {
+color
+}
+... on Bird {
+color
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { animal : Animal
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "animal" animalDecoder)
 
 
@@ -80,7 +72,7 @@ dogDecoder : Json.Decode.Decoder Dog
 dogDecoder =
     Json.Decode.map2 Dog
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphqlToElm.DecodeHelpers.constantDecoder "Dog" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphqlToElm.Helpers.Decode.constant "Dog" Json.Decode.string))
 
 
 type alias Dolphin =
@@ -93,7 +85,7 @@ dolphinDecoder : Json.Decode.Decoder Dolphin
 dolphinDecoder =
     Json.Decode.map2 Dolphin
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphqlToElm.DecodeHelpers.constantDecoder "Dolphin" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphqlToElm.Helpers.Decode.constant "Dolphin" Json.Decode.string))
 
 
 type alias Bird =
@@ -106,4 +98,4 @@ birdDecoder : Json.Decode.Decoder Bird
 birdDecoder =
     Json.Decode.map2 Bird
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphqlToElm.DecodeHelpers.constantDecoder "Bird" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphqlToElm.Helpers.Decode.constant "Bird" Json.Decode.string))

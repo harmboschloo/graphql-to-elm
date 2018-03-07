@@ -1,50 +1,42 @@
 module SameTypeSameFieldsNullable
     exposing
-        ( Data
+        ( Query
         , Person2
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  you {
-    email
-    age
-  }
-  youOrNull {
-    age
-    email
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+you {
+email
+age
+}
+youOrNull {
+age
+email
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { you : Person2
     , youOrNull : Maybe.Maybe Person2
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map2 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map2 Query
         (Json.Decode.field "you" person2Decoder)
         (Json.Decode.field "youOrNull" (Json.Decode.nullable person2Decoder))
 

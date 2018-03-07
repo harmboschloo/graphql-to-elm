@@ -1,49 +1,38 @@
 module ListOfObjects
     exposing
-        ( Data
+        ( Query
         , Friend
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  friends_friend {
-    name
-  }
-
-  friends_friendOrNull {
-    name
-  }
-
-  friendsOrNull_friend {
-    name
-  }
-
-  friendsOrNull_friendOrNull {
-    name
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+friends_friend {
+name
+}
+friends_friendOrNull {
+name
+}
+friendsOrNull_friend {
+name
+}
+friendsOrNull_friendOrNull {
+name
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { friends_friend : List Friend
     , friends_friendOrNull : List (Maybe.Maybe Friend)
     , friendsOrNull_friend : Maybe.Maybe (List Friend)
@@ -51,9 +40,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map4 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map4 Query
         (Json.Decode.field "friends_friend" (Json.Decode.list friendDecoder))
         (Json.Decode.field "friends_friendOrNull" (Json.Decode.list (Json.Decode.nullable friendDecoder)))
         (Json.Decode.field "friendsOrNull_friend" (Json.Decode.nullable (Json.Decode.list friendDecoder)))

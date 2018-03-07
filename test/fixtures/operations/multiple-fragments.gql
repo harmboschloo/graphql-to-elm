@@ -1,0 +1,36 @@
+query Query1($name: String) {
+  operation(name: $name) {
+    ...fields1
+  }
+}
+
+query Query2 {
+  operation {
+    ...fields2
+  }
+  current {
+    ...fields2
+  }
+  fragment {
+    ...fields3
+  }
+}
+
+mutation Mutation {
+  fragment {
+    ...fields3
+  }
+}
+
+fragment fields1 on Operation {
+  name
+  fragmentNames
+}
+
+fragment fields2 on Operation {
+  query
+}
+
+fragment fields3 on Fragment {
+  name
+}

@@ -11,37 +11,6 @@ export const writeFile = (dest: string, content: string): void => {
   writeFileSync(dest, content, "utf8");
 };
 
-export const cachedValue = (
-  key: string,
-  cache: { [key: string]: string },
-  newValue: () => string
-): string => {
-  if (cache[key]) {
-    return cache[key];
-  } else {
-    const value = newValue();
-    cache[key] = value;
-    return value;
-  }
-};
-
-export const findByIdIn = <T extends { id: number }>(items: T[]) => (
-  id: number
-): T => {
-  const item = items.find(item => item.id === id);
-  if (!item) {
-    throw new Error(`Could not find item with id: ${id}`);
-  }
-  return item;
-};
-
-export const getId = <T extends { id: number }>(a: T) => a.id;
-
-export const getOrder = <T extends { order: number }>(a: T) => a.order;
-
-export const getMaxOrder = <T extends { order: number }>(a: T[]) =>
-  a.map(getOrder).reduce((a, b) => Math.max(a, b));
-
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;
 
@@ -51,77 +20,40 @@ export const firstToLowerCase = (string: string): string =>
 export const sortString = (a: string, b: string): number =>
   a < b ? -1 : b < a ? 1 : 0;
 
-export const extractModule = (expression: string): string =>
-  expression.substr(0, expression.lastIndexOf("."));
-
 export const withParentheses = (x: string): string => `(${x})`;
 
-export const validModuleName = (name: string): string => validNameUpper(name);
+export const removeIndents = (string: string): string =>
+  string.replace(/^[\s]+/gm, "");
 
-export const validTypeName = (name: string): string => validNameUpper(name);
+export const assertOk = <T>(
+  a: T | undefined,
+  errorMessage: string = "not ok"
+): T => {
+  if (typeof a === "undefined") {
+    throw Error(errorMessage);
+  }
+  return a;
+};
 
-export const validTypeConstructorName = (name: string): string =>
-  validNameUpper(name);
+export const withDefault = <T>(defaultValue: T, value: T | undefined): T =>
+  typeof value !== "undefined" ? value : defaultValue;
 
-export const validVariableName = (name: string): string => validNameLower(name);
-
-export const validFieldName = (name: string): string => validNameLower(name);
-
-export const validNameLower = (name: string): string =>
-  validWord(firstToLowerCase(validNameUpper(name)));
-
-export const validNameUpper = (name: string): string =>
-  name
-    .split(/[^A-Za-z0-9_]/g)
-    .filter(x => !!x)
-    .map(firstToUpperCase)
-    .join("")
-    .replace(/^_+/, "");
-
-export const validWord = keyword =>
-  elmKeywords.includes(keyword) ? `${keyword}_` : keyword;
-
-export const nextValidName = (name: string, usedNames: string[]): string => {
-  name = validWord(name);
-
-  if (!usedNames.includes(name)) {
-    usedNames.push(name);
-    return name;
-  } else {
-    let count = 2;
-    while (usedNames.includes(name + count)) {
-      count++;
-    }
-    const name2 = name + count;
-    usedNames.push(name2);
-    return name2;
+export const addOnce = <T>(value: T, values: T[]) => {
+  if (!values.includes(value)) {
+    values.push(value);
   }
 };
 
-const elmKeywords = [
-  "as",
-  "case",
-  "else",
-  "exposing",
-  "if",
-  "import",
-  "in",
-  "let",
-  "module",
-  "of",
-  "port",
-  "then",
-  "type",
-  "where"
-  // "alias",
-  // "command",
-  // "effect",
-  // "false",
-  // "infix",
-  // "left",
-  // "non",
-  // "null",
-  // "right",
-  // "subscription",
-  // "true",
-];
+export const cachedValue = <T>(
+  key: string,
+  cache: { [key: string]: T },
+  create: () => T
+): T => {
+  if (cache[key]) {
+    return cache[key];
+  } else {
+    const value = create();
+    cache[key] = value;
+    return value;
+  }
+};

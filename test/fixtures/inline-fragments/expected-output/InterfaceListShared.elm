@@ -1,57 +1,49 @@
 module InterfaceListShared
     exposing
-        ( Data
+        ( Query
         , Animal
         , OnAnimal(..)
         , Dog
         , Dolphin
         , Bird
-        , post
-        , query
-        , decoder
+        , interfaceListShared
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query InterfaceListShared {
-  animals {
-    color
-    ... on Dog {
-      hairy
-    }
-    ... on Dolphin {
-      fins
-    }
-    ... on Bird {
-      canFly
-    }
-  }
+interfaceListShared : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfaceListShared =
+    GraphqlToElm.Graphql.Operation.query
+        """query InterfaceListShared {
+animals {
+color
+... on Dog {
+hairy
+}
+... on Dolphin {
+fins
+}
+... on Bird {
+canFly
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { animals : List Animal
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "animals" (Json.Decode.list animalDecoder))
 
 

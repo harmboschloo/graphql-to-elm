@@ -1,79 +1,80 @@
 module Query
     exposing
-        ( Variables
-        , Data
+        ( FragmentsVariables
+        , Query
         , User
         , Flip(..)
         , Heads
         , Tails
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        , fragments
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query Fragments($id: String!) {
-  user1: user {
-    ...fields
-  }
-  user2: user {
-    ...fields
-  }
-  user3: userOrNull {
-    ...fields
-  }
-  user4: userById(id: $id) {
-    ...fields
-  }
-  flip {
-    ...heads
-    ... on Tails {
-      length
-    }
-  }
+fragments : FragmentsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+fragments variables =
+    GraphqlToElm.Graphql.Operation.query
+        ("""query Fragments($id: String!) {
+user1: user {
+...fields
 }
-
-fragment fields on User {
-  id
-  name
-  email
+user2: user {
+...fields
 }
+user3: userOrNull {
+...fields
+}
+user4: userById(id: $id) {
+...fields
+}
+flip {
+...heads
+... on Tails {
+length
+}
+}
+}"""
+            ++ fields
+            ++ heads
+        )
+        (Maybe.Just <| encodeFragmentsVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
-fragment heads on Heads {
-  name
+
+fields : String
+fields =
+    """fragment fields on User {
+id
+name
+email
 }"""
 
 
-type alias Variables =
+heads : String
+heads =
+    """fragment heads on Heads {
+name
+}"""
+
+
+type alias FragmentsVariables =
     { id : String
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
+encodeFragmentsVariables : FragmentsVariables -> Json.Encode.Value
+encodeFragmentsVariables inputs =
     Json.Encode.object
         [ ( "id", Json.Encode.string inputs.id )
         ]
 
 
-type alias Data =
+type alias Query =
     { user1 : User
     , user2 : User
     , user3 : Maybe.Maybe User
@@ -82,9 +83,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map5 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map5 Query
         (Json.Decode.field "user1" userDecoder)
         (Json.Decode.field "user2" userDecoder)
         (Json.Decode.field "user3" (Json.Decode.nullable userDecoder))

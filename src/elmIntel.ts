@@ -1,17 +1,5 @@
 import * as path from "path";
 import {
-  GraphQLNullableType,
-  GraphQLNamedType,
-  isCompositeType,
-  GraphQLInputObjectType,
-  GraphQLList,
-  GraphQLScalarType,
-  GraphQLEnumType,
-  GraphQLNonNull,
-  getNamedType,
-  getNullableType
-} from "graphql";
-import {
   FinalOptions,
   TypeEncoders,
   TypeEncoder,
@@ -20,31 +8,42 @@ import {
 } from "./options";
 import {
   cachedValue,
-  findByIdIn,
-  getMaxOrder,
-  nextValidName,
-  validNameUpper,
-  validModuleName,
-  validTypeName,
-  validTypeConstructorName,
-  validVariableName,
-  validFieldName
+  firstToUpperCase,
+  firstToLowerCase,
+  assertOk
 } from "./utils";
 import {
   QueryIntel,
-  QueryItem,
-  QueryInputItem,
-  QueryOutputItem
+  QueryOperation,
+  QueryFragment,
+  QueryInput,
+  QueryInputField,
+  QueryOutputField,
+  QueryObjectInput,
+  QueryObjectOutput,
+  QueryObjectFragmentOutput,
+  QueryNonFragmentOutput,
+  QueryCompositeNonFragmentOutput,
+  QueryFragmentedOutput,
+  QueryFragmentedOnOutput,
+  QueryFragmentedFragmentOutput,
+  QueryFragmentOutput
 } from "./queryIntel";
-import { wrappedType } from "./generateElm";
-import {
-  ElmIntel,
-  ElmItem,
-  ElmEncodeItem,
-  ElmDecodeItem
-} from "./elmIntelTypes";
 
-export * from "./elmIntelTypes";
+export interface ElmIntel {
+  dest: string;
+  module: string;
+  operations: ElmOperation[];
+  fragments: ElmFragment[];
+}
+
+export interface ElmScope {
+  names: string[];
+  typesBySignature: { [signature: string]: string };
+  fragmentsByName: { [name: string]: string };
+  encodersByType: { [type: string]: string };
+  decodersByType: { [type: string]: string };
+}
 
 export const queryToElmIntel = (
   queryIntel: QueryIntel,
@@ -70,459 +69,700 @@ export const queryToElmIntel = (
     module = moduleParts.join(".");
   }
 
+  const scope: ElmScope = {
+    names: getReservedNames(),
+    typesBySignature: {},
+    fragmentsByName: {},
+    encodersByType: {},
+    decodersByType: {}
+  };
+
+  const operations = queryIntel.operations.map(operation =>
+    getOperation(operation, scope, options)
+  );
+
+  const fragments = getFragments(queryIntel.fragments, scope, options);
+
+  fixFragmentNames(operations, scope);
+
   const intel: ElmIntel = {
     dest,
     module,
-    query: queryIntel.query,
-    usedNames: getReservedNames(),
-    typesBySignature: {},
-    encode: {
-      items: [],
-      encodersByType: {}
-    },
-    decode: {
-      items: [],
-      decodersByType: {}
-    }
+    operations,
+    fragments
   };
 
-  queryIntel.inputs
-    .sort((a, b) => b.depth - a.depth || a.order - b.order)
-    .forEach(addEncodeItem(intel, options));
-
-  let nextDecodeId = queryIntel.outputs.length;
-  const getNextDecodeId = () => ++nextDecodeId;
-
-  queryIntel.outputs
-    .sort((a, b) => b.depth - a.depth || a.order - b.order)
-    .forEach(addDecodeItem(intel, getNextDecodeId, options));
-
+  // console.log("elm scope", JSON.stringify(scope, null, "  "));
   // console.log("elm intel", JSON.stringify(intel, null, "  "));
 
   return intel;
 };
 
-const addEncodeItem = (intel: ElmIntel, options: FinalOptions) => (
-  queryItem: QueryInputItem
-): void => {
-  const info = getItemInfo(queryItem);
-  const namedType: GraphQLNamedType = getNamedType(queryItem.type);
+const getReservedNames = () => [...reservedNames];
 
-  info.isOptional = info.isNullable;
-  info.isListOfOptionals = info.isListOfNullables;
+const reservedNames = ["Int", "Float", "Bool", "String", "List"];
 
-  let item: ElmEncodeItem;
+//
+// OPERATIONS
+//
 
-  if (info.id === 0) {
-    setRecordFieldNames(info.children, intel.encode.items);
-    item = {
-      ...info,
-      isOptional: false,
-      isNullable: false,
-      isList: false,
-      kind: "record",
-      type: "Variables",
-      encoder: "encodeVariables"
-    };
-  } else if (namedType instanceof GraphQLInputObjectType) {
-    setRecordFieldNames(info.children, intel.encode.items);
-    const type = newRecordType(info, intel.encode.items, intel);
-    item = {
-      ...info,
-      kind: "record",
-      type,
-      encoder: newEncoderName(type, intel)
-    };
-  } else if (namedType instanceof GraphQLScalarType) {
-    const scalarEncoder: TypeEncoder | undefined =
-      options.scalarEncoders[namedType.name] ||
-      defaultScalarEncoders[namedType.name];
+export type ElmOperation = ElmQueryOperation | ElmNamedOperation;
 
-    if (!scalarEncoder) {
-      `No encoder defined for scalar type: ${
-        queryItem.type
-      }. Please add one to options.scalarEncoders`;
-    }
+export interface ElmQueryOperation {
+  kind: "query";
+  name: string;
+  query: string;
+  fragments: string[];
+  variables: ElmRecordEncoder | undefined;
+  data: ElmDecoder;
+  errors: TypeDecoder;
+}
 
-    item = {
-      ...info,
-      kind: "scalar",
-      type: scalarEncoder.type,
-      encoder: scalarEncoder.encoder
-    };
-  } else if (namedType instanceof GraphQLEnumType) {
-    const typeName: string = namedType.name;
-    const enumEncoder: TypeEncoder | undefined = options.enumEncoders[typeName];
+export interface ElmNamedOperation {
+  kind: "named";
+  name: string;
+  gqlName: string;
+  variables: ElmRecordEncoder | undefined;
+  data: ElmDecoder;
+  errors: TypeDecoder;
+}
 
-    if (!enumEncoder) {
-      throw new Error(
-        `No encoder defined for enum type: ${
-          queryItem.type
-        }. Please add one to options.enumEncoders`
-      );
-    }
-
-    item = {
-      ...info,
-      kind: "enum",
-      type: enumEncoder.type,
-      encoder: enumEncoder.encoder
-    };
-  } else {
-    throw new Error(`Unhandled query input type: ${queryItem.type}`);
-  }
-
-  intel.encode.items.push(item);
-};
-
-const addDecodeItem = (
-  intel: ElmIntel,
-  nextId: () => number,
+const getOperation = (
+  queryOperation: QueryOperation,
+  scope: ElmScope,
   options: FinalOptions
-) => (queryItem: QueryOutputItem): void => {
-  if (!queryItem.isValid) {
-    return;
-  }
+): ElmOperation => {
+  const name = newOperationName(queryOperation.name, scope);
 
-  const info = getItemInfo(queryItem);
-  const namedType: GraphQLNamedType = getNamedType(queryItem.type);
+  const variables: ElmRecordEncoder | undefined = queryOperation.inputs
+    ? getRecordEncoder(queryOperation.inputs, scope, options)
+    : undefined;
 
-  info.isOptional = queryItem.withDirective;
+  const data: ElmDecoder = getCompositeDecoder(
+    queryOperation.outputs,
+    scope,
+    options
+  );
 
-  let item: ElmDecodeItem;
+  const errors: TypeDecoder = options.errorsDecoder;
 
-  if (isCompositeType(namedType)) {
-    if (info.id === 0) {
-      setRecordFieldNames(info.children, intel.decode.items);
-      item = {
-        ...info,
-        kind: "record",
-        type: "Data",
-        decoder: "decoder",
-        unionConstructor: ""
+  switch (options.operationType) {
+    case "query":
+      return {
+        kind: "query",
+        name,
+        query: queryOperation.query,
+        fragments: queryOperation.fragmentNames,
+        variables,
+        data,
+        errors
       };
-      intel.typesBySignature[""] = item.type;
-      intel.decode.decodersByType[item.type] = item.decoder;
-    } else if (queryItem.isFragmented) {
-      checkUnionChildSignatures(queryItem.children, intel.decode.items);
-
-      const prefix = queryItem.isFragmentedOn ? "On" : "";
-      const type = newUnionType(
-        `${prefix}${namedType.name}`,
-        info.children,
-        intel
-      );
-
-      item = {
-        ...info,
-        kind: queryItem.isFragmentedOn ? "union-on" : "union",
-        type,
-        decoder: newDecoderName(type, intel),
-        unionConstructor: ""
+    case "named":
+      return {
+        kind: "named",
+        name,
+        gqlName: queryOperation.name,
+        variables,
+        data,
+        errors
       };
-
-      if (!queryItem.hasAllPosibleFragmentTypes) {
-        const children = item.children.map(findByIdIn(intel.decode.items));
-        const otherItem: ElmDecodeItem = {
-          id: nextId(),
-          name: "",
-          queryTypename: "",
-          fieldName: "",
-          order: getMaxOrder(children) + 0.5,
-          children: [],
-          isOptional: false,
-          isListOfOptionals: false,
-          isNullable: false,
-          isList: false,
-          isListOfNullables: false,
-          kind: "empty",
-          type: `Other${namedType.name}`,
-          decoder: queryItem.isFragmentedOn
-            ? "Json.Decode.succeed"
-            : "GraphqlToElm.DecodeHelpers.emptyObjectDecoder",
-          unionConstructor: ""
-        };
-
-        item.children.push(otherItem.id);
-        intel.decode.items.push(otherItem);
-      }
-
-      setUnionConstructorNames(item, intel);
-    } else {
-      setRecordFieldNames(info.children, intel.decode.items);
-      const type = newRecordType(info, intel.decode.items, intel);
-
-      item = {
-        ...info,
-        kind: "record",
-        type,
-        decoder: newDecoderName(type, intel),
-        unionConstructor: ""
-      };
-    }
-  } else if (namedType instanceof GraphQLScalarType) {
-    const scalarDecoder: TypeDecoder | undefined =
-      options.scalarDecoders[namedType.name] ||
-      defaultScalarDecoders[namedType.name];
-
-    if (!scalarDecoder) {
-      throw new Error(
-        `No decoder defined for scalar type: ${
-          queryItem.type
-        }. Please add one to options.scalarDecoders`
-      );
-    }
-
-    item = {
-      ...info,
-      kind: "scalar",
-      type: scalarDecoder.type,
-      decoder: scalarDecoder.decoder,
-      unionConstructor: ""
-    };
-  } else if (namedType instanceof GraphQLEnumType) {
-    const typeName: string = namedType.name;
-    const enumDecoder: TypeDecoder | undefined = options.enumDecoders[typeName];
-
-    if (!enumDecoder) {
-      throw new Error(
-        `No decoder defined for enum type: ${
-          queryItem.type
-        }. Please add one to options.enumDecoders`
-      );
-    }
-
-    item = {
-      ...info,
-      kind: "enum",
-      type: enumDecoder.type,
-      decoder: enumDecoder.decoder,
-      unionConstructor: ""
-    };
-  } else {
-    throw new Error(`Unhandled query output type: ${queryItem.type}`);
-  }
-
-  intel.decode.items.push(item);
-};
-
-const defaultScalarEncoders: TypeEncoders = {
-  Int: {
-    type: "Int",
-    encoder: "Json.Encode.int"
-  },
-  Float: {
-    type: "Float",
-    encoder: "Json.Encode.float"
-  },
-  Boolean: {
-    type: "Bool",
-    encoder: "Json.Encode.bool"
-  },
-  String: {
-    type: "String",
-    encoder: "Json.Encode.string"
-  },
-  ID: {
-    type: "String",
-    encoder: "Json.Encode.string"
   }
 };
 
-const defaultScalarDecoders: TypeDecoders = {
-  Int: {
-    type: "Int",
-    decoder: "Json.Decode.int"
-  },
-  Float: {
-    type: "Float",
-    decoder: "Json.Decode.float"
-  },
-  Boolean: {
-    type: "Bool",
-    decoder: "Json.Decode.bool"
-  },
-  String: {
-    type: "String",
-    decoder: "Json.Decode.string"
-  },
-  ID: {
-    type: "String",
-    decoder: "Json.Decode.string"
+const newOperationName = (name: string, scope: ElmScope): string =>
+  getUnusedName(`${validVariableName(name)}`, scope.names);
+
+const fixFragmentNames = (
+  operations: ElmOperation[],
+  scope: ElmScope
+): void => {
+  operations.forEach(operation => {
+    if (operation.kind === "query") {
+      operation.fragments = operation.fragments.map(name =>
+        assertOk(scope.fragmentsByName[name])
+      );
+    }
+  });
+};
+
+//
+// FRAGMENTS
+//
+
+export interface ElmFragment {
+  name: String;
+  query: string;
+}
+
+const getFragments = (
+  fragments: QueryFragment[],
+  scope: ElmScope,
+  options: FinalOptions
+): ElmFragment[] => {
+  switch (options.operationType) {
+    case "query":
+      return fragments.map(fragment => getFragment(fragment, scope));
+    case "named":
+      return [];
   }
 };
 
-const getItemInfo = (queryItem: QueryItem) => {
-  const nullableType: GraphQLNullableType = getNullableType(queryItem.type);
-
+const getFragment = (
+  queryFragment: QueryFragment,
+  scope: ElmScope
+): ElmFragment => {
+  const name = getUnusedName(
+    validVariableName(queryFragment.name),
+    scope.names
+  );
+  scope.fragmentsByName[queryFragment.name] = name;
   return {
-    id: queryItem.id,
-    name: queryItem.name,
-    queryTypename: queryItem.type ? getNamedType(queryItem.type).name : "",
-    fieldName: "",
-    order: queryItem.order,
-    children: queryItem.children.slice(),
-    isOptional: false,
-    isListOfOptionals: false,
-    isNullable: !(queryItem.type instanceof GraphQLNonNull),
-    isList: nullableType instanceof GraphQLList,
-    isListOfNullables:
-      nullableType instanceof GraphQLList &&
-      !(nullableType.ofType instanceof GraphQLNonNull)
+    name,
+    query: queryFragment.query
   };
 };
 
-const reservedNames = [
-  "Int",
-  "Float",
-  "Bool",
-  "String",
-  "List",
-  "Variables",
-  "Data",
-  "query",
-  "encodeVariables",
-  "decoder"
-];
+//
+// ENCODERS
+//
 
-const getReservedNames = () => [...reservedNames];
+export type ElmEncoder = ElmRecordEncoder | ElmValueEncoder;
 
-const newName = (name: string, intel: ElmIntel): string =>
-  nextValidName(name, intel.usedNames);
+export interface ElmRecordEncoder {
+  kind: "record-encoder";
+  type: string;
+  encoder: string;
+  fields: ElmEncoderField[];
+}
 
-const setRecordFieldNames = (fieldItems: number[], items: ElmItem[]) => {
-  const usedFieldNames = [];
-  fieldItems.map(findByIdIn(items)).forEach(item => {
-    if (!item.name) {
-      throw new Error(`Elm intel field item ${item.type} does not have a name`);
+export interface ElmEncoderField {
+  jsonName: string;
+  name: string;
+  value: ElmEncoder;
+  valueWrapper: false | "optional";
+  valueListItemWrapper: false | "non-null" | "optional";
+}
+
+export interface ElmValueEncoder {
+  kind: "value-encoder";
+  type: string;
+  encoder: string;
+}
+
+const getEncoder = (
+  input: QueryInput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmEncoder => {
+  switch (input.kind) {
+    case "object":
+      return getRecordEncoder(input, scope, options);
+
+    case "scalar": {
+      const scalarEncoder: TypeEncoder = assertOk(
+        options.scalarEncoders[input.typeName],
+        `No encoder defined for scalar type: ${
+          input.typeName
+        }. Please add one to options.scalarEncoders`
+      );
+
+      return {
+        ...scalarEncoder,
+        kind: "value-encoder"
+      };
     }
-    item.fieldName = nextValidName(validFieldName(item.name), usedFieldNames);
-  });
+
+    case "enum": {
+      const enumEncoder: TypeEncoder = assertOk(
+        options.enumEncoders[input.typeName],
+        `No encoder defined for enum type: ${
+          input.typeName
+        }. Please add one to options.enumEncoders`
+      );
+
+      return {
+        ...enumEncoder,
+        kind: "value-encoder"
+      };
+    }
+  }
 };
 
-const newRecordType = (
-  item: { queryTypename: string; children: number[] },
-  items: ElmItem[],
-  intel: ElmIntel
-): string => {
-  let signature = `${item.queryTypename}: ${getRecordFieldsSignature(
-    item,
-    items
-  )}`;
-
-  return cachedValue(signature, intel.typesBySignature, () =>
-    newName(validTypeName(item.queryTypename), intel)
-  );
-};
-
-const getRecordFieldsSignature = (
-  item: { queryTypename: string; children: number[] },
-  items: ElmItem[]
-): string =>
-  item.children
-    .map(findByIdIn(items))
-    .map(child => {
-      if (!child.fieldName) {
-        throw new Error(
-          `Elm intel field item ${child.type} does not have a fieldName`
-        );
-      }
-      return child.name === "__typename"
-        ? `${child.fieldName} : ${wrappedType(child)} ${item.queryTypename}`
-        : `${child.fieldName} : ${wrappedType(child)}`;
+const getRecordEncoder = (
+  input: QueryObjectInput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmRecordEncoder => {
+  const usedFieldNames = [];
+  const fields: ElmEncoderField[] = input.fields.map(
+    (field: QueryInputField): ElmEncoderField => ({
+      jsonName: field.name,
+      name: getUnusedName(validFieldName(field.name), usedFieldNames),
+      value: getEncoder(field.value, scope, options),
+      valueWrapper: field.valueWrapper,
+      valueListItemWrapper: field.valueListItemWrapper
     })
-    .sort()
-    .join(", ");
+  );
+  const type = getRecordType(input, fields, scope);
 
-const getRecordFieldsJsonSignature = (
-  item: ElmItem,
-  items: ElmItem[]
-): string =>
-  item.children
-    .map(findByIdIn(items))
-    .map(child => getRecordFieldJsonSignature(child, item, items))
-    .sort()
-    .join(", ");
-
-const getRecordFieldJsonSignature = (
-  item: ElmItem,
-  parent: ElmItem,
-  items: ElmItem[]
-): string => {
-  if (!item.name) {
-    throw new Error(`Elm intel field item ${item.type} does not have a name`);
-  }
-
-  let signature;
-
-  if (item.kind === "record") {
-    signature = `{${getRecordFieldsJsonSignature(item, items)}}`;
-  } else if (item.name === "__typename") {
-    signature = parent.type;
-  } else {
-    signature = item.type;
-  }
-
-  if (item.isList) {
-    signature = `[${signature}]`;
-  }
-
-  return `${item.name} : ${signature}`;
+  return {
+    kind: "record-encoder",
+    type,
+    encoder: getEncoderName(type, scope),
+    fields
+  };
 };
 
-const checkUnionChildSignatures = (
-  children: number[],
-  items: ElmDecodeItem[]
-) => {
-  const childSignatures = children
-    .map(findByIdIn(items))
-    .map(item => getRecordFieldsJsonSignature(item, items));
+const getEncoderName = (type: string, scope: ElmScope): string =>
+  cachedValue(type, scope.encodersByType, () =>
+    getUnusedName(`encode${validNameUpper(type)}`, scope.names)
+  );
 
-  childSignatures.forEach((signatue, index) => {
-    if (childSignatures.indexOf(signatue) !== index) {
+//
+// Decoders
+//
+
+export type ElmDecoder =
+  | ElmValueDecoder
+  | ElmConstantDecoder
+  | ElmRecordDecoder
+  | ElmUnionDecoder
+  | ElmUnionOnDecoder
+  | ElmEmptyDecoder;
+
+export interface ElmValueDecoder {
+  kind: "value-decoder";
+  type: string;
+  decoder: string;
+}
+
+export interface ElmConstantDecoder {
+  kind: "constant-decoder";
+  type: string;
+  value: string;
+  decoder: string;
+}
+
+export interface ElmRecordDecoder {
+  kind: "record-decoder";
+  type: string;
+  decoder: string;
+  fields: ElmDecoderField[];
+}
+
+export interface ElmDecoderField {
+  jsonName: string;
+  name: string;
+  value: ElmDecoder;
+  valueWrapper: false | "nullable" | "optional" | "non-null-optional";
+  valueListItemWrapper: false | "non-null" | "nullable";
+}
+
+export interface ElmUnionDecoder {
+  kind: "union-decoder";
+  type: string;
+  decoder: string;
+  constructors: ElmUnionConstructor[];
+}
+
+export interface ElmUnionOnDecoder {
+  kind: "union-on-decoder";
+  type: string;
+  decoder: string;
+  constructors: ElmUnionConstructor[];
+}
+
+export interface ElmEmptyDecoder {
+  kind: "empty-decoder";
+  type: string;
+  decoder: string;
+}
+
+export interface ElmUnionConstructor {
+  name: string;
+  decoder: ElmUnionConstructorDecoder;
+}
+
+export type ElmUnionConstructorDecoder =
+  | ElmRecordDecoder
+  | ElmUnionDecoder
+  | ElmEmptyDecoder;
+
+const getCompositeDecoder = (
+  output: QueryCompositeNonFragmentOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmDecoder => {
+  switch (output.kind) {
+    case "object":
+      return getRecordDecoder(output, scope, options);
+
+    case "fragmented":
+      return getUnionDecoder(output, scope, options);
+
+    case "fragmented-on":
+      return getUnionOnDecoder(output, scope, options);
+  }
+};
+
+const getDecoder = (
+  parentOutput: QueryObjectOutput | QueryObjectFragmentOutput,
+  output: QueryNonFragmentOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmDecoder => {
+  switch (output.kind) {
+    case "object":
+    case "fragmented":
+    case "fragmented-on":
+      return getCompositeDecoder(output, scope, options);
+
+    case "typename":
+      return {
+        kind: "constant-decoder",
+        type: output.typeName,
+        value: `"${parentOutput.typeName}"`,
+        decoder: "Json.Decode.string"
+      };
+
+    case "scalar": {
+      const scalarDecoder: TypeDecoder = assertOk(
+        options.scalarDecoders[output.typeName],
+        `No decoder defined for scalar type: ${
+          output.typeName
+        }. Please add one to options.scalarDecoders`
+      );
+
+      return {
+        ...scalarDecoder,
+        kind: "value-decoder"
+      };
+    }
+
+    case "enum": {
+      const enumDecoder: TypeDecoder = assertOk(
+        options.enumDecoders[output.typeName],
+        `No decoder defined for enum type: ${
+          output.typeName
+        }. Please add one to options.enumDecoders`
+      );
+
+      return {
+        ...enumDecoder,
+        kind: "value-decoder"
+      };
+    }
+  }
+};
+
+const getRecordDecoder = (
+  output: QueryObjectOutput | QueryObjectFragmentOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmRecordDecoder => {
+  const usedFieldNames = [];
+  const fields: ElmDecoderField[] = output.fields.map(
+    (field: QueryOutputField): ElmDecoderField => ({
+      jsonName: field.name,
+      name: getUnusedName(validFieldName(field.name), usedFieldNames),
+      value: getDecoder(output, field.value, scope, options),
+      valueWrapper: field.valueWrapper,
+      valueListItemWrapper: field.valueListItemWrapper
+    })
+  );
+  const type = getRecordType(output, fields, scope);
+
+  return {
+    kind: "record-decoder",
+    type,
+    decoder: getDecoderName(type, scope),
+    fields
+  };
+};
+
+const getUnionDecoder = (
+  output: QueryFragmentedOutput | QueryFragmentedFragmentOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmUnionDecoder => {
+  const decoders = getUnionConstructorDecoders(output, scope, options);
+  const type = getUnionType(output, decoders, scope);
+  const constructors = getUnionConstructors(type, decoders, scope);
+
+  return {
+    kind: "union-decoder",
+    type,
+    decoder: getDecoderName(type, scope),
+    constructors
+  };
+};
+
+const getUnionOnDecoder = (
+  output: QueryFragmentedOnOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmUnionOnDecoder => {
+  const decoders = getUnionConstructorDecoders(output, scope, options);
+  const type = getUnionType(output, decoders, scope);
+  const constructors = getUnionConstructors(type, decoders, scope);
+
+  return {
+    kind: "union-on-decoder",
+    type,
+    decoder: getDecoderName(type, scope),
+    constructors
+  };
+};
+
+const getUnionConstructorDecoders = (
+  output:
+    | QueryFragmentedOutput
+    | QueryFragmentedFragmentOutput
+    | QueryFragmentedOnOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmUnionConstructorDecoder[] =>
+  checkUnionConstructorDecodeSignatures(
+    output.fragments.map(fragment =>
+      getUnionConstructorDecoder(fragment, scope, options)
+    )
+  );
+
+const getUnionConstructorDecoder = (
+  fragment: QueryFragmentOutput,
+  scope: ElmScope,
+  options: FinalOptions
+): ElmUnionConstructorDecoder => {
+  switch (fragment.kind) {
+    case "object-fragment":
+      return getRecordDecoder(fragment, scope, options);
+
+    case "fragmented-fragment":
+      return getUnionDecoder(fragment, scope, options);
+
+    case "empty-fragment":
+      return {
+        kind: "empty-decoder",
+        type: `Other${validNameUpper(fragment.typeName)}`,
+        decoder: "GraphqlToElm.Helpers.Decode.emptyObject"
+      };
+
+    case "other-fragment": {
+      return {
+        kind: "empty-decoder",
+        type: `Other${validNameUpper(fragment.typeName)}`,
+        decoder: "Json.Decode.succeed"
+      };
+    }
+  }
+};
+
+const checkUnionConstructorDecodeSignatures = (
+  decoders: ElmUnionConstructorDecoder[]
+): ElmUnionConstructorDecoder[] => {
+  const signatures = decoders.map(getDecodeSignature);
+
+  signatures.forEach((signature, index) => {
+    if (signatures.indexOf(signature) !== index) {
       throw Error(
-        `multiple union children with the same json signature: ${signatue}`
+        `multiple union constructors with the same decode signature: ${signature}`
       );
     }
   });
+
+  return decoders;
 };
 
-const newUnionType = (
-  type: string,
-  children: number[],
-  intel: ElmIntel
-): string => {
-  const childSignatures = children
-    .map(findByIdIn(intel.decode.items))
-    .map(item => item.type);
+const getDecodeSignature = (decoder: ElmDecoder): string => {
+  switch (decoder.kind) {
+    case "constant-decoder":
+      return `${decoder.type} ${decoder.value}`;
 
-  const signature = `${type}: ${childSignatures.join(", ")}`;
+    case "value-decoder":
+      return decoder.type;
 
-  return cachedValue(signature, intel.typesBySignature, () =>
-    newName(validTypeName(type), intel)
+    case "record-decoder":
+      return decoder.fields
+        .map(
+          field =>
+            `${field.jsonName} : ${wrapList(
+              field.valueListItemWrapper,
+              getDecodeSignature(field.value)
+            )}`
+        )
+        .sort()
+        .join(", ");
+
+    case "union-decoder":
+    case "union-on-decoder":
+      return `${decoder.type} : ${decoder.constructors
+        .map(constructor => getDecodeSignature(constructor.decoder))
+        .sort()
+        .join(" | ")}`;
+
+    case "empty-decoder":
+      return "{}";
+  }
+};
+
+const wrapList = (isList: false | string, signature: string): string =>
+  isList !== false ? `[${signature}]` : signature;
+
+const getUnionType = (
+  queryItem: { typeName: string },
+  decoders: ElmUnionConstructorDecoder[],
+  scope: ElmScope
+): string =>
+  cachedValue(
+    getUnionSignature(queryItem, decoders),
+    scope.typesBySignature,
+    () => getUnusedName(validTypeName(queryItem.typeName), scope.names)
   );
-};
 
-const setUnionConstructorNames = (item: ElmDecodeItem, intel: ElmIntel) =>
-  item.children.map(findByIdIn(intel.decode.items)).forEach(child => {
-    child.unionConstructor = newUnionConstructor(item.type, child.type, intel);
-  });
+const getUnionSignature = (
+  queryItem: { typeName: string },
+  decoders: ElmUnionConstructorDecoder[]
+): string =>
+  `${queryItem.typeName}: ${decoders.map(decoder => decoder.type).join(" | ")}`;
 
-const newUnionConstructor = (
+const getUnionConstructors = (
+  unionType: string,
+  decoders: ElmUnionConstructorDecoder[],
+  scope: ElmScope
+): ElmUnionConstructor[] =>
+  decoders.map(decoder => ({
+    name: getUnionConstructorName(unionType, decoder.type, scope),
+    decoder
+  }));
+
+const getUnionConstructorName = (
   unionType: string,
   constructorType: string,
-  intel: ElmIntel
+  scope: ElmScope
 ): string =>
-  cachedValue(`${unionType} On${constructorType}`, intel.typesBySignature, () =>
-    newName(validTypeConstructorName(`On${constructorType}`), intel)
+  cachedValue(`${unionType} On${constructorType}`, scope.typesBySignature, () =>
+    getUnusedName(
+      validTypeConstructorName(`On${validNameUpper(constructorType)}`),
+      scope.names
+    )
   );
 
-const newEncoderName = (type: string, intel: ElmIntel) =>
-  cachedValue(type, intel.encode.encodersByType, () =>
-    newName(`encode${validNameUpper(type)}`, intel)
+const getDecoderName = (type: string, scope: ElmScope): string =>
+  cachedValue(type, scope.decodersByType, () =>
+    getUnusedName(`${validVariableName(type)}Decoder`, scope.names)
   );
 
-const newDecoderName = (type: string, intel: ElmIntel) =>
-  cachedValue(type, intel.decode.decodersByType, () =>
-    newName(validVariableName(`${type}Decoder`), intel)
+//
+// RECORDS
+//
+
+export type ElmRecordField = ElmEncoderField | ElmDecoderField;
+
+const getRecordType = (
+  queryItem: { typeName: string },
+  fields: ElmRecordField[],
+  scope: ElmScope
+): string =>
+  cachedValue(
+    getRecordSignature(queryItem, fields),
+    scope.typesBySignature,
+    () => getUnusedName(validTypeName(queryItem.typeName), scope.names)
   );
+
+const getRecordSignature = (
+  queryItem: { typeName: string },
+  fields: ElmRecordField[]
+): string => `${queryItem.typeName}: ${getRecordFieldsSignature(fields)}`;
+
+const getRecordFieldsSignature = (fields: ElmRecordField[]): string =>
+  fields
+    .map(field => `${field.name} : ${wrappedTypeSignature(field)}`)
+    .sort()
+    .join(", ");
+
+const wrappedTypeSignature = (field: ElmRecordField): string => {
+  let signature = field.value.type;
+
+  if (field.valueListItemWrapper) {
+    signature = `[${field.valueListItemWrapper} ${signature}]`;
+  }
+
+  if (field.valueWrapper) {
+    signature = `${field.valueWrapper} ${signature}`;
+  }
+
+  return signature;
+};
+
+//
+//
+//
+
+const getUnusedName = (name: string, usedNames: string[]): string => {
+  name = validWord(name);
+
+  if (!usedNames.includes(name)) {
+    usedNames.push(name);
+    return name;
+  } else {
+    let count = 2;
+    while (usedNames.includes(name + count)) {
+      count++;
+    }
+    const name2 = name + count;
+    usedNames.push(name2);
+    return name2;
+  }
+};
+
+export const validModuleName = (name: string): string => validNameUpper(name);
+
+const validTypeName = (name: string): string => validNameUpper(name);
+
+const validTypeConstructorName = (name: string): string => validNameUpper(name);
+
+const validVariableName = (name: string): string => validNameLower(name);
+
+const validFieldName = (name: string): string => validNameLower(name);
+
+const validNameLower = (name: string): string =>
+  validWord(firstToLowerCase(validNameUpper(name)));
+
+const validNameUpper = (name: string): string =>
+  name
+    .split(/[^A-Za-z0-9_]/g)
+    .filter(x => !!x)
+    .map(firstToUpperCase)
+    .join("")
+    .replace(/^_+/, "");
+
+const validWord = keyword =>
+  elmKeywords.includes(keyword) ? `${keyword}_` : keyword;
+
+const elmKeywords = [
+  "as",
+  "case",
+  "else",
+  "exposing",
+  "if",
+  "import",
+  "in",
+  "let",
+  "module",
+  "of",
+  "port",
+  "then",
+  "type",
+  "where"
+  // "alias",
+  // "command",
+  // "effect",
+  // "false",
+  // "infix",
+  // "left",
+  // "non",
+  // "null",
+  // "right",
+  // "subscription",
+  // "true",
+];

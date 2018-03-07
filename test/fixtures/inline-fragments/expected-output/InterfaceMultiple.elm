@@ -1,52 +1,44 @@
 module InterfaceMultiple
     exposing
-        ( Data
+        ( Query
         , Animal(..)
         , Mammal
         , Bird
-        , post
-        , query
-        , decoder
+        , interfaceMultiple
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query InterfaceMultiple {
-  animal {
-    ... on Mammal {
-      subclass
-    }
-    ... on Bird {
-      color
-      canFly
-    }
-  }
+interfaceMultiple : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfaceMultiple =
+    GraphqlToElm.Graphql.Operation.query
+        """query InterfaceMultiple {
+animal {
+... on Mammal {
+subclass
+}
+... on Bird {
+color
+canFly
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { animal : Animal
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "animal" animalDecoder)
 
 
@@ -63,17 +55,6 @@ animalDecoder =
         ]
 
 
-type alias Mammal =
-    { subclass : String
-    }
-
-
-mammalDecoder : Json.Decode.Decoder Mammal
-mammalDecoder =
-    Json.Decode.map Mammal
-        (Json.Decode.field "subclass" Json.Decode.string)
-
-
 type alias Bird =
     { color : String
     , canFly : Bool
@@ -85,3 +66,14 @@ birdDecoder =
     Json.Decode.map2 Bird
         (Json.Decode.field "color" Json.Decode.string)
         (Json.Decode.field "canFly" Json.Decode.bool)
+
+
+type alias Mammal =
+    { subclass : String
+    }
+
+
+mammalDecoder : Json.Decode.Decoder Mammal
+mammalDecoder =
+    Json.Decode.map Mammal
+        (Json.Decode.field "subclass" Json.Decode.string)

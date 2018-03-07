@@ -1,51 +1,43 @@
 module UnionList
     exposing
-        ( Data
+        ( Query
         , Flip(..)
         , Heads
         , Tails
-        , post
-        , query
-        , decoder
+        , unionList
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query UnionList {
-  flips {
-    ... on Heads {
-      name
-    }
-    ... on Tails {
-      length
-    }
-  }
+unionList : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+unionList =
+    GraphqlToElm.Graphql.Operation.query
+        """query UnionList {
+flips {
+... on Heads {
+name
+}
+... on Tails {
+length
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { flips : List Flip
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "flips" (Json.Decode.list flipDecoder))
 
 

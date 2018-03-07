@@ -1,62 +1,55 @@
 module Include
     exposing
-        ( Variables
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        ( IncludeVariables
+        , Query
+        , include
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Decode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query Include($withSchool: Boolean!, $withCity: Boolean!) {
-  name
-  school @include(if: $withSchool)
-  city @include(if: $withCity)
+include : IncludeVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+include variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query Include($withSchool: Boolean!, $withCity: Boolean!) {
+name
+school @include(if: $withSchool)
+city @include(if: $withCity)
 }"""
+        (Maybe.Just <| encodeIncludeVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias IncludeVariables =
     { withSchool : Bool
     , withCity : Bool
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
+encodeIncludeVariables : IncludeVariables -> Json.Encode.Value
+encodeIncludeVariables inputs =
     Json.Encode.object
         [ ( "withSchool", Json.Encode.bool inputs.withSchool )
         , ( "withCity", Json.Encode.bool inputs.withCity )
         ]
 
 
-type alias Data =
+type alias Query =
     { name : String
     , school : Maybe.Maybe String
     , city : GraphqlToElm.Optional.Optional String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map3 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map3 Query
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphqlToElm.Optional.nonNullfieldDecoder "school" Json.Decode.string)
-        (GraphqlToElm.Optional.fieldDecoder "city" Json.Decode.string)
+        (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
+        (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)

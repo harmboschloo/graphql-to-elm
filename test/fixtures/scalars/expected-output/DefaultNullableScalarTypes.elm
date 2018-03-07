@@ -1,38 +1,30 @@
 module DefaultNullableScalarTypes
     exposing
-        ( Data
-        , post
+        ( Query
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  intOrNull
-  floatOrNull
-  stringOrNull
-  booleanOrNull
-  idOrNull
+    GraphqlToElm.Graphql.Operation.query
+        """{
+intOrNull
+floatOrNull
+stringOrNull
+booleanOrNull
+idOrNull
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { intOrNull : Maybe.Maybe Int
     , floatOrNull : Maybe.Maybe Float
     , stringOrNull : Maybe.Maybe String
@@ -41,9 +33,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map5 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map5 Query
         (Json.Decode.field "intOrNull" (Json.Decode.nullable Json.Decode.int))
         (Json.Decode.field "floatOrNull" (Json.Decode.nullable Json.Decode.float))
         (Json.Decode.field "stringOrNull" (Json.Decode.nullable Json.Decode.string))

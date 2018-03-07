@@ -1,47 +1,40 @@
 module InputsMixed
     exposing
-        ( Variables
+        ( InputsMixedVariables
         , MixedInputs
         , OtherInputs
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        , Query
+        , inputsMixed
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import GraphqlToElm.Optional
+import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
-  inputsMixed(inputs: $inputs, inputs2: $inputs2)
+inputsMixed : InputsMixedVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputsMixed variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
+inputsMixed(inputs: $inputs, inputs2: $inputs2)
 }"""
+        (Maybe.Just <| encodeInputsMixedVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias InputsMixedVariables =
     { inputs : MixedInputs
     , inputs2 : GraphqlToElm.Optional.Optional MixedInputs
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
-    GraphqlToElm.Optional.encodeObject
+encodeInputsMixedVariables : InputsMixedVariables -> Json.Encode.Value
+encodeInputsMixedVariables inputs =
+    GraphqlToElm.Optional.Encode.object
         [ ( "inputs", (encodeMixedInputs >> GraphqlToElm.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphqlToElm.Optional.map encodeMixedInputs) inputs.inputs2 )
         ]
@@ -56,7 +49,7 @@ type alias MixedInputs =
 
 encodeMixedInputs : MixedInputs -> Json.Encode.Value
 encodeMixedInputs inputs =
-    GraphqlToElm.Optional.encodeObject
+    GraphqlToElm.Optional.Encode.object
         [ ( "int", (Json.Encode.int >> GraphqlToElm.Optional.Present) inputs.int )
         , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (encodeOtherInputs >> GraphqlToElm.Optional.Present) inputs.other )
@@ -75,12 +68,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Data =
+type alias Query =
     { inputsMixed : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "inputsMixed" (Json.Decode.nullable Json.Decode.string))

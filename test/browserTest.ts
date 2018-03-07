@@ -15,8 +15,8 @@ import {
   generateElm,
   writeResult
 } from "../src";
-import { ElmEncodeItem } from "../src/elmIntelTypes";
-import { validModuleName, writeFile, findByIdIn } from "../src/utils";
+import { ElmEncoder, validModuleName } from "../src/elmIntel";
+import { writeFile } from "../src/utils";
 
 interface FixtureResult {
   fixture: Fixture;
@@ -44,6 +44,7 @@ const generateTestFiles = t => {
   const fixtures = getFixtures().filter(fixture => !fixture.throws);
   const results: FixtureResult[] = fixtures.map(writeQueries(t));
   writeTests(results);
+  writeNamedQueries(results);
   writeSchemas(fixtures);
 };
 
@@ -92,40 +93,36 @@ const writeTests = (results: FixtureResult[]) => {
 
   const imports = elmIntels.map(({ elmIntel }) => `import ${elmIntel.module}`);
 
-  const hasNullableInputs = elmIntels.some(({ elmIntel }) =>
-    elmIntel.encode.items.some(
-      item => item.isNullable || item.isListOfNullables
-    )
-  );
-
-  if (hasNullableInputs) {
-    imports.push("import GraphqlToElm.Optional");
-  }
-
-  const tests = elmIntels.map(
-    ({ fixture, elmIntel }) =>
-      `{ id = "${fixture.id}-${elmIntel.module}"
+  const tests = elmIntels.reduce(
+    (tests, { fixture, elmIntel }) => [
+      ...tests,
+      ...elmIntel.operations.map(
+        operation =>
+          `{ id = "${fixture.id}-${elmIntel.module}-${operation.name}"
       , schemaId = "${fixture.id}"
-      , query = ${elmIntel.module}.query
-      , variables = ${generateVariables(elmIntel)}
-      , decoder = Json.Decode.map toString ${elmIntel.module}.decoder
+      , operation = ${elmIntel.module}.${operation.name}${
+            operation.variables
+              ? ` ${generateVariables(operation.variables)}`
+              : ""
+          } |> Operation.mapData toString |> Operation.mapErrors toString
       }
 `
+      )
+    ],
+    []
   );
 
   const content = `module Tests exposing (Test, tests)
 
-import Json.Decode exposing (Decoder)
-import Json.Encode
+import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
+import GraphqlToElm.Optional as Optional
 ${imports.join("\n")}
 
 
 type alias Test =
     { id : String
     , schemaId : String
-    , query : String
-    , variables : Json.Encode.Value
-    , decoder : Decoder String
+    , operation : Operation String String
     }
 
 
@@ -139,46 +136,61 @@ tests =
   writeFile(testsPath, content);
 };
 
-const generateVariables = (intel: ElmIntel): string => {
-  const root = intel.encode.items.find(item => item.id === 0);
-
-  if (root) {
-    const variables = generateItemVariables(root, intel);
-    return `${intel.module}.encodeVariables ${variables}`;
-  } else {
-    return "Json.Encode.null";
+const generateVariables = (encoder: ElmEncoder): string => {
+  switch (encoder.kind) {
+    case "record-encoder": {
+      const fields = encoder.fields.map(
+        field =>
+          `${field.jsonName} = ${
+            field.valueWrapper === "optional"
+              ? "Optional.Absent"
+              : field.valueListItemWrapper
+                ? "[]"
+                : generateVariables(field.value)
+          }`
+      );
+      return `{ ${fields.join(", ")} }`;
+    }
+    case "value-encoder":
+      switch (encoder.type) {
+        case "Int":
+          return "0";
+        case "Float":
+          return "0.0";
+        case "Bool":
+          return "False";
+        case "String":
+          return '""';
+        default:
+          throw new Error(`unhandled encoder type: ${encoder.type}`);
+      }
   }
 };
 
-const generateItemVariables = (item: ElmEncodeItem, intel: ElmIntel) => {
-  if (item.isNullable) {
-    return `GraphqlToElm.Optional.Absent`;
-  } else if (item.isList) {
-    return "[]";
-  } else if (item.kind === "record") {
-    const fields = item.children
-      .map(findByIdIn(intel.encode.items))
-      .map(
-        (child: ElmEncodeItem) =>
-          `${child.fieldName} = ${generateItemVariables(child, intel)}`
-      );
-    return `{ ${fields.join(", ")} }`;
-  } else {
-    switch (item.type) {
-      case "Int":
-        return "0";
-      case "Float":
-        return "0.0";
-      case "Bool":
-        return "False";
-      case "String":
-        return '""';
-      default:
-        throw new Error(
-          `generateItemVariables unhandled item type: ${item.type}`
-        );
-    }
-  }
+const writeNamedQueries = (results: FixtureResult[]) => {
+  const namedQueries = [];
+
+  results.forEach(({ result, fixture }) => {
+    result.queries.forEach(query =>
+      query.elmIntel.operations.forEach(operation => {
+        if (operation.kind === "named") {
+          namedQueries.push({
+            id: `${fixture.id}/${operation.gqlName}`,
+            query: query.queryIntel.query
+          });
+        }
+      })
+    );
+  });
+
+  const entries = namedQueries.map(
+    ({ id, query }) => `  "${id}": \`${query}\``
+  );
+  const content = `export const namedQueries = {\n${entries.join(",\n")}\n};\n`;
+
+  const path = resolve(generatePath, "namedQueries.ts");
+
+  writeFile(path, content);
 };
 
 const writeSchemas = (fixtures: Fixture[]) => {
@@ -190,9 +202,9 @@ const writeSchemas = (fixtures: Fixture[]) => {
   const entries = schemas.map(({ id, path }) => `  "${id}": "${path}"`);
   const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
 
-  const schemasPath = resolve(generatePath, "schemas.ts");
+  const path = resolve(generatePath, "schemas.ts");
 
-  writeFile(schemasPath, content);
+  writeFile(path, content);
 };
 
 export const makeElm = t => {

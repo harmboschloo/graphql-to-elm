@@ -1,8 +1,13 @@
 module Main exposing (main)
 
+import Set
 import Tests exposing (Test, tests)
 import Html exposing (Html)
-import GraphqlToElm.Http exposing (Response(..), send, post)
+import Http as RegularHttp
+import GraphqlToElm.Graphql.Operation.Batch as Batch exposing (Batch)
+import GraphqlToElm.Graphql.Response as GraphqlResponse
+import GraphqlToElm.Http as Http exposing (Response, Error(..))
+import GraphqlToElm.Http.Batch as HttpBatch
 
 
 numberOfRounds : Int
@@ -10,14 +15,87 @@ numberOfRounds =
     100
 
 
-testsLength : Int
-testsLength =
-    List.length tests
+postTests : List Test
+postTests =
+    tests
+        |> List.repeat numberOfRounds
+        |> List.concat
+
+
+schemaIds : List String
+schemaIds =
+    tests
+        |> List.map .schemaId
+        |> Set.fromList
+        |> Set.toList
+
+
+testsBySchema : List ( String, List Test )
+testsBySchema =
+    schemaIds
+        |> List.map
+            (\schemaId ->
+                ( schemaId
+                , List.filter (\test -> test.schemaId == schemaId) tests
+                )
+            )
+
+
+type alias BatchData =
+    List (GraphqlResponse.Response String String)
+
+
+batch2Tests : List ( String, String, Batch BatchData )
+batch2Tests =
+    testsBySchema
+        |> List.map
+            (\( schemaId, tests ) ->
+                List.map2
+                    (\a b ->
+                        ( schemaId
+                        , "[" ++ a.id ++ "," ++ b.id ++ "]"
+                        , Batch.batch2
+                            (\a b ->
+                                [ a
+                                    |> GraphqlResponse.mapData toString
+                                    |> GraphqlResponse.mapErrors toString
+                                , b
+                                    |> GraphqlResponse.mapData toString
+                                    |> GraphqlResponse.mapErrors toString
+                                ]
+                            )
+                            a.operation
+                            b.operation
+                        )
+                    )
+                    (tests)
+                    (List.reverse tests)
+            )
+        |> List.concat
+
+
+getTests : List Test
+getTests =
+    tests
+        |> List.filter (\test -> not <| List.member test.id getTestBlackList)
+        |> List.repeat numberOfRounds
+        |> List.concat
+
+
+getTestBlackList : List String
+getTestBlackList =
+    [ "operations-named-Tests.OperationsNamed.Query-mutation"
+    , "operations-Tests.Operations.MultipleFragments-mutation"
+    , "operations-Tests.Operations.Multiple-mutation"
+    , "operations-Tests.Operations.AnonymousMutation-mutation"
+    ]
 
 
 numberOfTests : Int
 numberOfTests =
-    numberOfRounds * testsLength
+    List.length postTests
+        + List.length batch2Tests
+        + List.length getTests
 
 
 
@@ -30,34 +108,43 @@ type alias Model =
     }
 
 
+testsDone : Model -> Int
+testsDone { passed, failed } =
+    passed + failed
+
+
 init : ( Model, Cmd Msg )
 init =
     let
         _ =
-            Debug.log "[Start Test]"
-                ("number of tests: "
-                    ++ toString testsLength
-                    ++ " x "
-                    ++ toString numberOfRounds
-                )
+            Debug.log "[Start Test] number of tests" numberOfTests
     in
         ( Model 0 0
-        , tests
-            |> List.repeat numberOfRounds
+        , [ List.map sendPost postTests
+          , List.map sendBatch batch2Tests
+          , List.map sendGet getTests
+          ]
             |> List.concat
-            |> List.map sendTest
             |> Cmd.batch
         )
 
 
-sendTest : Test -> Cmd Msg
-sendTest test =
-    send (TestResponseReceived test.id) <|
-        post ("/graphql/" ++ test.schemaId)
-            { query = test.query
-            , variables = test.variables
-            }
-            test.decoder
+sendPost : Test -> Cmd Msg
+sendPost test =
+    Http.send (TestResponseReceived test.id) <|
+        Http.post ("/graphql/" ++ test.schemaId) test.operation
+
+
+sendBatch : ( String, String, Batch BatchData ) -> Cmd Msg
+sendBatch ( schemaId, id, batch ) =
+    HttpBatch.send (TestBatchResponseReceived id) <|
+        HttpBatch.post ("/graphql/" ++ schemaId) batch
+
+
+sendGet : Test -> Cmd Msg
+sendGet test =
+    Http.send (TestResponseReceived test.id) <|
+        Http.get ("/graphql/" ++ test.schemaId) test.operation
 
 
 
@@ -65,21 +152,40 @@ sendTest test =
 
 
 type Msg
-    = TestResponseReceived String (Response String)
+    = TestResponseReceived String (Response String String)
+    | TestBatchResponseReceived String (Result RegularHttp.Error BatchData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        TestResponseReceived id (Data data) ->
+        TestResponseReceived id (Ok data) ->
             passed id data model
 
-        TestResponseReceived id (Errors errors data) ->
+        TestResponseReceived id (Err (GraphqlError errors data)) ->
             failed id
                 ("Errors: " ++ toString { errors = errors, data = data })
                 model
 
-        TestResponseReceived id (HttpError error) ->
+        TestResponseReceived id (Err (HttpError error)) ->
+            failed id ("HttpError: " ++ toString error) model
+
+        TestBatchResponseReceived id (Ok data) ->
+            data
+                |> List.filterMap
+                    (\response ->
+                        case response of
+                            GraphqlResponse.Errors errors _ ->
+                                Just errors
+
+                            GraphqlResponse.Data _ ->
+                                Nothing
+                    )
+                |> List.head
+                |> Maybe.map (\errors -> failed id ("Errors: " ++ errors) model)
+                |> Maybe.withDefault (passed id (toString data) model)
+
+        TestBatchResponseReceived id (Err error) ->
             failed id ("HttpError: " ++ toString error) model
 
 
@@ -87,7 +193,13 @@ passed : String -> String -> Model -> ( Model, Cmd Msg )
 passed id data model =
     let
         _ =
-            Debug.log "[Test Passed]" id
+            Debug.log
+                ("[Test Passed] "
+                    ++ toString (testsDone model + 1)
+                    ++ "/"
+                    ++ (toString numberOfTests)
+                )
+                id
     in
         { model | passed = model.passed + 1 }
             |> end
@@ -107,7 +219,7 @@ end : Model -> ( Model, Cmd Msg )
 end model =
     let
         _ =
-            if model.passed + model.failed == numberOfTests then
+            if testsDone model == numberOfTests then
                 Debug.log "[End Test]"
                     ("passed: "
                         ++ toString model.passed

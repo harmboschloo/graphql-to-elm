@@ -1,0 +1,17 @@
+query Query1($name: String) {
+  operation(name: $name) {
+    name
+  }
+}
+
+query Query2 {
+  operation {
+    query
+  }
+}
+
+mutation Mutation {
+  fragment {
+    name
+  }
+}

@@ -1,0 +1,16 @@
+query FragmentInFragment {
+  animal {
+    color
+    ... on Mammal {
+      ... on Dog {
+        hairy
+      }
+      ... on Dolphin {
+        fins
+      }
+    }
+    ... on Bird {
+      canFly
+    }
+  }
+}

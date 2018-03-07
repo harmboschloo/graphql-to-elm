@@ -1,6 +1,6 @@
 module Query
     exposing
-        ( Data
+        ( Query
         , ElmKeywords
         , OtherElmKeywords
         , ElmBasics
@@ -8,98 +8,84 @@ module Query
         , List2
         , GraphqlToElmReservedWords
         , Misc
-        , post
         , query
-        , decoder
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
+query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
 query =
-    """{
-  elmKeywords {
-    as
-    case
-    else
-    exposing
-    if
-    import
-    in
-    let
-    # module
-    # of
-    # port
-    # then
-    # type
-    # where
-  }
-
-  otherElmKeywords {
-    alias
-    command
-    effect
-    false
-    infix
-    left
-    non
-    null
-    # right
-    # subscription
-    # true
-  }
-
-  elmBasics {
-    not
-    flip
-    String
-    Int
-    infix
-    min
-    Just
-    True
-  }
-
-  boolean {
-    is
-  }
-
-  list {
-    is
-  }
-
-  graphqlToElmReservedWords {
-    Variables
-    Data
-    query
-    encodeVariables
-    decoder
-  }
-
-  misc {
-    else
-    else_
-    type_
-    Variables2
-    decoder2
-  }
+    GraphqlToElm.Graphql.Operation.query
+        """{
+elmKeywords {
+as
+case
+else
+exposing
+if
+import
+in
+let
+# module
+# of
+# port
+# then
+# type
+# where
+}
+otherElmKeywords {
+alias
+command
+effect
+false
+infix
+left
+non
+null
+# right
+# subscription
+# true
+}
+elmBasics {
+not
+flip
+String
+Int
+infix
+min
+Just
+True
+}
+boolean {
+is
+}
+list {
+is
+}
+graphqlToElmReservedWords {
+Variables
+Data
+query
+encodeVariables
+decoder
+}
+misc {
+else
+else_
+type_
+Variables2
+decoder2
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { elmKeywords : ElmKeywords
     , otherElmKeywords : OtherElmKeywords
     , elmBasics : ElmBasics
@@ -110,9 +96,9 @@ type alias Data =
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map7 Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map7 Query
         (Json.Decode.field "elmKeywords" elmKeywordsDecoder)
         (Json.Decode.field "otherElmKeywords" otherElmKeywordsDecoder)
         (Json.Decode.field "elmBasics" elmBasicsDecoder)

@@ -1,49 +1,41 @@
 module InterfacePartial
     exposing
-        ( Data
+        ( Query
         , Animal(..)
         , Dog
-        , post
-        , query
-        , decoder
+        , interfacePartial
         )
 
-import GraphqlToElm.DecodeHelpers
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Helpers.Decode
 import Json.Decode
-import Json.Encode
 
 
-post : String -> GraphqlToElm.Http.Request Data
-post url =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = Json.Encode.null
-        }
-        decoder
-
-
-query : String
-query =
-    """query InterfacePartial {
-  animal {
-    ... on Dog {
-      color
-      hairy
-    }
-  }
+interfacePartial : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfacePartial =
+    GraphqlToElm.Graphql.Operation.query
+        """query InterfacePartial {
+animal {
+... on Dog {
+color
+hairy
+}
+}
 }"""
+        Maybe.Nothing
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Data =
+type alias Query =
     { animal : Animal
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "animal" animalDecoder)
 
 
@@ -56,7 +48,7 @@ animalDecoder : Json.Decode.Decoder Animal
 animalDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnDog dogDecoder
-        , GraphqlToElm.DecodeHelpers.emptyObjectDecoder OnOtherAnimal
+        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherAnimal
         ]
 
 

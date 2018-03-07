@@ -1,55 +1,47 @@
 module Scalars
     exposing
-        ( Variables
-        , Data
-        , post
-        , query
-        , encodeVariables
-        , decoder
+        ( ScalarsVariables
+        , Query
+        , scalars
         )
 
-import GraphqlToElm.Http
+import GraphqlToElm.Graphql.Errors
+import GraphqlToElm.Graphql.Operation
 import Json.Decode
 import Json.Encode
 
 
-post : String -> Variables -> GraphqlToElm.Http.Request Data
-post url variables =
-    GraphqlToElm.Http.post
-        url
-        { query = query
-        , variables = encodeVariables variables
-        }
-        decoder
-
-
-query : String
-query =
-    """query Scalars($string: String!, $int: Int!) {
-  scalars(string: $string, int: $int)
+scalars : ScalarsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+scalars variables =
+    GraphqlToElm.Graphql.Operation.query
+        """query Scalars($string: String!, $int: Int!) {
+scalars(string: $string, int: $int)
 }"""
+        (Maybe.Just <| encodeScalarsVariables variables)
+        queryDecoder
+        GraphqlToElm.Graphql.Errors.decoder
 
 
-type alias Variables =
+type alias ScalarsVariables =
     { string : String
     , int : Int
     }
 
 
-encodeVariables : Variables -> Json.Encode.Value
-encodeVariables inputs =
+encodeScalarsVariables : ScalarsVariables -> Json.Encode.Value
+encodeScalarsVariables inputs =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs.string )
         , ( "int", Json.Encode.int inputs.int )
         ]
 
 
-type alias Data =
+type alias Query =
     { scalars : Maybe.Maybe String
     }
 
 
-decoder : Json.Decode.Decoder Data
-decoder =
-    Json.Decode.map Data
+queryDecoder : Json.Decode.Decoder Query
+queryDecoder =
+    Json.Decode.map Query
         (Json.Decode.field "scalars" (Json.Decode.nullable Json.Decode.string))

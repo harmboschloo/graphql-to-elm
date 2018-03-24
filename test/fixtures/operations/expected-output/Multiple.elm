@@ -12,17 +12,17 @@ module Multiple
         , mutation
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-query1 : Query1Variables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 query1 variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Query1($name: String) {
 operation(name: $name) {
 name
@@ -30,12 +30,12 @@ name
 }"""
         (Maybe.Just <| encodeQuery1Variables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
-query2 : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query2
+query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query2
 query2 =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Query2 {
 operation {
 query
@@ -43,12 +43,12 @@ query
 }"""
         Maybe.Nothing
         query2Decoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
-mutation : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Mutation
+mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Mutation
 mutation =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """mutation Mutation {
 fragment {
 name
@@ -56,7 +56,7 @@ name
 }"""
         Maybe.Nothing
         mutationDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query1Variables =

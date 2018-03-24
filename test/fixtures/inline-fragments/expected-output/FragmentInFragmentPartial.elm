@@ -8,15 +8,15 @@ module FragmentInFragmentPartial
         , fragmentInFragmentPartial
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-fragmentInFragmentPartial : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 fragmentInFragmentPartial =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query FragmentInFragmentPartial {
 animal {
 color
@@ -29,7 +29,7 @@ hairy
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

@@ -114,7 +114,7 @@ const writeTests = (results: FixtureResult[]) => {
 
   const content = `module Tests exposing (Test, tests)
 
-import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
+import GraphqlToElm.Operation as Operation exposing (Operation)
 import GraphqlToElm.Optional as Optional
 ${imports.join("\n")}
 

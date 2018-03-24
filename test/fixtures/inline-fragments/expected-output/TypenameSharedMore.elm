@@ -9,15 +9,15 @@ module TypenameSharedMore
         , typenameSharedMore
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-typenameSharedMore : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+typenameSharedMore : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 typenameSharedMore =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query TypenameSharedMore {
 animal {
 __typename
@@ -35,7 +35,7 @@ color
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

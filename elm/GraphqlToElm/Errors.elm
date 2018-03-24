@@ -1,4 +1,4 @@
-module GraphqlToElm.Graphql.Errors
+module GraphqlToElm.Errors
     exposing
         ( Errors
         , Error

@@ -7,23 +7,23 @@ module InputsMixed
         , inputsMixed
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-inputsMixed : InputsMixedVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputsMixed : InputsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 inputsMixed variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
 inputsMixed(inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeInputsMixedVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias InputsMixedVariables =

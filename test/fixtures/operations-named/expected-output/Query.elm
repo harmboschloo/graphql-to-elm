@@ -12,39 +12,39 @@ module Query
         , mutation
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-query1 : Query1Variables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 query1 variables =
-    GraphqlToElm.Graphql.Operation.named
+    GraphqlToElm.Operation.named
         "Query1"
         (Maybe.Just <| encodeQuery1Variables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
-query2 : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query2
+query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query2
 query2 =
-    GraphqlToElm.Graphql.Operation.named
+    GraphqlToElm.Operation.named
         "Query2"
         Maybe.Nothing
         query2Decoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
-mutation : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Mutation
+mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Mutation
 mutation =
-    GraphqlToElm.Graphql.Operation.named
+    GraphqlToElm.Operation.named
         "Mutation"
         Maybe.Nothing
         mutationDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query1Variables =

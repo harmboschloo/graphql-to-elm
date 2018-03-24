@@ -5,21 +5,21 @@ module Scalars
         , scalars
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 import Json.Encode
 
 
-scalars : ScalarsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+scalars : ScalarsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 scalars variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Scalars($string: String!, $int: Int!) {
 scalars(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias ScalarsVariables =

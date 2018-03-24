@@ -9,8 +9,8 @@ module GraphqlToElm.Http
         )
 
 import Http
-import GraphqlToElm.Graphql.Response as GraphqlResponse
-import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
+import GraphqlToElm.Response as GraphqlResponse
+import GraphqlToElm.Operation as Operation exposing (Operation)
 import GraphqlToElm.Optional exposing (Optional)
 import GraphqlToElm.Helpers.Url as Url
 

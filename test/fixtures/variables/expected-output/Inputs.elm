@@ -7,21 +7,21 @@ module Inputs
         , inputs
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 import Json.Encode
 
 
-inputs : InputsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 inputs variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Inputs($inputs: Inputs!) {
 inputs(inputs: $inputs)
 }"""
         (Maybe.Just <| encodeInputsVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias InputsVariables =

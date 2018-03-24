@@ -8,17 +8,17 @@ module Lists
         , lists
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-lists : ListsVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 lists variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Lists(
 $ints: [Int!]
 $floats: [Float]
@@ -29,7 +29,7 @@ lists(ints: $ints, floats: $floats, inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeListsVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias ListsVariables =

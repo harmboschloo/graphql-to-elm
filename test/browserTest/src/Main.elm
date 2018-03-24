@@ -4,10 +4,9 @@ import Set
 import Tests exposing (Test, tests)
 import Html exposing (Html)
 import Http as RegularHttp
-import GraphqlToElm.Graphql.Operation.Batch as Batch exposing (Batch)
-import GraphqlToElm.Graphql.Response as GraphqlResponse
+import GraphqlToElm.Response as GraphqlResponse
 import GraphqlToElm.Http as Http exposing (Response, Error(..))
-import GraphqlToElm.Http.Batch as HttpBatch
+import GraphqlToElm.Batch as Batch exposing (Batch)
 
 
 numberOfRounds : Int
@@ -137,8 +136,8 @@ sendPost test =
 
 sendBatch : ( String, String, Batch BatchData ) -> Cmd Msg
 sendBatch ( schemaId, id, batch ) =
-    HttpBatch.send (TestBatchResponseReceived id) <|
-        HttpBatch.post ("/graphql/" ++ schemaId) batch
+    Batch.send (TestBatchResponseReceived id) <|
+        Batch.post ("/graphql/" ++ schemaId) batch
 
 
 sendGet : Test -> Cmd Msg

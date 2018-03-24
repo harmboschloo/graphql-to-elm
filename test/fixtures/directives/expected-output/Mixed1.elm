@@ -5,17 +5,17 @@ module Mixed1
         , mixed1
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
 import Json.Decode
 import Json.Encode
 
 
-mixed1 : Mixed1Variables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+mixed1 : Mixed1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 mixed1 variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Mixed1($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @include(if: $withSchool)
@@ -23,7 +23,7 @@ city @skip(if: $withCity)
 }"""
         (Maybe.Just <| encodeMixed1Variables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Mixed1Variables =

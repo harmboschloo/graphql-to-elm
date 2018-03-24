@@ -7,14 +7,14 @@ module Union
         , union
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-union : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+union : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 union =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Union {
 flip {
 ... on Heads {
@@ -27,7 +27,7 @@ length
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

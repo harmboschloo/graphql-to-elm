@@ -1,4 +1,4 @@
-module GraphqlToElm.Graphql.Response
+module GraphqlToElm.Response
     exposing
         ( Response(Data, Errors)
         , mapData
@@ -7,7 +7,7 @@ module GraphqlToElm.Graphql.Response
         )
 
 import Json.Decode as Decode exposing (Decoder)
-import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
+import GraphqlToElm.Operation as Operation exposing (Operation)
 import GraphqlToElm.Optional as Optional exposing (Optional(..))
 import GraphqlToElm.Optional.Decode as OptionalDecode
 

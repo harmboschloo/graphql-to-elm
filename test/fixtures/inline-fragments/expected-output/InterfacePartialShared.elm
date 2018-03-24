@@ -7,14 +7,14 @@ module InterfacePartialShared
         , interfacePartialShared
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfacePartialShared : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 interfacePartialShared =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InterfacePartialShared {
 animal {
 color
@@ -25,7 +25,7 @@ hairy
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

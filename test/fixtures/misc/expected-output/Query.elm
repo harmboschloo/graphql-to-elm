@@ -9,14 +9,14 @@ module Query
         , testQuery
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-testQuery : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+testQuery : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 testQuery =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query TestQuery {
 i {
 name
@@ -46,7 +46,7 @@ age
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

@@ -11,14 +11,14 @@ module FragmentInFragmentShared
         , fragmentInFragmentShared
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-fragmentInFragmentShared : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+fragmentInFragmentShared : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 fragmentInFragmentShared =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query FragmentInFragmentShared {
 animal {
 color
@@ -38,7 +38,7 @@ canFly
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

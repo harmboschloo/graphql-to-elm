@@ -1,4 +1,4 @@
-module GraphqlToElm.Graphql.Operation
+module GraphqlToElm.Operation
     exposing
         ( Operation
         , named

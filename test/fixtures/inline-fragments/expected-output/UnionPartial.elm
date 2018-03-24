@@ -8,15 +8,15 @@ module UnionPartial
         , unionPartial
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-unionPartial : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+unionPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 unionPartial =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query UnionPartial {
 flip {
 ... on Heads {
@@ -31,7 +31,7 @@ length
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

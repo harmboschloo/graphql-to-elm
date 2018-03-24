@@ -126,7 +126,7 @@ const generateImports = (intel: ElmIntel): string => {
   };
 
   intel.operations.forEach(operation => {
-    addImport("GraphqlToElm.Graphql.Operation");
+    addImport("GraphqlToElm.Operation");
 
     if (operation.variables) {
       visitEncoders(operation.variables, {
@@ -197,7 +197,7 @@ const generateOperation = (operation: ElmOperation): string => {
 
   const declaration = `${operation.name} :${
     variables.declaration
-  } GraphqlToElm.Graphql.Operation.Operation ${operation.errors.type} ${
+  } GraphqlToElm.Operation.Operation ${operation.errors.type} ${
     operation.data.type
   }`;
 
@@ -205,7 +205,7 @@ const generateOperation = (operation: ElmOperation): string => {
     case "query":
       return `${declaration}
 ${operation.name}${variables.parameter} =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         ${generateQuery(operation)}
         ${variables.value}
         ${operation.data.decoder}
@@ -213,7 +213,7 @@ ${operation.name}${variables.parameter} =
     case "named":
       return `${declaration}
 ${operation.name}${variables.parameter} =
-    GraphqlToElm.Graphql.Operation.named
+    GraphqlToElm.Operation.named
         "${operation.gqlName}"
         ${variables.value}
         ${operation.data.decoder}

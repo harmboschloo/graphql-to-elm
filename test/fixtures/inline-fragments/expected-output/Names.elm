@@ -9,15 +9,15 @@ module Names
         , names
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-names : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+names : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 names =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Names {
 flip1: flip {
 ... on Heads {
@@ -48,7 +48,7 @@ length
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

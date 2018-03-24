@@ -9,14 +9,14 @@ module InterfaceShared
         , interfaceShared
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceShared : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfaceShared : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 interfaceShared =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InterfaceShared {
 animal {
 color
@@ -33,7 +33,7 @@ canFly
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

@@ -5,23 +5,23 @@ module ScalarsMixed
         , scalarsMixed
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 scalarsMixed variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query ScalarsMixed($string: String, $int: Int!) {
 scalarsMixed(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsMixedVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias ScalarsMixedVariables =

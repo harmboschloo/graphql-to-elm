@@ -7,23 +7,23 @@ module InputsOptional
         , inputsOptional
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
 import Json.Decode
 import Json.Encode
 
 
-inputsOptional : InputsOptionalVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+inputsOptional : InputsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 inputsOptional variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InputsOptional($inputs: OptionalInputs) {
 inputsOptional(inputs: $inputs)
 }"""
         (Maybe.Just <| encodeInputsOptionalVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias InputsOptionalVariables =

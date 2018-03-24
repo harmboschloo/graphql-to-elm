@@ -1,4 +1,4 @@
-module GraphqlToElm.Graphql.Operation.Batch
+module GraphqlToElm.Batch
     exposing
         ( Batch
         , map
@@ -6,14 +6,16 @@ module GraphqlToElm.Graphql.Operation.Batch
         , encode
         , batch2
         , batch3
-        , batch4
+        , batch4,post
+        , send
         )
 
+import Http
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
 import GraphqlToElm.Helpers.Decode as DecodeHelpers
-import GraphqlToElm.Graphql.Operation as Operation exposing (Operation)
-import GraphqlToElm.Graphql.Response as Response exposing (Response)
+import GraphqlToElm.Operation as Operation exposing (Operation)
+import GraphqlToElm.Response as Response exposing (Response)
 
 
 type Batch a
@@ -144,3 +146,16 @@ failDecoder n list =
             ++ toString n
             ++ " items but got "
             ++ toString (List.length list)
+
+
+post : String -> Batch a -> Http.Request a
+post url batch =
+    Http.post
+        url
+        (Http.jsonBody <| encode batch)
+        (decoder batch)
+
+
+send : (Result Http.Error a -> msg) -> Http.Request a -> Cmd msg
+send =
+    Http.send

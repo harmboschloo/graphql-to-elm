@@ -6,15 +6,15 @@ module InterfacePartial
         , interfacePartial
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfacePartial : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfacePartial : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 interfacePartial =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InterfacePartial {
 animal {
 ... on Dog {
@@ -25,7 +25,7 @@ hairy
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

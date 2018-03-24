@@ -7,14 +7,14 @@ module InterfaceMultiple
         , interfaceMultiple
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceMultiple : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+interfaceMultiple : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 interfaceMultiple =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query InterfaceMultiple {
 animal {
 ... on Mammal {
@@ -28,7 +28,7 @@ canFly
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

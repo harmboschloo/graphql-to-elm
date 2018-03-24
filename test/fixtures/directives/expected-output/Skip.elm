@@ -5,17 +5,17 @@ module Skip
         , skip
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
 import Json.Decode
 import Json.Encode
 
 
-skip : SkipVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+skip : SkipVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 skip variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Skip($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @skip(if: $withSchool)
@@ -23,7 +23,7 @@ city @skip(if: $withCity)
 }"""
         (Maybe.Just <| encodeSkipVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias SkipVariables =

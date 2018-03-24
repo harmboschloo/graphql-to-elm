@@ -5,17 +5,17 @@ module Include
         , include
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
+import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
 import Json.Decode
 import Json.Encode
 
 
-include : IncludeVariables -> GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 include variables =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """query Include($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @include(if: $withSchool)
@@ -23,7 +23,7 @@ city @include(if: $withCity)
 }"""
         (Maybe.Just <| encodeIncludeVariables variables)
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias IncludeVariables =

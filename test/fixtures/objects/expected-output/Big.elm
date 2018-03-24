@@ -6,15 +6,15 @@ module Big
         , query
         )
 
-import GraphqlToElm.Graphql.Errors
-import GraphqlToElm.Graphql.Operation
+import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
+import GraphqlToElm.Operation
 import Json.Decode
 
 
-query : GraphqlToElm.Graphql.Operation.Operation GraphqlToElm.Graphql.Errors.Errors Query
+query : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
 query =
-    GraphqlToElm.Graphql.Operation.query
+    GraphqlToElm.Operation.query
         """{
 i {
 intel {
@@ -35,7 +35,7 @@ field12
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Graphql.Errors.decoder
+        GraphqlToElm.Errors.decoder
 
 
 type alias Query =

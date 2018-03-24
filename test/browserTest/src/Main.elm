@@ -3,9 +3,8 @@ module Main exposing (main)
 import Set
 import Tests exposing (Test, tests)
 import Html exposing (Html)
-import Http as RegularHttp
-import GraphqlToElm.Response as GraphqlResponse
-import GraphqlToElm.Http as Http exposing (Response, Error(..))
+import GraphqlToElm.Response as Response exposing (Response(Data, Errors))
+import GraphqlToElm.Http as Http
 import GraphqlToElm.Batch as Batch exposing (Batch)
 
 
@@ -41,7 +40,7 @@ testsBySchema =
 
 
 type alias BatchData =
-    List (GraphqlResponse.Response String String)
+    List (Response String String)
 
 
 batch2Tests : List ( String, String, Batch BatchData )
@@ -56,11 +55,11 @@ batch2Tests =
                         , Batch.batch2
                             (\a b ->
                                 [ a
-                                    |> GraphqlResponse.mapData toString
-                                    |> GraphqlResponse.mapErrors toString
+                                    |> Response.mapData toString
+                                    |> Response.mapErrors toString
                                 , b
-                                    |> GraphqlResponse.mapData toString
-                                    |> GraphqlResponse.mapErrors toString
+                                    |> Response.mapData toString
+                                    |> Response.mapErrors toString
                                 ]
                             )
                             a.operation
@@ -151,22 +150,22 @@ sendGet test =
 
 
 type Msg
-    = TestResponseReceived String (Response String String)
-    | TestBatchResponseReceived String (Result RegularHttp.Error BatchData)
+    = TestResponseReceived String (Result Http.Error (Response String String))
+    | TestBatchResponseReceived String (Result Batch.Error BatchData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        TestResponseReceived id (Ok data) ->
+        TestResponseReceived id (Ok (Data data)) ->
             passed id data model
 
-        TestResponseReceived id (Err (GraphqlError errors data)) ->
+        TestResponseReceived id (Ok (Errors errors data)) ->
             failed id
                 ("Errors: " ++ toString { errors = errors, data = data })
                 model
 
-        TestResponseReceived id (Err (HttpError error)) ->
+        TestResponseReceived id (Err error) ->
             failed id ("HttpError: " ++ toString error) model
 
         TestBatchResponseReceived id (Ok data) ->
@@ -174,10 +173,10 @@ update msg model =
                 |> List.filterMap
                     (\response ->
                         case response of
-                            GraphqlResponse.Errors errors _ ->
+                            Response.Errors errors _ ->
                                 Just errors
 
-                            GraphqlResponse.Data _ ->
+                            Response.Data _ ->
                                 Nothing
                     )
                 |> List.head

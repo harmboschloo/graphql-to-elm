@@ -1,12 +1,15 @@
 module GraphqlToElm.Batch
     exposing
-        ( Batch
+        ( Request
+        , Error
+        , Batch
         , map
         , decoder
         , encode
         , batch2
         , batch3
-        , batch4,post
+        , batch4
+        , post
         , send
         )
 
@@ -16,6 +19,14 @@ import Json.Encode as Encode
 import GraphqlToElm.Helpers.Decode as DecodeHelpers
 import GraphqlToElm.Operation as Operation exposing (Operation)
 import GraphqlToElm.Response as Response exposing (Response)
+
+
+type alias Request a =
+    Http.Request a
+
+
+type alias Error =
+    Http.Error
 
 
 type Batch a
@@ -148,7 +159,7 @@ failDecoder n list =
             ++ toString (List.length list)
 
 
-post : String -> Batch a -> Http.Request a
+post : String -> Batch a -> Request a
 post url batch =
     Http.post
         url
@@ -156,6 +167,6 @@ post url batch =
         (decoder batch)
 
 
-send : (Result Http.Error a -> msg) -> Http.Request a -> Cmd msg
+send : (Result Error a -> msg) -> Request a -> Cmd msg
 send =
     Http.send

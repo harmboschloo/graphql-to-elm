@@ -1,61 +1,44 @@
 module GraphqlToElm.Http
     exposing
         ( Request
-        , Response
-        , Error(GraphqlError, HttpError)
+        , Error
         , get
         , post
         , send
         )
 
 import Http
-import GraphqlToElm.Response as GraphqlResponse
+import GraphqlToElm.Response as Response exposing (Response)
 import GraphqlToElm.Operation as Operation exposing (Operation)
-import GraphqlToElm.Optional exposing (Optional)
 import GraphqlToElm.Helpers.Url as Url
+ 
+
+type alias Request a =
+    Http.Request a
 
 
-type alias Request e a =
-    Http.Request (GraphqlResponse.Response e a)
+type alias Error =
+    Http.Error
 
 
-type alias Response e a =
-    Result (Error e a) a
-
-
-type Error e a
-    = GraphqlError e (Optional a)
-    | HttpError Http.Error
-
-
-get : String -> Operation e a -> Request e a
+get : String -> Operation e a -> Request (Response e a)
 get url operation =
     Http.get
         (Url.withParameters url <| Operation.encodeParameters operation)
-        (GraphqlResponse.decoder operation)
+        (Response.decoder operation)
 
 
-post : String -> Operation e a -> Request e a
+post : String -> Operation e a -> Request (Response e a)
 post url operation =
     Http.post
         url
         (Http.jsonBody <| Operation.encode operation)
-        (GraphqlResponse.decoder operation)
+        (Response.decoder operation)
 
 
-send : (Response e a -> msg) -> Request e a -> Cmd msg
-send responseMsg request =
-    Http.send (toResponse >> responseMsg) request
-
-
-toResponse : Result Http.Error (GraphqlResponse.Response e a) -> Response e a
-toResponse result =
-    case result of
-        Err error ->
-            Err (HttpError error)
-
-        Ok (GraphqlResponse.Errors errors data) ->
-            Err (GraphqlError errors data)
-
-        Ok (GraphqlResponse.Data data) ->
-            Ok data
+send :
+    (Result Http.Error (Response e a) -> msg)
+    -> Request (Response e a)
+    -> Cmd msg
+send =
+    Http.send

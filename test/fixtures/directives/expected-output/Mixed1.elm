@@ -15,7 +15,7 @@ import Json.Encode
 
 mixed1 : Mixed1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 mixed1 variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Mixed1($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @include(if: $withSchool)

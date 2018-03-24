@@ -16,7 +16,7 @@ import Json.Decode
 
 typename : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 typename =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Typename {
 animal {
 ... on Dog {

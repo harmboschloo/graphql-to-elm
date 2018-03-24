@@ -10,7 +10,7 @@ export interface Options {
   errorsDecoder?: TypeDecoder;
   src?: string;
   dest?: string;
-  operationType?: "query" | "named";
+  operationKind?: "query" | "named";
   log?: (message: string) => void;
 }
 
@@ -24,7 +24,7 @@ export interface FinalOptions {
   errorsDecoder: TypeDecoder;
   src: string;
   dest: string;
-  operationType: "query" | "named";
+  operationKind: "query" | "named";
   log: (message: string) => void;
 }
 
@@ -115,7 +115,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
   );
   const src = withDefault(".", options.src);
   const dest = withDefault(src, options.dest);
-  const operationType = withDefault("query", options.operationType);
+  const operationKind = withDefault("query", options.operationKind);
   const log =
     typeof options.log !== "undefined"
       ? options.log || (x => {})
@@ -131,7 +131,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
     errorsDecoder,
     src,
     dest,
-    operationType,
+    operationKind,
     log
   };
 };

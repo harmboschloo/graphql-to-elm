@@ -12,7 +12,7 @@ import Json.Decode
 
 single : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 single =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Single {
 single: animal {
 ... on Animal {

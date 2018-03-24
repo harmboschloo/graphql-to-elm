@@ -11,7 +11,7 @@ import Json.Decode
 
 query : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 query =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """{
 pets_pet
 pets_petOrNull

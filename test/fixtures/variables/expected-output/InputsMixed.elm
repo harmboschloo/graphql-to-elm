@@ -17,7 +17,7 @@ import Json.Encode
 
 inputsMixed : InputsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 inputsMixed variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
 inputsMixed(inputs: $inputs, inputs2: $inputs2)
 }"""

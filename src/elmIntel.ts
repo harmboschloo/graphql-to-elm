@@ -153,7 +153,7 @@ const getOperation = (
 
   const errors: TypeDecoder = options.errorsDecoder;
 
-  switch (options.operationType) {
+  switch (options.operationKind) {
     case "query":
       return {
         type: getOperationType(queryOperation.type),
@@ -219,7 +219,7 @@ const getFragments = (
   scope: ElmScope,
   options: FinalOptions
 ): ElmFragment[] => {
-  switch (options.operationType) {
+  switch (options.operationKind) {
     case "query":
       return fragments.map(fragment => getFragment(fragment, scope));
     case "named":

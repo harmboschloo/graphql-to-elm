@@ -15,7 +15,7 @@ import Json.Encode
 
 skip : SkipVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 skip variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Skip($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @skip(if: $withSchool)

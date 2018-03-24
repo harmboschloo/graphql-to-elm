@@ -13,7 +13,7 @@ import Json.Encode
 
 scalars : ScalarsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 scalars variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Scalars($string: String!, $int: Int!) {
 scalars(string: $string, int: $int)
 }"""

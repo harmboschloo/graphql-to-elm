@@ -18,7 +18,7 @@ import Json.Encode
 
 lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 lists variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Lists(
 $ints: [Int!]
 $floats: [Float]

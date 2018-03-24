@@ -16,7 +16,7 @@ import Json.Decode
 
 testQuery : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 testQuery =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query TestQuery {
 i {
 name

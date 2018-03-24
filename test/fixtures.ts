@@ -24,7 +24,7 @@ interface Config {
   enumDecoders?: TypeDecoders;
   src?: string;
   dest?: string;
-  operationType?: "query" | "named";
+  operationKind?: "query" | "named";
   expect?: string;
   throws?: string;
 }
@@ -42,7 +42,7 @@ const create = ({
   enumDecoders,
   src,
   dest = "generated-output",
-  operationType,
+  operationKind,
   expect = "expected-output",
   throws
 }: Config): FinalConfig => ({
@@ -53,7 +53,7 @@ const create = ({
     enumDecoders,
     src,
     dest,
-    operationType
+    operationKind
   },
   expect,
   throws
@@ -156,7 +156,7 @@ const data: { [key: string]: FinalConfig } = {
 
   "operations-named": create({
     queries: ["query.gql"],
-    operationType: "named"
+    operationKind: "named"
   }),
 
   scalars: create({

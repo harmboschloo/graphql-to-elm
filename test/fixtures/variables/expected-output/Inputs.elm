@@ -15,7 +15,7 @@ import Json.Encode
 
 inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 inputs variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Inputs($inputs: Inputs!) {
 inputs(inputs: $inputs)
 }"""

@@ -14,7 +14,7 @@ import Json.Decode
 
 union : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 union =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Union {
 flip {
 ... on Heads {

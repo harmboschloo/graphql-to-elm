@@ -4,8 +4,8 @@ module GraphqlToElm.Operation
         , Query
         , Mutation
         , Subscription
-        , named
-        , query
+        , withName
+        , withQuery
         , dataDecoder
         , mapData
         , errorsDecoder
@@ -41,18 +41,28 @@ type Subscription
 
 
 type Kind
-    = NamedOperation String
-    | QueryOperation String
+    = WithName String
+    | WithQuery String
 
 
-named : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation t e a
-named name =
-    operation (NamedOperation name)
+withName :
+    String
+    -> Maybe Encode.Value
+    -> Decoder a
+    -> Decoder e
+    -> Operation t e a
+withName name =
+    operation (WithName name)
 
 
-query : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation t e a
-query queryString =
-    operation (QueryOperation queryString)
+withQuery :
+    String
+    -> Maybe Encode.Value
+    -> Decoder a
+    -> Decoder e
+    -> Operation t e a
+withQuery query =
+    operation (WithQuery query)
 
 
 operation :
@@ -97,13 +107,13 @@ mapErrors mapper (Operation operation) =
 encode : Operation t e a -> Encode.Value
 encode (Operation operation) =
     case operation.kind of
-        NamedOperation name ->
+        WithName name ->
             Encode.object
                 (( "operationName", Encode.string name )
                     :: variablesField operation.variables
                 )
 
-        QueryOperation query ->
+        WithQuery query ->
             Encode.object
                 (( "query", Encode.string query )
                     :: variablesField operation.variables
@@ -123,11 +133,11 @@ variablesField variables =
 encodeParameters : Operation t e a -> List ( String, String )
 encodeParameters (Operation operation) =
     case operation.kind of
-        NamedOperation name ->
+        WithName name ->
             ( "operationName", encodeUri name )
                 :: encodeVariablesParameter operation.variables
 
-        QueryOperation query ->
+        WithQuery query ->
             ( "query", encodeUri query )
                 :: encodeVariablesParameter operation.variables
 

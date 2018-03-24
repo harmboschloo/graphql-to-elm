@@ -14,7 +14,7 @@ import Json.Decode
 
 interfaceMultiple : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfaceMultiple =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfaceMultiple {
 animal {
 ... on Mammal {

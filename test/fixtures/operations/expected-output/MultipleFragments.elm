@@ -22,7 +22,7 @@ import Json.Encode
 
 query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 query1 variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         ("""query Query1($name: String) {
 operation(name: $name) {
 ...fields1
@@ -37,7 +37,7 @@ operation(name: $name) {
 
 query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query2
 query2 =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         ("""query Query2 {
 operation {
 ...fields2
@@ -59,7 +59,7 @@ fragment {
 
 mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors Mutation
 mutation =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         ("""mutation Mutation {
 fragment {
 ...fields3

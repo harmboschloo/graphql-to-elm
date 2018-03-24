@@ -13,7 +13,7 @@ import Json.Decode
 
 aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 aliases =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Aliases {
 user1: user {
 id

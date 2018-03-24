@@ -16,7 +16,7 @@ import Json.Decode
 
 unionPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 unionPartial =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query UnionPartial {
 flip {
 ... on Heads {

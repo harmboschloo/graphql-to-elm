@@ -15,7 +15,7 @@ import Json.Encode
 
 mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 mixed2 variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Mixed2($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @skip(if: $withSchool)

@@ -15,7 +15,7 @@ import Json.Encode
 
 scalarsOptional : ScalarsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 scalarsOptional variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query ScalarsOptional($string: String, $int: Int) {
 scalarsOptional(string: $string, int: $int)
 }"""

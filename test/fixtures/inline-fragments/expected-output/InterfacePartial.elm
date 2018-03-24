@@ -14,7 +14,7 @@ import Json.Decode
 
 interfacePartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfacePartial =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfacePartial {
 animal {
 ... on Dog {

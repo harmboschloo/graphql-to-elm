@@ -15,7 +15,7 @@ import Json.Decode
 
 interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfaceList =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfaceList {
 animals {
 ... on Dog {

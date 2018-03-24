@@ -15,7 +15,7 @@ import Json.Encode
 
 include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 include variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Include($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @include(if: $withSchool)

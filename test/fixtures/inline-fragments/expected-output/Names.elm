@@ -17,7 +17,7 @@ import Json.Decode
 
 names : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 names =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query Names {
 flip1: flip {
 ... on Heads {

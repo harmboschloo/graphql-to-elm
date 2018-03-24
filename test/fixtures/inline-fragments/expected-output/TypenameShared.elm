@@ -16,7 +16,7 @@ import Json.Decode
 
 typenameShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 typenameShared =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query TypenameShared {
 animal {
 __typename

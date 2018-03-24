@@ -16,7 +16,7 @@ import Json.Decode
 
 interfaceListShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfaceListShared =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfaceListShared {
 animals {
 color

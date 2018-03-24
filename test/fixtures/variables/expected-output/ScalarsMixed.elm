@@ -15,7 +15,7 @@ import Json.Encode
 
 scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 scalarsMixed variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query ScalarsMixed($string: String, $int: Int!) {
 scalarsMixed(string: $string, int: $int)
 }"""

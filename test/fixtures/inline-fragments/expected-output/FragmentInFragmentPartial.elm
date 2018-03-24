@@ -16,7 +16,7 @@ import Json.Decode
 
 fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 fragmentInFragmentPartial =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query FragmentInFragmentPartial {
 animal {
 color

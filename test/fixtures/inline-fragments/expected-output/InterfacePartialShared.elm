@@ -14,7 +14,7 @@ import Json.Decode
 
 interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfacePartialShared =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfacePartialShared {
 animal {
 color

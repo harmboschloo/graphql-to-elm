@@ -12,7 +12,7 @@ import Json.Decode
 
 interfacePlain : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfacePlain =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InterfacePlain {
 animal {
 color

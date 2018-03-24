@@ -17,7 +17,7 @@ import Json.Encode
 
 inputsMultiple : InputsMultipleVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 inputsMultiple variables =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         """query InputsMultiple($inputs: Inputs!, $inputs2: Inputs) {
 inputsMultiple(inputs: $inputs, inputs2: $inputs2)
 }"""

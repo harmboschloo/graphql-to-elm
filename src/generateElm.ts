@@ -205,7 +205,7 @@ const generateOperation = (operation: ElmOperation): string => {
     case "query":
       return `${declaration}
 ${operation.name}${variables.parameter} =
-    GraphqlToElm.Operation.query
+    GraphqlToElm.Operation.withQuery
         ${generateQuery(operation)}
         ${variables.value}
         ${operation.data.decoder}
@@ -213,7 +213,7 @@ ${operation.name}${variables.parameter} =
     case "named":
       return `${declaration}
 ${operation.name}${variables.parameter} =
-    GraphqlToElm.Operation.named
+    GraphqlToElm.Operation.withName
         "${operation.gqlName}"
         ${variables.value}
         ${operation.data.decoder}

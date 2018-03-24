@@ -52,7 +52,7 @@ batch2Tests =
                     (\a b ->
                         ( schemaId
                         , "[" ++ a.id ++ "," ++ b.id ++ "]"
-                        , Batch.batch2
+                        , Batch.batch
                             (\a b ->
                                 [ a
                                     |> Response.mapData toString
@@ -63,7 +63,7 @@ batch2Tests =
                                 ]
                             )
                             a.operation
-                            b.operation
+                            |> Batch.and b.operation
                         )
                     )
                     (tests)

@@ -1,16 +1,15 @@
 module GraphqlToElm.Batch
     exposing
-        ( Request
+        ( Batch
+        , Request
         , Error
-        , Batch
         , map
-        , decoder
-        , encode
-        , batch2
-        , batch3
-        , batch4
+        , batch
+        , and
         , post
         , send
+        , encode
+        , decoder
         )
 
 import Http
@@ -21,6 +20,13 @@ import GraphqlToElm.Operation as Operation exposing (Operation)
 import GraphqlToElm.Response as Response exposing (Response)
 
 
+type Batch a
+    = Batch
+        { operations : List Encode.Value
+        , decoder : List Decode.Value -> ( List Decode.Value, Decoder a )
+        }
+
+
 type alias Request a =
     Http.Request a
 
@@ -29,134 +35,79 @@ type alias Error =
     Http.Error
 
 
-type Batch a
-    = Batch
-        { batch : List Encode.Value
-        , decoder : Decoder a
-        }
-
 
 map : (a -> b) -> Batch a -> Batch b
 map mapper (Batch batch) =
-    Batch { batch | decoder = Decode.map mapper batch.decoder }
-
-
-decoder : Batch a -> Decoder a
-decoder (Batch batch) =
-    batch.decoder
-
-
-encode : Batch a -> Encode.Value
-encode (Batch batch) =
-    Encode.list batch.batch
-
-
-batch2 :
-    (Response e1 a1 -> Response e2 a2 -> b)
-    -> Operation e1 a1
-    -> Operation e2 a2
-    -> Batch b
-batch2 mapper op1 op2 =
     Batch
-        { batch =
-            [ Operation.encode op1
-            , Operation.encode op2
-            ]
+        { operations = batch.operations
         , decoder =
-            valuesDecoder
-                (\list ->
-                    case list of
-                        [ value1, value2 ] ->
-                            Decode.map2 mapper
-                                (responseDecoder op1 value1)
-                                (responseDecoder op2 value2)
-
-                        _ ->
-                            failDecoder 2 list
-                )
+            (\values0 ->
+                let
+                    ( values1, decoder1 ) =
+                        batch.decoder values0
+                in
+                    ( values1, Decode.map mapper decoder1 )
+            )
         }
 
 
-batch3 :
-    (Response e1 a1 -> Response e2 a2 -> Response e3 a3 -> b)
-    -> Operation e1 a1
-    -> Operation e2 a2
-    -> Operation e3 a3
+batch :
+    (Response e a -> b)
+    -> Operation e a
     -> Batch b
-batch3 mapper op1 op2 op3 =
+batch mapper operation =
     Batch
-        { batch =
-            [ Operation.encode op1
-            , Operation.encode op2
-            , Operation.encode op3
-            ]
+        { operations =
+            [ Operation.encode operation ]
         , decoder =
-            valuesDecoder
-                (\list ->
-                    case list of
-                        [ value1, value2, value3 ] ->
-                            Decode.map3 mapper
-                                (responseDecoder op1 value1)
-                                (responseDecoder op2 value2)
-                                (responseDecoder op3 value3)
-
-                        _ ->
-                            failDecoder 3 list
-                )
+            (\values0 ->
+                responseDecoder operation values0
+                    |> Tuple.mapSecond (Decode.map mapper)
+            )
         }
 
 
-batch4 :
-    (Response e1 a1 -> Response e2 a2 -> Response e3 a3 -> Response e4 a4 -> b)
-    -> Operation e1 a1
-    -> Operation e2 a2
-    -> Operation e3 a3
-    -> Operation e4 a4
-    -> Batch b
-batch4 mapper op1 op2 op3 op4 =
+and : Operation e a -> Batch (Response e a -> b) -> Batch b
+and operation (Batch batch) =
     Batch
-        { batch =
-            [ Operation.encode op1
-            , Operation.encode op2
-            , Operation.encode op3
-            , Operation.encode op4
-            ]
+        { operations =
+            Operation.encode operation :: batch.operations
         , decoder =
-            valuesDecoder
-                (\list ->
-                    case list of
-                        [ value1, value2, value3, value4 ] ->
-                            Decode.map4 mapper
-                                (responseDecoder op1 value1)
-                                (responseDecoder op2 value2)
-                                (responseDecoder op3 value3)
-                                (responseDecoder op4 value3)
+            (\values0 ->
+                let
+                    ( values1, decoder1 ) =
+                        batch.decoder values0
 
-                        _ ->
-                            failDecoder 4 list
-                )
+                    ( values2, decoder2 ) =
+                        responseDecoder operation values1
+                in
+                    ( values2
+                    , DecodeHelpers.andMap decoder2 decoder1
+                    )
+            )
         }
 
 
-valuesDecoder : (List Decode.Value -> Decoder a) -> Decoder a
-valuesDecoder toDecoder =
-    Decode.andThen toDecoder (Decode.list Decode.value)
+responseDecoder :
+    Operation e a
+    -> (List Decode.Value -> ( List Decode.Value, Decoder (Response e a) ))
+responseDecoder operation =
+    (\values ->
+        case values of
+            [] ->
+                ( []
+                , Decode.fail "no more batch responses to decode"
+                )
+
+            head :: tail ->
+                ( tail
+                , head
+                    |> decodeValue (Response.decoder operation)
+                    |> DecodeHelpers.fromResult
+                )
+    )
 
 
-responseDecoder : Operation e a -> Decode.Value -> Decoder (Response e a)
-responseDecoder operation value =
-    value
-        |> decodeValue (Response.decoder operation)
-        |> DecodeHelpers.fromResult
-
-
-failDecoder : Int -> List Decode.Value -> Decoder a
-failDecoder n list =
-    Decode.fail <|
-        "expected list with "
-            ++ toString n
-            ++ " items but got "
-            ++ toString (List.length list)
 
 
 post : String -> Batch a -> Request a
@@ -170,3 +121,14 @@ post url batch =
 send : (Result Error a -> msg) -> Request a -> Cmd msg
 send =
     Http.send
+
+
+encode : Batch a -> Encode.Value
+encode (Batch batch) =
+    Encode.list (List.reverse batch.operations)
+
+
+decoder : Batch a -> Decoder a
+decoder (Batch batch) =
+    Decode.list Decode.value
+        |> Decode.andThen (batch.decoder >> Tuple.second)

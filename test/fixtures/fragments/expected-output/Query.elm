@@ -15,7 +15,7 @@ import Json.Decode
 import Json.Encode
 
 
-fragments : FragmentsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+fragments : FragmentsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 fragments variables =
     GraphqlToElm.Operation.query
         ("""query Fragments($id: String!) {

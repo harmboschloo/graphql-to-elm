@@ -197,9 +197,9 @@ const generateOperation = (operation: ElmOperation): string => {
 
   const declaration = `${operation.name} :${
     variables.declaration
-  } GraphqlToElm.Operation.Operation ${operation.errors.type} ${
-    operation.data.type
-  }`;
+  } GraphqlToElm.Operation.Operation GraphqlToElm.Operation.${operation.type} ${
+    operation.errors.type
+  } ${operation.data.type}`;
 
   switch (operation.kind) {
     case "query":

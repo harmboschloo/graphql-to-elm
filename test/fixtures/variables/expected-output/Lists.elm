@@ -16,7 +16,7 @@ import Json.Decode
 import Json.Encode
 
 
-lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 lists variables =
     GraphqlToElm.Operation.query
         """query Lists(

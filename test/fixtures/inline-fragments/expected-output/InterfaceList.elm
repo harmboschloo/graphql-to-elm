@@ -13,7 +13,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfaceList =
     GraphqlToElm.Operation.query
         """query InterfaceList {

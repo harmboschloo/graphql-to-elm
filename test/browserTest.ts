@@ -15,7 +15,7 @@ import {
   generateElm,
   writeResult
 } from "../src";
-import { ElmEncoder, validModuleName } from "../src/elmIntel";
+import { ElmEncoder, ElmOperationType, validModuleName } from "../src/elmIntel";
 import { writeFile } from "../src/utils";
 
 interface FixtureResult {
@@ -93,42 +93,50 @@ const writeTests = (results: FixtureResult[]) => {
 
   const imports = elmIntels.map(({ elmIntel }) => `import ${elmIntel.module}`);
 
-  const tests = elmIntels.reduce(
-    (tests, { fixture, elmIntel }) => [
-      ...tests,
-      ...elmIntel.operations.map(
-        operation =>
-          `{ id = "${fixture.id}-${elmIntel.module}-${operation.name}"
+  const getTests = (operationType: ElmOperationType) =>
+    elmIntels.reduce(
+      (tests, { fixture, elmIntel }) => [
+        ...tests,
+        ...elmIntel.operations
+          .filter(operation => operation.type === operationType)
+          .map(
+            operation =>
+              `{ id = "${fixture.id}-${elmIntel.module}-${operation.name}"
       , schemaId = "${fixture.id}"
       , operation = ${elmIntel.module}.${operation.name}${
-            operation.variables
-              ? ` ${generateVariables(operation.variables)}`
-              : ""
-          } |> Operation.mapData toString |> Operation.mapErrors toString
+                operation.variables
+                  ? ` ${generateVariables(operation.variables)}`
+                  : ""
+              } |> Operation.mapData toString |> Operation.mapErrors toString
       }
 `
-      )
-    ],
-    []
-  );
+          )
+      ],
+      []
+    );
 
-  const content = `module Tests exposing (Test, tests)
+  const content = `module Tests exposing (Test, queryTests, mutationTests)
 
-import GraphqlToElm.Operation as Operation exposing (Operation)
+import GraphqlToElm.Operation as Operation exposing (Operation, Query, Mutation)
 import GraphqlToElm.Optional as Optional
 ${imports.join("\n")}
 
 
-type alias Test =
+type alias Test t =
     { id : String
     , schemaId : String
-    , operation : Operation String String
+    , operation : Operation t String String
     }
 
 
-tests : List Test
-tests =
-    [ ${tests.join("    , ")}    ]  
+queryTests : List (Test Query)
+queryTests =
+    [ ${getTests("Query").join("    , ")}    ]  
+
+
+mutationTests : List (Test Mutation)
+mutationTests =
+    [ ${getTests("Mutation").join("    , ")}    ]  
 `;
 
   const testsPath = resolve(generatePath, "Tests.elm");

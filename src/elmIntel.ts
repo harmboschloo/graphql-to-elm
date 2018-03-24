@@ -15,6 +15,7 @@ import {
 import {
   QueryIntel,
   QueryOperation,
+  QueryOperationType,
   QueryFragment,
   QueryInput,
   QueryInputField,
@@ -109,6 +110,7 @@ const reservedNames = ["Int", "Float", "Bool", "String", "List"];
 export type ElmOperation = ElmQueryOperation | ElmNamedOperation;
 
 export interface ElmQueryOperation {
+  type: ElmOperationType;
   kind: "query";
   name: string;
   query: string;
@@ -119,6 +121,7 @@ export interface ElmQueryOperation {
 }
 
 export interface ElmNamedOperation {
+  type: ElmOperationType;
   kind: "named";
   name: string;
   gqlName: string;
@@ -127,11 +130,15 @@ export interface ElmNamedOperation {
   errors: TypeDecoder;
 }
 
+export type ElmOperationType = "Query" | "Mutation" | "Subscription";
+
 const getOperation = (
   queryOperation: QueryOperation,
   scope: ElmScope,
   options: FinalOptions
 ): ElmOperation => {
+  const type = getOperationType(queryOperation.type);
+
   const name = newOperationName(queryOperation.name, scope);
 
   const variables: ElmRecordEncoder | undefined = queryOperation.inputs
@@ -149,6 +156,7 @@ const getOperation = (
   switch (options.operationType) {
     case "query":
       return {
+        type: getOperationType(queryOperation.type),
         kind: "query",
         name,
         query: queryOperation.query,
@@ -159,6 +167,7 @@ const getOperation = (
       };
     case "named":
       return {
+        type: getOperationType(queryOperation.type),
         kind: "named",
         name,
         gqlName: queryOperation.name,
@@ -166,6 +175,17 @@ const getOperation = (
         data,
         errors
       };
+  }
+};
+
+const getOperationType = (type: QueryOperationType): ElmOperationType => {
+  switch (type) {
+    case "query":
+      return "Query";
+    case "mutation":
+      return "Mutation";
+    case "subscription":
+      return "Subscription";
   }
 };
 

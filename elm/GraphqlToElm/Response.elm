@@ -46,7 +46,7 @@ mapErrors mapper response =
             Errors (mapper errors) data
 
 
-decoder : Operation e a -> Decoder (Response e a)
+decoder : Operation t e a -> Decoder (Response e a)
 decoder operation =
     Decode.oneOf
         [ Decode.map2 Errors

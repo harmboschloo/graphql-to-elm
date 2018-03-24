@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-typenameShared : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+typenameShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 typenameShared =
     GraphqlToElm.Operation.query
         """query TypenameShared {

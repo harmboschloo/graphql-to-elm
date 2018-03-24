@@ -56,12 +56,15 @@ interface OperationNodeInfo {
 }
 
 export interface QueryOperation {
+  type: QueryOperationType;
   name: string;
   query: string;
   fragmentNames: string[];
   inputs: QueryObjectInput | undefined;
   outputs: QueryRootOutput;
 }
+
+export type QueryOperationType = "query" | "mutation" | "subscription";
 
 export type QueryRootOutput = QueryObjectOutput | QueryFragmentedOutput;
 
@@ -169,6 +172,7 @@ const getOperationsInfo = (
 const getOperation = (schema: GraphQLSchema) => (
   info: OperationNodeInfo
 ): QueryOperation => ({
+  type: info.node.operation,
   name: info.node.name ? info.node.name.value : info.node.operation,
   query: info.query,
   fragmentNames: info.fragmentNames,

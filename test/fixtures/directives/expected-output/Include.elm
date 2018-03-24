@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 include variables =
     GraphqlToElm.Operation.query
         """query Include($withSchool: Boolean!, $withCity: Boolean!) {

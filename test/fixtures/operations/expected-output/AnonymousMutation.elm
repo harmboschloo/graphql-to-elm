@@ -10,7 +10,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Mutation
+mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors Mutation
 mutation =
     GraphqlToElm.Operation.query
         """mutation {

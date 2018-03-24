@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-unionList : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+unionList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 unionList =
     GraphqlToElm.Operation.query
         """query UnionList {

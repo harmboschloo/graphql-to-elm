@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 mixed2 variables =
     GraphqlToElm.Operation.query
         """query Mixed2($withSchool: Boolean!, $withCity: Boolean!) {

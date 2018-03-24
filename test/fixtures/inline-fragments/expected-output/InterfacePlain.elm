@@ -10,7 +10,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfacePlain : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+interfacePlain : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfacePlain =
     GraphqlToElm.Operation.query
         """query InterfacePlain {

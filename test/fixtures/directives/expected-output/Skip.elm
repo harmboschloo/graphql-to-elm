@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-skip : SkipVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+skip : SkipVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 skip variables =
     GraphqlToElm.Operation.query
         """query Skip($withSchool: Boolean!, $withCity: Boolean!) {

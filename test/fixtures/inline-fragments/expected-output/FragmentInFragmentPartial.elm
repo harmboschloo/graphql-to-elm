@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 fragmentInFragmentPartial =
     GraphqlToElm.Operation.query
         """query FragmentInFragmentPartial {

@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 interfacePartialShared =
     GraphqlToElm.Operation.query
         """query InterfacePartialShared {

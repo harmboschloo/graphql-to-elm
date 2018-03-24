@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 inputs variables =
     GraphqlToElm.Operation.query
         """query Inputs($inputs: Inputs!) {

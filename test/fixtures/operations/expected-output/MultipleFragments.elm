@@ -20,7 +20,7 @@ import Json.Decode
 import Json.Encode
 
 
-query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 query1 variables =
     GraphqlToElm.Operation.query
         ("""query Query1($name: String) {
@@ -35,7 +35,7 @@ operation(name: $name) {
         GraphqlToElm.Errors.decoder
 
 
-query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query2
+query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query2
 query2 =
     GraphqlToElm.Operation.query
         ("""query Query2 {
@@ -57,7 +57,7 @@ fragment {
         GraphqlToElm.Errors.decoder
 
 
-mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Mutation
+mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors Mutation
 mutation =
     GraphqlToElm.Operation.query
         ("""mutation Mutation {

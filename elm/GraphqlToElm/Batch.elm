@@ -4,8 +4,10 @@ module GraphqlToElm.Batch
         , Request
         , Error
         , map
-        , batch
-        , and
+        , query
+        , mutation
+        , andQuery
+        , andMutation
         , post
         , send
         , encode
@@ -16,7 +18,7 @@ import Http
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
 import GraphqlToElm.Helpers.Decode as DecodeHelpers
-import GraphqlToElm.Operation as Operation exposing (Operation)
+import GraphqlToElm.Operation as Operation exposing (Operation, Query, Mutation)
 import GraphqlToElm.Response as Response exposing (Response)
 
 
@@ -35,7 +37,6 @@ type alias Error =
     Http.Error
 
 
-
 map : (a -> b) -> Batch a -> Batch b
 map mapper (Batch batch) =
     Batch
@@ -51,11 +52,18 @@ map mapper (Batch batch) =
         }
 
 
-batch :
-    (Response e a -> b)
-    -> Operation e a
-    -> Batch b
-batch mapper operation =
+query : (Response e a -> b) -> Operation Query e a -> Batch b
+query =
+    any
+
+
+mutation : (Response e a -> b) -> Operation Mutation e a -> Batch b
+mutation =
+    any
+
+
+any : (Response e a -> b) -> Operation t e a -> Batch b
+any mapper operation =
     Batch
         { operations =
             [ Operation.encode operation ]
@@ -67,8 +75,18 @@ batch mapper operation =
         }
 
 
-and : Operation e a -> Batch (Response e a -> b) -> Batch b
-and operation (Batch batch) =
+andQuery : Operation Query e a -> Batch (Response e a -> b) -> Batch b
+andQuery =
+    andAny
+
+
+andMutation : Operation Mutation e a -> Batch (Response e a -> b) -> Batch b
+andMutation =
+    andAny
+
+
+andAny : Operation t e a -> Batch (Response e a -> b) -> Batch b
+andAny operation (Batch batch) =
     Batch
         { operations =
             Operation.encode operation :: batch.operations
@@ -89,7 +107,7 @@ and operation (Batch batch) =
 
 
 responseDecoder :
-    Operation e a
+    Operation t e a
     -> (List Decode.Value -> ( List Decode.Value, Decoder (Response e a) ))
 responseDecoder operation =
     (\values ->
@@ -106,8 +124,6 @@ responseDecoder operation =
                     |> DecodeHelpers.fromResult
                 )
     )
-
-
 
 
 post : String -> Batch a -> Request a

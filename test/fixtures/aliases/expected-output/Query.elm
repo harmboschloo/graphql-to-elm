@@ -11,7 +11,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Errors.Errors Query
+aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
 aliases =
     GraphqlToElm.Operation.query
         """query Aliases {

@@ -1,6 +1,9 @@
 module GraphqlToElm.Operation
     exposing
         ( Operation
+        , Query
+        , Mutation
+        , Subscription
         , named
         , query
         , dataDecoder
@@ -16,62 +19,74 @@ import Json.Encode as Encode
 import Http exposing (encodeUri)
 
 
-type Operation e a
+type Operation t e a
     = Operation
-        { type_ : Type
+        { kind : Kind
         , variables : Maybe Encode.Value
         , dataDecoder : Decoder a
         , errorsDecoder : Decoder e
         }
 
 
-type Type
-    = Named String
-    | Query String
+type Query
+    = Query
 
 
-named : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation e a
+type Mutation
+    = Mutation
+
+
+type Subscription
+    = Subscription
+
+
+type Kind
+    = NamedOperation String
+    | QueryOperation String
+
+
+named : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation t e a
 named name =
-    operation (Named name)
+    operation (NamedOperation name)
 
 
-query : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation e a
+query : String -> Maybe Encode.Value -> Decoder a -> Decoder e -> Operation t e a
 query queryString =
-    operation (Query queryString)
+    operation (QueryOperation queryString)
 
 
 operation :
-    Type
+    Kind
     -> Maybe Encode.Value
     -> Decoder a
     -> Decoder e
-    -> Operation e a
-operation type_ variables dataDecoder errorsDecoder =
+    -> Operation t e a
+operation kind variables dataDecoder errorsDecoder =
     Operation
-        { type_ = type_
+        { kind = kind
         , variables = variables
         , dataDecoder = dataDecoder
         , errorsDecoder = errorsDecoder
         }
 
 
-dataDecoder : Operation e a -> Decoder a
+dataDecoder : Operation t e a -> Decoder a
 dataDecoder (Operation operation) =
     operation.dataDecoder
 
 
-mapData : (a -> b) -> Operation e a -> Operation e b
+mapData : (a -> b) -> Operation t e a -> Operation t e b
 mapData mapper (Operation operation) =
     Operation
         { operation | dataDecoder = Decode.map mapper operation.dataDecoder }
 
 
-errorsDecoder : Operation e a -> Decoder e
+errorsDecoder : Operation t e a -> Decoder e
 errorsDecoder (Operation operation) =
     operation.errorsDecoder
 
 
-mapErrors : (e1 -> e2) -> Operation e1 a -> Operation e2 a
+mapErrors : (e1 -> e2) -> Operation t e1 a -> Operation t e2 a
 mapErrors mapper (Operation operation) =
     Operation
         { operation
@@ -79,16 +94,16 @@ mapErrors mapper (Operation operation) =
         }
 
 
-encode : Operation e a -> Encode.Value
+encode : Operation t e a -> Encode.Value
 encode (Operation operation) =
-    case operation.type_ of
-        Named name ->
+    case operation.kind of
+        NamedOperation name ->
             Encode.object
                 (( "operationName", Encode.string name )
                     :: variablesField operation.variables
                 )
 
-        Query query ->
+        QueryOperation query ->
             Encode.object
                 (( "query", Encode.string query )
                     :: variablesField operation.variables
@@ -105,14 +120,14 @@ variablesField variables =
             [ ( "variables", variables ) ]
 
 
-encodeParameters : Operation e a -> List ( String, String )
+encodeParameters : Operation t e a -> List ( String, String )
 encodeParameters (Operation operation) =
-    case operation.type_ of
-        Named name ->
+    case operation.kind of
+        NamedOperation name ->
             ( "operationName", encodeUri name )
                 :: encodeVariablesParameter operation.variables
 
-        Query query ->
+        QueryOperation query ->
             ( "query", encodeUri query )
                 :: encodeVariablesParameter operation.variables
 

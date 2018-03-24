@@ -1,8 +1,9 @@
 module Main exposing (main)
 
 import Set
-import Tests exposing (Test, tests)
+import Tests exposing (Test, queryTests, mutationTests)
 import Html exposing (Html)
+import GraphqlToElm.Operation exposing (Query, Mutation)
 import GraphqlToElm.Response as Response exposing (Response(Data, Errors))
 import GraphqlToElm.Http as Http
 import GraphqlToElm.Batch as Batch exposing (Batch)
@@ -13,28 +14,38 @@ numberOfRounds =
     100
 
 
-postTests : List Test
-postTests =
-    tests
+postQueryTests : List (Test Query)
+postQueryTests =
+    queryTests
+        |> List.repeat numberOfRounds
+        |> List.concat
+
+
+postMutationTests : List (Test Mutation)
+postMutationTests =
+    mutationTests
         |> List.repeat numberOfRounds
         |> List.concat
 
 
 schemaIds : List String
 schemaIds =
-    tests
-        |> List.map .schemaId
+    [ List.map .schemaId queryTests
+    , List.map .schemaId mutationTests
+    ]
+        |> List.concat
         |> Set.fromList
         |> Set.toList
 
 
-testsBySchema : List ( String, List Test )
+testsBySchema : List ( String, List (Test Query), List (Test Mutation) )
 testsBySchema =
     schemaIds
         |> List.map
             (\schemaId ->
                 ( schemaId
-                , List.filter (\test -> test.schemaId == schemaId) tests
+                , List.filter (\test -> test.schemaId == schemaId) queryTests
+                , List.filter (\test -> test.schemaId == schemaId) mutationTests
                 )
             )
 
@@ -43,56 +54,77 @@ type alias BatchData =
     List (Response String String)
 
 
-batch2Tests : List ( String, String, Batch BatchData )
-batch2Tests =
-    testsBySchema
-        |> List.map
-            (\( schemaId, tests ) ->
-                List.map2
-                    (\a b ->
-                        ( schemaId
-                        , "[" ++ a.id ++ "," ++ b.id ++ "]"
-                        , Batch.batch
+batchTests : List ( String, String, Batch BatchData )
+batchTests =
+    let
+        id2 a b =
+            "[" ++ String.join "," [ a.id, b.id ] ++ "]"
+
+        id3 a b c =
+            "[" ++ String.join "," [ a.id, b.id, c.id ] ++ "]"
+
+        map =
+            Response.mapData toString >> Response.mapErrors toString
+
+        map2 a b =
+            [ map a, map b ]
+
+        map3 a b c =
+            [ map a, map b, map c ]
+    in
+        testsBySchema
+            |> List.map
+                (\( schemaId, queryTests, mutationTests ) ->
+                    List.concat
+                        [ List.map2
                             (\a b ->
-                                [ a
-                                    |> Response.mapData toString
-                                    |> Response.mapErrors toString
-                                , b
-                                    |> Response.mapData toString
-                                    |> Response.mapErrors toString
-                                ]
+                                ( schemaId
+                                , id2 a b
+                                , Batch.query map2 a.operation
+                                    |> Batch.andQuery b.operation
+                                )
                             )
-                            a.operation
-                            |> Batch.and b.operation
-                        )
-                    )
-                    (tests)
-                    (List.reverse tests)
-            )
-        |> List.concat
+                            (queryTests)
+                            (List.reverse queryTests)
+                        , List.map3
+                            (\a b c ->
+                                ( schemaId
+                                , id3 a b c
+                                , Batch.query map3 a.operation
+                                    |> Batch.andMutation b.operation
+                                    |> Batch.andQuery c.operation
+                                )
+                            )
+                            (queryTests)
+                            (mutationTests)
+                            (List.reverse queryTests)
+                        , List.map2
+                            (\a b ->
+                                ( schemaId
+                                , id2 a b
+                                , Batch.mutation map2 a.operation
+                                    |> Batch.andMutation b.operation
+                                )
+                            )
+                            (List.reverse mutationTests)
+                            (mutationTests)
+                        ]
+                )
+            |> List.concat
 
 
-getTests : List Test
+getTests : List (Test Query)
 getTests =
-    tests
-        |> List.filter (\test -> not <| List.member test.id getTestBlackList)
+    queryTests
         |> List.repeat numberOfRounds
         |> List.concat
 
 
-getTestBlackList : List String
-getTestBlackList =
-    [ "operations-named-Tests.OperationsNamed.Query-mutation"
-    , "operations-Tests.Operations.MultipleFragments-mutation"
-    , "operations-Tests.Operations.Multiple-mutation"
-    , "operations-Tests.Operations.AnonymousMutation-mutation"
-    ]
-
-
 numberOfTests : Int
 numberOfTests =
-    List.length postTests
-        + List.length batch2Tests
+    List.length postQueryTests
+        + List.length postMutationTests
+        + List.length batchTests
         + List.length getTests
 
 
@@ -118,8 +150,9 @@ init =
             Debug.log "[Start Test] number of tests" numberOfTests
     in
         ( Model 0 0
-        , [ List.map sendPost postTests
-          , List.map sendBatch batch2Tests
+        , [ List.map sendPostQuery postQueryTests
+          , List.map sendPostMutation postMutationTests
+          , List.map sendBatch batchTests
           , List.map sendGet getTests
           ]
             |> List.concat
@@ -127,10 +160,16 @@ init =
         )
 
 
-sendPost : Test -> Cmd Msg
-sendPost test =
+sendPostQuery : Test Query -> Cmd Msg
+sendPostQuery test =
     Http.send (TestResponseReceived test.id) <|
-        Http.post ("/graphql/" ++ test.schemaId) test.operation
+        Http.postQuery ("/graphql/" ++ test.schemaId) test.operation
+
+
+sendPostMutation : Test Mutation -> Cmd Msg
+sendPostMutation test =
+    Http.send (TestResponseReceived test.id) <|
+        Http.postMutation ("/graphql/" ++ test.schemaId) test.operation
 
 
 sendBatch : ( String, String, Batch BatchData ) -> Cmd Msg
@@ -139,10 +178,10 @@ sendBatch ( schemaId, id, batch ) =
         Batch.post ("/graphql/" ++ schemaId) batch
 
 
-sendGet : Test -> Cmd Msg
+sendGet : Test Query -> Cmd Msg
 sendGet test =
     Http.send (TestResponseReceived test.id) <|
-        Http.get ("/graphql/" ++ test.schemaId) test.operation
+        Http.getQuery ("/graphql/" ++ test.schemaId) test.operation
 
 
 

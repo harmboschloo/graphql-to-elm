@@ -2,3 +2,4 @@ node_modules
 elm-stuff
 generated*
 /lib
+/documentation.json

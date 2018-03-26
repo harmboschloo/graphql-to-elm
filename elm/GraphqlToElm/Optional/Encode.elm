@@ -5,10 +5,18 @@ module GraphqlToElm.Optional.Encode
         , object
         )
 
+{-| Encode [`Optionals`](# GraphqlToElm.Optional.Optional) to JSON.
+
+@docs optional, list, object
+
+-}
+
 import Json.Encode as Encode
 import GraphqlToElm.Optional exposing (Optional(Absent, Null, Present))
 
 
+{-| Encode an `Optional` value.
+-}
 optional : (a -> Encode.Value) -> Optional a -> Maybe Encode.Value
 optional encoder optional =
     case optional of
@@ -22,6 +30,8 @@ optional encoder optional =
             Nothing
 
 
+{-| Encode a list of `Optional` values. Absent values are omitted.
+-}
 list : (a -> Encode.Value) -> List (Optional a) -> Encode.Value
 list encoder optionals =
     optionals
@@ -29,6 +39,8 @@ list encoder optionals =
         |> Encode.list
 
 
+{-| Encode a object of `Optional` fields. Absent fields are omitted.
+-}
 object : List ( String, Optional Encode.Value ) -> Encode.Value
 object optionalFields =
     optionalFields

@@ -7,14 +7,21 @@ module GraphqlToElm.Optional
         , fromMaybe
         )
 
+{-| An `Optional` can be `Present`, `Null` or `Absent`.
+
+@docs Optional, map, withDefault, toMaybe, fromMaybe
+
+-}
 
 
+{-| -}
 type Optional a
     = Present a
     | Null
     | Absent
 
 
+{-| -}
 map : (a -> b) -> Optional a -> Optional b
 map mapper optional =
     case optional of
@@ -28,6 +35,7 @@ map mapper optional =
             Absent
 
 
+{-| -}
 withDefault : a -> Optional a -> a
 withDefault default optional =
     case optional of
@@ -38,6 +46,7 @@ withDefault default optional =
             default
 
 
+{-| -}
 toMaybe : Optional a -> Maybe a
 toMaybe optional =
     case optional of
@@ -48,6 +57,7 @@ toMaybe optional =
             Nothing
 
 
+{-| -}
 fromMaybe : Maybe a -> Optional a -> Optional a
 fromMaybe maybe default =
     case maybe of

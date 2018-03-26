@@ -1,9 +1,17 @@
 module GraphqlToElm.Optional.Decode exposing (field, nonNullField)
 
+{-| Decode [`Optionals`](# GraphqlToElm.Optional.Optional) from JSON.
+
+@docs field, nonNullField
+
+-}
+
 import Json.Decode as Decode exposing (Decoder)
 import GraphqlToElm.Optional exposing (Optional(Absent, Null, Present))
 
 
+{-| Decode a JSON object with a `Optional` field.
+-}
 field : String -> Decoder a -> Decoder (Optional a)
 field name decoder =
     Decode.maybe (Decode.field name Decode.value)
@@ -26,6 +34,9 @@ valueToOptionalDecoder decoder value =
             Decode.succeed (Present a)
 
 
+{-| Decode a JSON object with a `Optional` field that can be present or absent
+but not `null`.
+-}
 nonNullField : String -> Decoder a -> Decoder (Maybe a)
 nonNullField name decoder =
     Decode.maybe (Decode.field name Decode.value)

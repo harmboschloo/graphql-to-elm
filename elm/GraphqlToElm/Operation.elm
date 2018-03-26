@@ -14,11 +14,26 @@ module GraphqlToElm.Operation
         , encodeParameters
         )
 
+{-| A GraphQL operation.
+
+@docs Operation, Query, Mutation, Subscription
+
+@docs withName, withQuery
+
+@docs encode, encodeParameters
+
+@docs dataDecoder, errorsDecoder
+
+@docs mapData, mapErrors
+
+-}
+
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Http exposing (encodeUri)
 
 
+{-| -}
 type Operation t e a
     = Operation
         { kind : Kind
@@ -28,14 +43,17 @@ type Operation t e a
         }
 
 
+{-| -}
 type Query
     = Query
 
 
+{-| -}
 type Mutation
     = Mutation
 
 
+{-| -}
 type Subscription
     = Subscription
 
@@ -45,6 +63,7 @@ type Kind
     | WithQuery String
 
 
+{-| -}
 withName :
     String
     -> Maybe Encode.Value
@@ -55,6 +74,7 @@ withName name =
     operation (WithName name)
 
 
+{-| -}
 withQuery :
     String
     -> Maybe Encode.Value
@@ -80,22 +100,26 @@ operation kind variables dataDecoder errorsDecoder =
         }
 
 
+{-| -}
 dataDecoder : Operation t e a -> Decoder a
 dataDecoder (Operation operation) =
     operation.dataDecoder
 
 
+{-| -}
 mapData : (a -> b) -> Operation t e a -> Operation t e b
 mapData mapper (Operation operation) =
     Operation
         { operation | dataDecoder = Decode.map mapper operation.dataDecoder }
 
 
+{-| -}
 errorsDecoder : Operation t e a -> Decoder e
 errorsDecoder (Operation operation) =
     operation.errorsDecoder
 
 
+{-| -}
 mapErrors : (e1 -> e2) -> Operation t e1 a -> Operation t e2 a
 mapErrors mapper (Operation operation) =
     Operation
@@ -104,6 +128,7 @@ mapErrors mapper (Operation operation) =
         }
 
 
+{-| -}
 encode : Operation t e a -> Encode.Value
 encode (Operation operation) =
     case operation.kind of
@@ -130,6 +155,7 @@ variablesField variables =
             [ ( "variables", variables ) ]
 
 
+{-| -}
 encodeParameters : Operation t e a -> List ( String, String )
 encodeParameters (Operation operation) =
     case operation.kind of

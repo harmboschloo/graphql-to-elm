@@ -6,34 +6,37 @@ module GraphqlToElm.Helpers.Decode
         , constant
         )
 
+{-| Some additional functions that help with decoding JSON.
+
+@docs andMap, fromResult, constant, emptyObject
+
+-}
+
 import Json.Decode as Decode exposing (Decoder)
 
 
+{-| Provide a pipeline for mapping decoders.
+Can be used for decoding large records.
+-}
 andMap : Decoder a -> Decoder (a -> b) -> Decoder b
 andMap =
     Decode.map2 (|>)
 
 
+{-| Turn a result into a decoder.
+-}
 fromResult : Result String a -> Decoder a
 fromResult result =
     case result of
         Err error ->
             Decode.fail error
+
         Ok value ->
             Decode.succeed value
 
-emptyObject : a -> Decoder a
-emptyObject result =
-    Decode.keyValuePairs Decode.value
-        |> Decode.andThen
-            (\pairs ->
-                if List.isEmpty pairs then
-                    Decode.succeed result
-                else
-                    Decode.fail "expected empty object"
-            )
 
-
+{-| Decode a constant value.
+-}
 constant : a -> Decoder a -> Decoder a
 constant constantValue =
     Decode.andThen
@@ -48,3 +51,19 @@ constant constantValue =
                         ++ toString value
                         ++ "`"
         )
+
+
+{-| Decode an empty object `{}`.
+-}
+emptyObject : a -> Decoder a
+emptyObject result =
+    Decode.keyValuePairs Decode.value
+        |> Decode.andThen
+            (\pairs ->
+                case pairs of
+                    [] ->
+                        Decode.succeed result
+
+                    _ ->
+                        Decode.fail "expected empty object"
+            )

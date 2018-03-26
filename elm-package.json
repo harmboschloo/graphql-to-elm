@@ -1,10 +1,21 @@
 {
   "version": "1.0.0",
-  "summary": "helpful summary of your project, less than 80 characters",
-  "repository": "https://github.com/user/project.git",
+  "summary": "Validates graphql queries and converts them to elm code.  ",
+  "repository": "https://github.com/harmboschloo/graphql-to-elm.git",
   "license": "BSD-3-Clause",
   "source-directories": ["elm"],
-  "exposed-modules": [],
+  "exposed-modules": [
+    "GraphqlToElm.Helpers.Decode",
+    "GraphqlToElm.Helpers.Url",
+    "GraphqlToElm.Optional.Decode",
+    "GraphqlToElm.Optional.Encode",
+    "GraphqlToElm.Batch",
+    "GraphqlToElm.Errors",
+    "GraphqlToElm.Http",
+    "GraphqlToElm.Operation",
+    "GraphqlToElm.Optional",
+    "GraphqlToElm.Response"
+  ],
   "dependencies": {
     "elm-lang/core": "5.1.1 <= v < 6.0.0",
     "elm-lang/http": "1.0.0 <= v < 2.0.0"

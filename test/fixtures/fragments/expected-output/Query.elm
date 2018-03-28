@@ -1,7 +1,7 @@
 module Query
     exposing
         ( FragmentsVariables
-        , Query
+        , FragmentsQuery
         , User
         , Flip(..)
         , Heads
@@ -15,7 +15,7 @@ import Json.Decode
 import Json.Encode
 
 
-fragments : FragmentsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+fragments : FragmentsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentsQuery
 fragments variables =
     GraphqlToElm.Operation.withQuery
         ("""query Fragments($id: String!) {
@@ -42,7 +42,7 @@ length
             ++ heads
         )
         (Maybe.Just <| encodeFragmentsVariables variables)
-        queryDecoder
+        fragmentsQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -74,7 +74,7 @@ encodeFragmentsVariables inputs =
         ]
 
 
-type alias Query =
+type alias FragmentsQuery =
     { user1 : User
     , user2 : User
     , user3 : Maybe.Maybe User
@@ -83,9 +83,9 @@ type alias Query =
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map5 Query
+fragmentsQueryDecoder : Json.Decode.Decoder FragmentsQuery
+fragmentsQueryDecoder =
+    Json.Decode.map5 FragmentsQuery
         (Json.Decode.field "user1" userDecoder)
         (Json.Decode.field "user2" userDecoder)
         (Json.Decode.field "user3" (Json.Decode.nullable userDecoder))

@@ -1,6 +1,6 @@
 module FragmentInFragmentPartial
     exposing
-        ( Query
+        ( FragmentInFragmentPartialQuery
         , Animal
         , OnAnimal(..)
         , Mammal(..)
@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentInFragmentPartialQuery
 fragmentInFragmentPartial =
     GraphqlToElm.Operation.withQuery
         """query FragmentInFragmentPartial {
@@ -28,18 +28,18 @@ hairy
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        fragmentInFragmentPartialQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias FragmentInFragmentPartialQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+fragmentInFragmentPartialQueryDecoder : Json.Decode.Decoder FragmentInFragmentPartialQuery
+fragmentInFragmentPartialQueryDecoder =
+    Json.Decode.map FragmentInFragmentPartialQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

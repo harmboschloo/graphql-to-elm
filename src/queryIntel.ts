@@ -35,7 +35,13 @@ import {
   validate
 } from "graphql";
 import { FinalOptions } from "./options";
-import { readFile, removeIndents, assertOk, addOnce } from "./utils";
+import {
+  readFile,
+  removeIndents,
+  assertOk,
+  addOnce,
+  firstToUpperCase
+} from "./utils";
 
 export interface QueryIntel {
   src: string;
@@ -519,7 +525,7 @@ const getOutputs = (
       }
     },
     leave: {
-      OperationDefinition() {
+      OperationDefinition(node: OperationDefinitionNode) {
         const nodeInfo: NodeInfo = popNodeInfo();
         const name: string = "";
         const type: GraphQLCompositeType = assertCompositeType(
@@ -532,8 +538,11 @@ const getOutputs = (
           nodeInfo.fragments,
           schema
         );
+        rootOutput.typeName = `${
+          node.name ? node.name.value : ""
+        }${firstToUpperCase(rootOutput.typeName)}`;
       },
-      Field(node) {
+      Field(node: FieldNode) {
         const nodeInfo: NodeInfo = popNodeInfo();
         const name: string = node.alias ? node.alias.value : node.name.value;
         const type: GraphQLType = typeInfo.getType();

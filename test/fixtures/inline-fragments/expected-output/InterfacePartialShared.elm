@@ -1,6 +1,6 @@
 module InterfacePartialShared
     exposing
-        ( Query
+        ( InterfacePartialSharedQuery
         , Animal
         , OnAnimal(..)
         , Dog
@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+interfacePartialShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfacePartialSharedQuery
 interfacePartialShared =
     GraphqlToElm.Operation.withQuery
         """query InterfacePartialShared {
@@ -24,18 +24,18 @@ hairy
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        interfacePartialSharedQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias InterfacePartialSharedQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+interfacePartialSharedQueryDecoder : Json.Decode.Decoder InterfacePartialSharedQuery
+interfacePartialSharedQueryDecoder =
+    Json.Decode.map InterfacePartialSharedQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

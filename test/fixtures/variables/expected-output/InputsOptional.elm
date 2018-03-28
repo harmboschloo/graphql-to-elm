@@ -3,7 +3,7 @@ module InputsOptional
         ( InputsOptionalVariables
         , OptionalInputs
         , OtherInputs
-        , Query
+        , InputsOptionalQuery
         , inputsOptional
         )
 
@@ -15,14 +15,14 @@ import Json.Decode
 import Json.Encode
 
 
-inputsOptional : InputsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+inputsOptional : InputsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InputsOptionalQuery
 inputsOptional variables =
     GraphqlToElm.Operation.withQuery
         """query InputsOptional($inputs: OptionalInputs) {
 inputsOptional(inputs: $inputs)
 }"""
         (Maybe.Just <| encodeInputsOptionalVariables variables)
-        queryDecoder
+        inputsOptionalQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -66,12 +66,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Query =
+type alias InputsOptionalQuery =
     { inputsOptional : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+inputsOptionalQueryDecoder : Json.Decode.Decoder InputsOptionalQuery
+inputsOptionalQueryDecoder =
+    Json.Decode.map InputsOptionalQuery
         (Json.Decode.field "inputsOptional" (Json.Decode.nullable Json.Decode.string))

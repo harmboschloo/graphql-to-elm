@@ -1,6 +1,6 @@
 module InterfaceMultiple
     exposing
-        ( Query
+        ( InterfaceMultipleQuery
         , Animal(..)
         , Mammal
         , Bird
@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceMultiple : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+interfaceMultiple : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceMultipleQuery
 interfaceMultiple =
     GraphqlToElm.Operation.withQuery
         """query InterfaceMultiple {
@@ -27,18 +27,18 @@ canFly
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        interfaceMultipleQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias InterfaceMultipleQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+interfaceMultipleQueryDecoder : Json.Decode.Decoder InterfaceMultipleQuery
+interfaceMultipleQueryDecoder =
+    Json.Decode.map InterfaceMultipleQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

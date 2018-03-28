@@ -1,7 +1,7 @@
 module Mixed2
     exposing
         ( Mixed2Variables
-        , Query
+        , Mixed2Query
         , mixed2
         )
 
@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Mixed2Query
 mixed2 variables =
     GraphqlToElm.Operation.withQuery
         """query Mixed2($withSchool: Boolean!, $withCity: Boolean!) {
@@ -22,7 +22,7 @@ school @skip(if: $withSchool)
 city @include(if: $withCity)
 }"""
         (Maybe.Just <| encodeMixed2Variables variables)
-        queryDecoder
+        mixed2QueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -40,16 +40,16 @@ encodeMixed2Variables inputs =
         ]
 
 
-type alias Query =
+type alias Mixed2Query =
     { name : String
     , school : Maybe.Maybe String
     , city : GraphqlToElm.Optional.Optional String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map3 Query
+mixed2QueryDecoder : Json.Decode.Decoder Mixed2Query
+mixed2QueryDecoder =
+    Json.Decode.map3 Mixed2Query
         (Json.Decode.field "name" Json.Decode.string)
         (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
         (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)

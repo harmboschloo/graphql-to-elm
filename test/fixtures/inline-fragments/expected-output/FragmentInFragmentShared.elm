@@ -1,6 +1,6 @@
 module FragmentInFragmentShared
     exposing
-        ( Query
+        ( FragmentInFragmentSharedQuery
         , Animal
         , OnAnimal(..)
         , Mammal
@@ -16,7 +16,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-fragmentInFragmentShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+fragmentInFragmentShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentInFragmentSharedQuery
 fragmentInFragmentShared =
     GraphqlToElm.Operation.withQuery
         """query FragmentInFragmentShared {
@@ -37,18 +37,18 @@ canFly
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        fragmentInFragmentSharedQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias FragmentInFragmentSharedQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+fragmentInFragmentSharedQueryDecoder : Json.Decode.Decoder FragmentInFragmentSharedQuery
+fragmentInFragmentSharedQueryDecoder =
+    Json.Decode.map FragmentInFragmentSharedQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

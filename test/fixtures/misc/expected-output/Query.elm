@@ -1,6 +1,6 @@
 module Query
     exposing
-        ( Query
+        ( TestQueryQuery
         , User
         , User2
         , User4
@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-testQuery : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+testQuery : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TestQueryQuery
 testQuery =
     GraphqlToElm.Operation.withQuery
         """query TestQuery {
@@ -45,11 +45,11 @@ age
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        testQueryQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias TestQueryQuery =
     { i : User
     , version : Int
     , me : User2
@@ -59,9 +59,9 @@ type alias Query =
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map6 Query
+testQueryQueryDecoder : Json.Decode.Decoder TestQueryQuery
+testQueryQueryDecoder =
+    Json.Decode.map6 TestQueryQuery
         (Json.Decode.field "i" userDecoder)
         (Json.Decode.field "version" Json.Decode.int)
         (Json.Decode.field "me" user2Decoder)

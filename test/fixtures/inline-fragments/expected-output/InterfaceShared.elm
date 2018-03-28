@@ -1,6 +1,6 @@
 module InterfaceShared
     exposing
-        ( Query
+        ( InterfaceSharedQuery
         , Animal
         , OnAnimal(..)
         , Dog
@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+interfaceShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceSharedQuery
 interfaceShared =
     GraphqlToElm.Operation.withQuery
         """query InterfaceShared {
@@ -32,18 +32,18 @@ canFly
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        interfaceSharedQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias InterfaceSharedQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+interfaceSharedQueryDecoder : Json.Decode.Decoder InterfaceSharedQuery
+interfaceSharedQueryDecoder =
+    Json.Decode.map InterfaceSharedQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

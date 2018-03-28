@@ -1,6 +1,6 @@
 module UnionPartial
     exposing
-        ( Query
+        ( UnionPartialQuery
         , Flip(..)
         , Heads
         , Flip2(..)
@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-unionPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+unionPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionPartialQuery
 unionPartial =
     GraphqlToElm.Operation.withQuery
         """query UnionPartial {
@@ -30,19 +30,19 @@ length
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        unionPartialQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias UnionPartialQuery =
     { flip : Flip
     , flipOrNull : Maybe.Maybe Flip2
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map2 Query
+unionPartialQueryDecoder : Json.Decode.Decoder UnionPartialQuery
+unionPartialQueryDecoder =
+    Json.Decode.map2 UnionPartialQuery
         (Json.Decode.field "flip" flipDecoder)
         (Json.Decode.field "flipOrNull" (Json.Decode.nullable flip2Decoder))
 

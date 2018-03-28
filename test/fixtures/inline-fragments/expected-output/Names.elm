@@ -1,6 +1,6 @@
 module Names
     exposing
-        ( Query
+        ( NamesQuery
         , Flip(..)
         , Heads
         , Tails
@@ -15,7 +15,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-names : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+names : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors NamesQuery
 names =
     GraphqlToElm.Operation.withQuery
         """query Names {
@@ -47,11 +47,11 @@ length
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        namesQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias NamesQuery =
     { flip1 : Flip
     , flip2 : Flip
     , flip3 : Flip2
@@ -59,9 +59,9 @@ type alias Query =
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map4 Query
+namesQueryDecoder : Json.Decode.Decoder NamesQuery
+namesQueryDecoder =
+    Json.Decode.map4 NamesQuery
         (Json.Decode.field "flip1" flipDecoder)
         (Json.Decode.field "flip2" flipDecoder)
         (Json.Decode.field "flip3" flip2Decoder)

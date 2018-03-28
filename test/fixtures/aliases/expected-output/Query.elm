@@ -1,6 +1,6 @@
 module Query
     exposing
-        ( Query
+        ( AliasesQuery
         , User
         , User2
         , aliases
@@ -11,7 +11,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors AliasesQuery
 aliases =
     GraphqlToElm.Operation.withQuery
         """query Aliases {
@@ -41,11 +41,11 @@ name
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        aliasesQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias AliasesQuery =
     { user1 : User
     , user2 : User2
     , user3 : User
@@ -55,9 +55,9 @@ type alias Query =
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map6 Query
+aliasesQueryDecoder : Json.Decode.Decoder AliasesQuery
+aliasesQueryDecoder =
+    Json.Decode.map6 AliasesQuery
         (Json.Decode.field "user1" userDecoder)
         (Json.Decode.field "user2" user2Decoder)
         (Json.Decode.field "user3" userDecoder)

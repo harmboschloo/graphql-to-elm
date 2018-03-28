@@ -1,6 +1,6 @@
 module Single
     exposing
-        ( Query
+        ( SingleQuery
         , Animal
         , single
         )
@@ -10,7 +10,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-single : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+single : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors SingleQuery
 single =
     GraphqlToElm.Operation.withQuery
         """query Single {
@@ -28,19 +28,19 @@ color
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        singleQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias SingleQuery =
     { single : Animal
     , shared : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map2 Query
+singleQueryDecoder : Json.Decode.Decoder SingleQuery
+singleQueryDecoder =
+    Json.Decode.map2 SingleQuery
         (Json.Decode.field "single" animalDecoder)
         (Json.Decode.field "shared" animalDecoder)
 

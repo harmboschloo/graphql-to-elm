@@ -4,7 +4,7 @@ module Lists
         , Inputs
         , OtherInputs
         , OptionalInputs
-        , Query
+        , ListsQuery
         , lists
         )
 
@@ -16,7 +16,7 @@ import Json.Decode
 import Json.Encode
 
 
-lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+lists : ListsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors ListsQuery
 lists variables =
     GraphqlToElm.Operation.withQuery
         """query Lists(
@@ -28,7 +28,7 @@ $inputs2: [OptionalInputs]!
 lists(ints: $ints, floats: $floats, inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeListsVariables variables)
-        queryDecoder
+        listsQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -94,12 +94,12 @@ encodeOptionalInputs inputs =
         ]
 
 
-type alias Query =
+type alias ListsQuery =
     { lists : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+listsQueryDecoder : Json.Decode.Decoder ListsQuery
+listsQueryDecoder =
+    Json.Decode.map ListsQuery
         (Json.Decode.field "lists" (Json.Decode.nullable Json.Decode.string))

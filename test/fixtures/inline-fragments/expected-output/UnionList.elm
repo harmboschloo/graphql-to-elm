@@ -1,6 +1,6 @@
 module UnionList
     exposing
-        ( Query
+        ( UnionListQuery
         , Flip(..)
         , Heads
         , Tails
@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-unionList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+unionList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionListQuery
 unionList =
     GraphqlToElm.Operation.withQuery
         """query UnionList {
@@ -26,18 +26,18 @@ length
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        unionListQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias UnionListQuery =
     { flips : List Flip
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+unionListQueryDecoder : Json.Decode.Decoder UnionListQuery
+unionListQueryDecoder =
+    Json.Decode.map UnionListQuery
         (Json.Decode.field "flips" (Json.Decode.list flipDecoder))
 
 

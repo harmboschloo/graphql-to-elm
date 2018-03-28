@@ -1,7 +1,7 @@
 module ScalarsMixed
     exposing
         ( ScalarsMixedVariables
-        , Query
+        , ScalarsMixedQuery
         , scalarsMixed
         )
 
@@ -13,14 +13,14 @@ import Json.Decode
 import Json.Encode
 
 
-scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors ScalarsMixedQuery
 scalarsMixed variables =
     GraphqlToElm.Operation.withQuery
         """query ScalarsMixed($string: String, $int: Int!) {
 scalarsMixed(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsMixedVariables variables)
-        queryDecoder
+        scalarsMixedQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -38,12 +38,12 @@ encodeScalarsMixedVariables inputs =
         ]
 
 
-type alias Query =
+type alias ScalarsMixedQuery =
     { scalarsMixed : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+scalarsMixedQueryDecoder : Json.Decode.Decoder ScalarsMixedQuery
+scalarsMixedQueryDecoder =
+    Json.Decode.map ScalarsMixedQuery
         (Json.Decode.field "scalarsMixed" (Json.Decode.nullable Json.Decode.string))

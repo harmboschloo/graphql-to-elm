@@ -1,7 +1,7 @@
 module ScalarsOptional
     exposing
         ( ScalarsOptionalVariables
-        , Query
+        , ScalarsOptionalQuery
         , scalarsOptional
         )
 
@@ -13,14 +13,14 @@ import Json.Decode
 import Json.Encode
 
 
-scalarsOptional : ScalarsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+scalarsOptional : ScalarsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors ScalarsOptionalQuery
 scalarsOptional variables =
     GraphqlToElm.Operation.withQuery
         """query ScalarsOptional($string: String, $int: Int) {
 scalarsOptional(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsOptionalVariables variables)
-        queryDecoder
+        scalarsOptionalQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -38,12 +38,12 @@ encodeScalarsOptionalVariables inputs =
         ]
 
 
-type alias Query =
+type alias ScalarsOptionalQuery =
     { scalarsOptional : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+scalarsOptionalQueryDecoder : Json.Decode.Decoder ScalarsOptionalQuery
+scalarsOptionalQueryDecoder =
+    Json.Decode.map ScalarsOptionalQuery
         (Json.Decode.field "scalarsOptional" (Json.Decode.nullable Json.Decode.string))

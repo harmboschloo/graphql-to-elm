@@ -1,11 +1,11 @@
 module Multiple
     exposing
         ( Query1Variables
-        , Query
+        , Query1Query
         , Operation
-        , Query2
+        , Query2Query
         , Operation2
-        , Mutation
+        , MutationMutation
         , Fragment
         , query1
         , query2
@@ -20,7 +20,7 @@ import Json.Decode
 import Json.Encode
 
 
-query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+query1 : Query1Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query1Query
 query1 variables =
     GraphqlToElm.Operation.withQuery
         """query Query1($name: String) {
@@ -29,11 +29,11 @@ name
 }
 }"""
         (Maybe.Just <| encodeQuery1Variables variables)
-        queryDecoder
+        query1QueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query2
+query2 : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query2Query
 query2 =
     GraphqlToElm.Operation.withQuery
         """query Query2 {
@@ -42,11 +42,11 @@ query
 }
 }"""
         Maybe.Nothing
-        query2Decoder
+        query2QueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors Mutation
+mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors MutationMutation
 mutation =
     GraphqlToElm.Operation.withQuery
         """mutation Mutation {
@@ -55,7 +55,7 @@ name
 }
 }"""
         Maybe.Nothing
-        mutationDecoder
+        mutationMutationDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -71,14 +71,14 @@ encodeQuery1Variables inputs =
         ]
 
 
-type alias Query =
+type alias Query1Query =
     { operation : Maybe.Maybe Operation
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+query1QueryDecoder : Json.Decode.Decoder Query1Query
+query1QueryDecoder =
+    Json.Decode.map Query1Query
         (Json.Decode.field "operation" (Json.Decode.nullable operationDecoder))
 
 
@@ -93,14 +93,14 @@ operationDecoder =
         (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
 
 
-type alias Query2 =
+type alias Query2Query =
     { operation : Maybe.Maybe Operation2
     }
 
 
-query2Decoder : Json.Decode.Decoder Query2
-query2Decoder =
-    Json.Decode.map Query2
+query2QueryDecoder : Json.Decode.Decoder Query2Query
+query2QueryDecoder =
+    Json.Decode.map Query2Query
         (Json.Decode.field "operation" (Json.Decode.nullable operation2Decoder))
 
 
@@ -115,14 +115,14 @@ operation2Decoder =
         (Json.Decode.field "query" Json.Decode.string)
 
 
-type alias Mutation =
+type alias MutationMutation =
     { fragment : Maybe.Maybe Fragment
     }
 
 
-mutationDecoder : Json.Decode.Decoder Mutation
-mutationDecoder =
-    Json.Decode.map Mutation
+mutationMutationDecoder : Json.Decode.Decoder MutationMutation
+mutationMutationDecoder =
+    Json.Decode.map MutationMutation
         (Json.Decode.field "fragment" (Json.Decode.nullable fragmentDecoder))
 
 

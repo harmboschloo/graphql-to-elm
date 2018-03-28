@@ -3,7 +3,7 @@ module InputsMixed
         ( InputsMixedVariables
         , MixedInputs
         , OtherInputs
-        , Query
+        , InputsMixedQuery
         , inputsMixed
         )
 
@@ -15,14 +15,14 @@ import Json.Decode
 import Json.Encode
 
 
-inputsMixed : InputsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+inputsMixed : InputsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InputsMixedQuery
 inputsMixed variables =
     GraphqlToElm.Operation.withQuery
         """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
 inputsMixed(inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeInputsMixedVariables variables)
-        queryDecoder
+        inputsMixedQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -68,12 +68,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Query =
+type alias InputsMixedQuery =
     { inputsMixed : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+inputsMixedQueryDecoder : Json.Decode.Decoder InputsMixedQuery
+inputsMixedQueryDecoder =
+    Json.Decode.map InputsMixedQuery
         (Json.Decode.field "inputsMixed" (Json.Decode.nullable Json.Decode.string))

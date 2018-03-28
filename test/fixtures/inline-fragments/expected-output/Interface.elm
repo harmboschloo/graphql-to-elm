@@ -1,6 +1,6 @@
 module Interface
     exposing
-        ( Query
+        ( InterfaceQuery
         , Animal(..)
         , Dog
         , Dolphin
@@ -13,7 +13,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interface : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+interface : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceQuery
 interface =
     GraphqlToElm.Operation.withQuery
         """query Interface {
@@ -33,18 +33,18 @@ canFly
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        interfaceQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias InterfaceQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+interfaceQueryDecoder : Json.Decode.Decoder InterfaceQuery
+interfaceQueryDecoder =
+    Json.Decode.map InterfaceQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

@@ -1,6 +1,6 @@
 module InterfaceList
     exposing
-        ( Query
+        ( InterfaceListQuery
         , Animal(..)
         , Dog
         , Dolphin
@@ -13,7 +13,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceListQuery
 interfaceList =
     GraphqlToElm.Operation.withQuery
         """query InterfaceList {
@@ -33,18 +33,18 @@ color
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        interfaceListQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias InterfaceListQuery =
     { animals : List Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+interfaceListQueryDecoder : Json.Decode.Decoder InterfaceListQuery
+interfaceListQueryDecoder =
+    Json.Decode.map InterfaceListQuery
         (Json.Decode.field "animals" (Json.Decode.list animalDecoder))
 
 

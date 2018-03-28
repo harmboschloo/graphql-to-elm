@@ -3,7 +3,7 @@ module Inputs
         ( InputsVariables
         , Inputs
         , OtherInputs
-        , Query
+        , InputsQuery
         , inputs
         )
 
@@ -13,14 +13,14 @@ import Json.Decode
 import Json.Encode
 
 
-inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+inputs : InputsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InputsQuery
 inputs variables =
     GraphqlToElm.Operation.withQuery
         """query Inputs($inputs: Inputs!) {
 inputs(inputs: $inputs)
 }"""
         (Maybe.Just <| encodeInputsVariables variables)
-        queryDecoder
+        inputsQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -64,12 +64,12 @@ encodeOtherInputs inputs =
         ]
 
 
-type alias Query =
+type alias InputsQuery =
     { inputs : Maybe.Maybe String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+inputsQueryDecoder : Json.Decode.Decoder InputsQuery
+inputsQueryDecoder =
+    Json.Decode.map InputsQuery
         (Json.Decode.field "inputs" (Json.Decode.nullable Json.Decode.string))

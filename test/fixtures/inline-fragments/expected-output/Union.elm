@@ -1,6 +1,6 @@
 module Union
     exposing
-        ( Query
+        ( UnionQuery
         , Flip(..)
         , Heads
         , Tails
@@ -12,7 +12,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-union : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+union : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionQuery
 union =
     GraphqlToElm.Operation.withQuery
         """query Union {
@@ -26,18 +26,18 @@ length
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        unionQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias UnionQuery =
     { flip : Flip
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+unionQueryDecoder : Json.Decode.Decoder UnionQuery
+unionQueryDecoder =
+    Json.Decode.map UnionQuery
         (Json.Decode.field "flip" flipDecoder)
 
 

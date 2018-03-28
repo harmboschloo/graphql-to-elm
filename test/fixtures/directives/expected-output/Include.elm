@@ -1,7 +1,7 @@
 module Include
     exposing
         ( IncludeVariables
-        , Query
+        , IncludeQuery
         , include
         )
 
@@ -13,7 +13,7 @@ import Json.Decode
 import Json.Encode
 
 
-include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+include : IncludeVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors IncludeQuery
 include variables =
     GraphqlToElm.Operation.withQuery
         """query Include($withSchool: Boolean!, $withCity: Boolean!) {
@@ -22,7 +22,7 @@ school @include(if: $withSchool)
 city @include(if: $withCity)
 }"""
         (Maybe.Just <| encodeIncludeVariables variables)
-        queryDecoder
+        includeQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
@@ -40,16 +40,16 @@ encodeIncludeVariables inputs =
         ]
 
 
-type alias Query =
+type alias IncludeQuery =
     { name : String
     , school : Maybe.Maybe String
     , city : GraphqlToElm.Optional.Optional String
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map3 Query
+includeQueryDecoder : Json.Decode.Decoder IncludeQuery
+includeQueryDecoder =
+    Json.Decode.map3 IncludeQuery
         (Json.Decode.field "name" Json.Decode.string)
         (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
         (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)

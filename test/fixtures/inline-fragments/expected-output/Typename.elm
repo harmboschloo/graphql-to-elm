@@ -1,6 +1,6 @@
 module Typename
     exposing
-        ( Query
+        ( TypenameQuery
         , Animal(..)
         , Dog
         , Dolphin
@@ -14,7 +14,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-typename : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+typename : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TypenameQuery
 typename =
     GraphqlToElm.Operation.withQuery
         """query Typename {
@@ -33,18 +33,18 @@ color
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        typenameQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias TypenameQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+typenameQueryDecoder : Json.Decode.Decoder TypenameQuery
+typenameQueryDecoder =
+    Json.Decode.map TypenameQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

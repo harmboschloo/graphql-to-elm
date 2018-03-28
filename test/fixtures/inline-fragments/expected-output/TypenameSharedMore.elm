@@ -1,6 +1,6 @@
 module TypenameSharedMore
     exposing
-        ( Query
+        ( TypenameSharedMoreQuery
         , Animal
         , OnAnimal(..)
         , Dog
@@ -15,7 +15,7 @@ import GraphqlToElm.Operation
 import Json.Decode
 
 
-typenameSharedMore : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+typenameSharedMore : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TypenameSharedMoreQuery
 typenameSharedMore =
     GraphqlToElm.Operation.withQuery
         """query TypenameSharedMore {
@@ -34,18 +34,18 @@ color
 }
 }"""
         Maybe.Nothing
-        queryDecoder
+        typenameSharedMoreQueryDecoder
         GraphqlToElm.Errors.decoder
 
 
-type alias Query =
+type alias TypenameSharedMoreQuery =
     { animal : Animal
     }
 
 
-queryDecoder : Json.Decode.Decoder Query
-queryDecoder =
-    Json.Decode.map Query
+typenameSharedMoreQueryDecoder : Json.Decode.Decoder TypenameSharedMoreQuery
+typenameSharedMoreQueryDecoder =
+    Json.Decode.map TypenameSharedMoreQuery
         (Json.Decode.field "animal" animalDecoder)
 
 

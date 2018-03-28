@@ -1,0 +1,24 @@
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  user: User!
+  messages: [Message!]!
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Message {
+  id: ID!
+  from: User!
+  message: String!
+}

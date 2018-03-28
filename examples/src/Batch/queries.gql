@@ -1,0 +1,19 @@
+query User {
+  user {
+    id
+    name
+    email
+  }
+}
+
+query Messages {
+  messages {
+    id
+    from {
+      id
+      name
+      email
+    }
+    message
+  }
+}

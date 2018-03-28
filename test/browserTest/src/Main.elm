@@ -66,10 +66,10 @@ batchTests =
         map =
             Response.mapData toString >> Response.mapErrors toString
 
-        map2 a b =
+        batch2 a b =
             [ map a, map b ]
 
-        map3 a b c =
+        batch3 a b c =
             [ map a, map b, map c ]
     in
         testsBySchema
@@ -80,8 +80,9 @@ batchTests =
                             (\a b ->
                                 ( schemaId
                                 , id2 a b
-                                , Batch.query map2 a.operation
-                                    |> Batch.andQuery b.operation
+                                , Batch.batch batch2
+                                    |> Batch.query a.operation
+                                    |> Batch.query b.operation
                                 )
                             )
                             (queryTests)
@@ -90,9 +91,10 @@ batchTests =
                             (\a b c ->
                                 ( schemaId
                                 , id3 a b c
-                                , Batch.query map3 a.operation
-                                    |> Batch.andMutation b.operation
-                                    |> Batch.andQuery c.operation
+                                , Batch.batch batch3
+                                    |> Batch.query a.operation
+                                    |> Batch.mutation b.operation
+                                    |> Batch.query c.operation
                                 )
                             )
                             (queryTests)
@@ -102,8 +104,9 @@ batchTests =
                             (\a b ->
                                 ( schemaId
                                 , id2 a b
-                                , Batch.mutation map2 a.operation
-                                    |> Batch.andMutation b.operation
+                                , Batch.batch batch2
+                                    |> Batch.mutation a.operation
+                                    |> Batch.mutation b.operation
                                 )
                             )
                             (List.reverse mutationTests)

@@ -3,11 +3,10 @@ module GraphqlToElm.Batch
         ( Batch
         , Request
         , Error
-        , map
+        , batch
         , query
         , mutation
-        , andQuery
-        , andMutation
+        , map
         , post
         , send
         , encode
@@ -16,11 +15,12 @@ module GraphqlToElm.Batch
 
 {-| Batch operations together in one request.
 
-    query (,,) operation1
-        |> andQuery operation2
-        |> andMutation operation3
+    batch (,,)
+        |> query operation1
+        |> query operation2
+        |> mutation operation3
 
-@docs Batch, query, mutation, andQuery, andMutation
+@docs Batch, batch, query, mutation
 
 
 # Mapping
@@ -47,8 +47,7 @@ import GraphqlToElm.Operation as Operation exposing (Operation, Query, Mutation)
 import GraphqlToElm.Response as Response exposing (Response)
 
 
-{-| A `Operations` batch.
--}
+{-| -}
 type Batch a
     = Batch
         { operations : List Encode.Value
@@ -66,82 +65,29 @@ type alias Error =
     Http.Error
 
 
-{-| Convert the batch type.
--}
-map : (a -> b) -> Batch a -> Batch b
-map mapper (Batch batch) =
+{-| -}
+batch : (Response e a -> b) -> Batch (Response e a -> b)
+batch a =
     Batch
-        { operations = batch.operations
-        , decoder =
-            (\values0 ->
-                let
-                    ( values1, decoder1 ) =
-                        batch.decoder values0
-                in
-                    ( values1, Decode.map mapper decoder1 )
-            )
+        { operations = []
+        , decoder = (\values -> ( values, Decode.succeed a ))
         }
 
 
-{-| Create a batch from a query operation.
-
-    query (,) operation1
-        |> andQuery operation2
-
--}
-query : (Response e a -> b) -> Operation Query e a -> Batch b
+{-| -}
+query : Operation Query e a -> Batch (Response e a -> b) -> Batch b
 query =
     any
 
 
-{-| Create a batch from a mutation operation.
-
-    mutation (,) operation1
-        |> andQuery operation2
-
--}
-mutation : (Response e a -> b) -> Operation Mutation e a -> Batch b
+{-| -}
+mutation : Operation Mutation e a -> Batch (Response e a -> b) -> Batch b
 mutation =
     any
 
 
-any : (Response e a -> b) -> Operation t e a -> Batch b
-any mapper operation =
-    Batch
-        { operations =
-            [ Operation.encode operation ]
-        , decoder =
-            (\values0 ->
-                responseDecoder operation values0
-                    |> Tuple.mapSecond (Decode.map mapper)
-            )
-        }
-
-
-{-| Add a query operation to the batch.
-
-    query (,) operation1
-        |> andQuery operation2
-
--}
-andQuery : Operation Query e a -> Batch (Response e a -> b) -> Batch b
-andQuery =
-    andAny
-
-
-{-| Add a mutation operation to the batch.
-
-    query (,) operation1
-        |> andMutation operation2
-
--}
-andMutation : Operation Mutation e a -> Batch (Response e a -> b) -> Batch b
-andMutation =
-    andAny
-
-
-andAny : Operation t e a -> Batch (Response e a -> b) -> Batch b
-andAny operation (Batch batch) =
+any : Operation t e a -> Batch (Response e a -> b) -> Batch b
+any operation (Batch batch) =
     Batch
         { operations =
             Operation.encode operation :: batch.operations
@@ -168,7 +114,7 @@ responseDecoder operation =
     (\values ->
         case values of
             [] ->
-                ( []
+                ( values
                 , Decode.fail "no more batch responses to decode"
                 )
 
@@ -181,7 +127,25 @@ responseDecoder operation =
     )
 
 
-{-| Create a post request to an url.
+{-| Convert the batch type.
+-}
+map : (a -> b) -> Batch a -> Batch b
+map mapper (Batch batch) =
+    Batch
+        { operations = batch.operations
+        , decoder = batch.decoder >> Tuple.mapSecond (Decode.map mapper)
+        }
+
+
+{-| Simple helper to create a http post request.
+Implemented as:
+
+    post url batch =
+        Http.post
+            url
+            (Http.jsonBody <| encode batch)
+            (decoder batch)
+
 -}
 post : String -> Batch a -> Request a
 post url batch =
@@ -191,7 +155,7 @@ post url batch =
         (decoder batch)
 
 
-{-| Send a http requst.
+{-| The same as `Http.send`.
 -}
 send : (Result Error a -> msg) -> Request a -> Cmd msg
 send =

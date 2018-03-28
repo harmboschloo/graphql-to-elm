@@ -7,6 +7,7 @@ import GraphqlToElm.Operation exposing (Query, Mutation)
 import GraphqlToElm.Response as Response exposing (Response(Data, Errors))
 import GraphqlToElm.Http as Http
 import GraphqlToElm.Batch as Batch exposing (Batch)
+import GraphqlToElm.PlainBatch as PlainBatch
 
 
 numberOfRounds : Int
@@ -50,27 +51,14 @@ testsBySchema =
             )
 
 
-type alias BatchData =
-    List (Response String String)
-
-
-batchTests : List ( String, String, Batch BatchData )
+batchTests : List ( String, String, Batch String (List String) )
 batchTests =
     let
-        id2 a b =
-            "[" ++ String.join "," [ a.id, b.id ] ++ "]"
-
-        id3 a b c =
-            "[" ++ String.join "," [ a.id, b.id, c.id ] ++ "]"
-
-        map =
-            Response.mapData toString >> Response.mapErrors toString
-
         batch2 a b =
-            [ map a, map b ]
+            [ toString a, toString b ]
 
         batch3 a b c =
-            [ map a, map b, map c ]
+            [ toString a, toString b, toString c ]
     in
         testsBySchema
             |> List.map
@@ -116,6 +104,76 @@ batchTests =
             |> List.concat
 
 
+type alias PlainBatchData =
+    List (Response String String)
+
+
+plainBatchTests : List ( String, String, PlainBatch.Batch PlainBatchData )
+plainBatchTests =
+    let
+        map =
+            Response.mapData toString >> Response.mapErrors toString
+
+        batch2 a b =
+            [ map a, map b ]
+
+        batch3 a b c =
+            [ map a, map b, map c ]
+    in
+        testsBySchema
+            |> List.map
+                (\( schemaId, queryTests, mutationTests ) ->
+                    List.concat
+                        [ List.map2
+                            (\a b ->
+                                ( schemaId
+                                , id2 a b
+                                , PlainBatch.batch batch2
+                                    |> PlainBatch.query a.operation
+                                    |> PlainBatch.query b.operation
+                                )
+                            )
+                            (queryTests)
+                            (List.reverse queryTests)
+                        , List.map3
+                            (\a b c ->
+                                ( schemaId
+                                , id3 a b c
+                                , PlainBatch.batch batch3
+                                    |> PlainBatch.query a.operation
+                                    |> PlainBatch.mutation b.operation
+                                    |> PlainBatch.query c.operation
+                                )
+                            )
+                            (queryTests)
+                            (mutationTests)
+                            (List.reverse queryTests)
+                        , List.map2
+                            (\a b ->
+                                ( schemaId
+                                , id2 a b
+                                , PlainBatch.batch batch2
+                                    |> PlainBatch.mutation a.operation
+                                    |> PlainBatch.mutation b.operation
+                                )
+                            )
+                            (List.reverse mutationTests)
+                            (mutationTests)
+                        ]
+                )
+            |> List.concat
+
+
+id2 : { a | id : String } -> { b | id : String } -> String
+id2 a b =
+    "[" ++ String.join "," [ a.id, b.id ] ++ "]"
+
+
+id3 : { a | id : String } -> { b | id : String } -> { c | id : String } -> String
+id3 a b c =
+    "[" ++ String.join "," [ a.id, b.id, c.id ] ++ "]"
+
+
 getTests : List (Test Query)
 getTests =
     queryTests
@@ -128,6 +186,7 @@ numberOfTests =
     List.length postQueryTests
         + List.length postMutationTests
         + List.length batchTests
+        + List.length plainBatchTests
         + List.length getTests
 
 
@@ -156,6 +215,7 @@ init =
         , [ List.map sendPostQuery postQueryTests
           , List.map sendPostMutation postMutationTests
           , List.map sendBatch batchTests
+          , List.map sendPlainBatch plainBatchTests
           , List.map sendGet getTests
           ]
             |> List.concat
@@ -175,10 +235,16 @@ sendPostMutation test =
         Http.postMutation ("/graphql/" ++ test.schemaId) test.operation
 
 
-sendBatch : ( String, String, Batch BatchData ) -> Cmd Msg
+sendBatch : ( String, String, Batch String (List String) ) -> Cmd Msg
 sendBatch ( schemaId, id, batch ) =
     Batch.send (TestBatchResponseReceived id) <|
         Batch.post ("/graphql/" ++ schemaId) batch
+
+
+sendPlainBatch : ( String, String, PlainBatch.Batch PlainBatchData ) -> Cmd Msg
+sendPlainBatch ( schemaId, id, batch ) =
+    PlainBatch.send (TestPlainBatchResponseReceived id) <|
+        PlainBatch.post ("/graphql/" ++ schemaId) batch
 
 
 sendGet : Test Query -> Cmd Msg
@@ -193,7 +259,8 @@ sendGet test =
 
 type Msg
     = TestResponseReceived String (Result Http.Error (Response String String))
-    | TestBatchResponseReceived String (Result Batch.Error BatchData)
+    | TestBatchResponseReceived String (Result Batch.Error (Result String (List String)))
+    | TestPlainBatchResponseReceived String (Result PlainBatch.Error PlainBatchData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -211,6 +278,17 @@ update msg model =
             failed id ("HttpError: " ++ toString error) model
 
         TestBatchResponseReceived id (Ok data) ->
+            case data of
+                Err errors ->
+                    failed id ("Errors: " ++ errors) model
+
+                Ok data ->
+                    passed id (toString data) model
+
+        TestBatchResponseReceived id (Err error) ->
+            failed id ("HttpError: " ++ toString error) model
+
+        TestPlainBatchResponseReceived id (Ok data) ->
             data
                 |> List.filterMap
                     (\response ->
@@ -225,7 +303,7 @@ update msg model =
                 |> Maybe.map (\errors -> failed id ("Errors: " ++ errors) model)
                 |> Maybe.withDefault (passed id (toString data) model)
 
-        TestBatchResponseReceived id (Err error) ->
+        TestPlainBatchResponseReceived id (Err error) ->
             failed id ("HttpError: " ++ toString error) model
 
 

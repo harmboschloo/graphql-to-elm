@@ -1,4 +1,4 @@
-module GraphqlToElm.Batch
+module GraphqlToElm.PlainBatch
     exposing
         ( Batch
         , Request
@@ -7,7 +7,6 @@ module GraphqlToElm.Batch
         , query
         , mutation
         , map
-        , mapError
         , post
         , send
         , encode
@@ -15,27 +14,19 @@ module GraphqlToElm.Batch
         )
 
 {-| Batch operations together in one request.
+Returns a `Response` for every operation.
 
-    send BatchReceived <|
-        post "/graphql" <|
-            (batch (,,)
-                |> query operation1
-                |> query operation2
-                |> mutation operation3
-            )
-
-Sending a batch returns `Result` of the combined data
-or the first error encountered.
-
-
-# Batch
+    batch (,,)
+        |> query operation1
+        |> query operation2
+        |> mutation operation3
 
 @docs Batch, batch, query, mutation
 
 
 # Mapping
 
-@docs map, mapError
+@docs map
 
 
 # Http
@@ -58,11 +49,10 @@ import GraphqlToElm.Response as Response exposing (Response)
 
 
 {-| -}
-type Batch e a
+type Batch a
     = Batch
         { operations : List Encode.Value
-        , decoder :
-            List Decode.Value -> ( List Decode.Value, Decoder (Result e a) )
+        , decoder : List Decode.Value -> ( List Decode.Value, Decoder a )
         }
 
 
@@ -77,27 +67,27 @@ type alias Error =
 
 
 {-| -}
-batch : (a -> b) -> Batch e (a -> b)
+batch : (Response e a -> b) -> Batch (Response e a -> b)
 batch a =
     Batch
         { operations = []
-        , decoder = (\values -> ( values, Decode.succeed (Ok a) ))
+        , decoder = (\values -> ( values, Decode.succeed a ))
         }
 
 
 {-| -}
-query : Operation Query e a -> Batch e (a -> b) -> Batch e b
+query : Operation Query e a -> Batch (Response e a -> b) -> Batch b
 query =
     any
 
 
 {-| -}
-mutation : Operation Mutation e a -> Batch e (a -> b) -> Batch e b
+mutation : Operation Mutation e a -> Batch (Response e a -> b) -> Batch b
 mutation =
     any
 
 
-any : Operation t e a -> Batch e (a -> b) -> Batch e b
+any : Operation t e a -> Batch (Response e a -> b) -> Batch b
 any operation (Batch batch) =
     Batch
         { operations =
@@ -112,20 +102,15 @@ any operation (Batch batch) =
                         responseDecoder operation values1
                 in
                     ( values2
-                    , Decode.map2 andMapResult decoder2 decoder1
+                    , DecodeHelpers.andMap decoder2 decoder1
                     )
             )
         }
 
 
-andMapResult : Result e a -> Result e (a -> b) -> Result e b
-andMapResult =
-    Result.map2 (|>)
-
-
 responseDecoder :
     Operation t e a
-    -> (List Decode.Value -> ( List Decode.Value, Decoder (Result e a) ))
+    -> (List Decode.Value -> ( List Decode.Value, Decoder (Response e a) ))
 responseDecoder operation =
     (\values ->
         case values of
@@ -137,35 +122,19 @@ responseDecoder operation =
             head :: tail ->
                 ( tail
                 , head
-                    |> decodeValue
-                        (Response.decoder operation
-                            |> Decode.map Response.toResult
-                        )
+                    |> decodeValue (Response.decoder operation)
                     |> DecodeHelpers.fromResult
                 )
     )
 
 
-{-| Convert the batch data value.
+{-| Convert the batch value.
 -}
-map : (a -> b) -> Batch e a -> Batch e b
+map : (a -> b) -> Batch a -> Batch b
 map mapper (Batch batch) =
     Batch
         { operations = batch.operations
-        , decoder =
-            batch.decoder >> Tuple.mapSecond (Decode.map <| Result.map mapper)
-        }
-
-
-{-| Convert the batch error value.
--}
-mapError : (e1 -> e2) -> Batch e1 a -> Batch e2 a
-mapError mapper (Batch batch) =
-    Batch
-        { operations = batch.operations
-        , decoder =
-            batch.decoder
-                >> Tuple.mapSecond (Decode.map <| Result.mapError mapper)
+        , decoder = batch.decoder >> Tuple.mapSecond (Decode.map mapper)
         }
 
 
@@ -179,7 +148,7 @@ Implemented as:
             (decoder batch)
 
 -}
-post : String -> Batch e a -> Request (Result e a)
+post : String -> Batch a -> Request a
 post url batch =
     Http.post
         url
@@ -189,21 +158,21 @@ post url batch =
 
 {-| The same as `Http.send`.
 -}
-send : (Result Error (Result e a) -> msg) -> Request (Result e a) -> Cmd msg
+send : (Result Error a -> msg) -> Request a -> Cmd msg
 send =
     Http.send
 
 
 {-| Encode the batch operations for a request.
 -}
-encode : Batch e a -> Encode.Value
+encode : Batch a -> Encode.Value
 encode (Batch batch) =
     Encode.list (List.reverse batch.operations)
 
 
 {-| Decoder for the response of a batch request.
 -}
-decoder : Batch e a -> Decoder (Result e a)
+decoder : Batch a -> Decoder a
 decoder (Batch batch) =
     Decode.list Decode.value
         |> Decode.andThen (batch.decoder >> Tuple.second)

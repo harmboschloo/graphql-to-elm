@@ -3,13 +3,14 @@ module GraphqlToElm.Response
         ( Response(Data, Errors)
         , mapData
         , mapErrors
+        , toResult
         , decoder
         )
 
 {-| The GraphQL response type.
 See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
 
-@docs Response, mapData, mapErrors, decoder
+@docs Response, mapData, mapErrors, toResult, decoder
 
 -}
 
@@ -56,6 +57,19 @@ mapErrors mapper response =
 
         Errors errors data ->
             Errors (mapper errors) data
+
+
+{-| Converts a `Response` to a `Result`.
+Note that the optional data in the `Errors` case will be lost.
+-}
+toResult : Response e a -> Result e a
+toResult response =
+    case response of
+        Data data ->
+            Ok data
+
+        Errors errors _ ->
+            Err errors
 
 
 {-| Decoder for the response of an operation.

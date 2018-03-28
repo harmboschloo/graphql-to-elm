@@ -60,7 +60,7 @@ postAny url operation =
 
 {-| -}
 send :
-    (Result Http.Error (Response e a) -> msg)
+    (Result Error (Response e a) -> msg)
     -> Request (Response e a)
     -> Cmd msg
 send =

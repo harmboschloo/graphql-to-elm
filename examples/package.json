@@ -12,8 +12,8 @@
     "graphql-to-elm": "file:.."
   },
   "scripts": {
-    "graphql-to-elm": "node graphql-to-elm",
-    "start": "node graphql-to-elm && node server"
+    "build": "node graphql-to-elm && node build",
+    "start": "node server"
   },
   "author": "Harm Boschloo",
   "repository": {

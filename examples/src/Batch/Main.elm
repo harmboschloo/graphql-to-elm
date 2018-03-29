@@ -1,11 +1,19 @@
 module Batch.Main exposing (main)
 
-import Regex
-import Json.Encode as Encode
-import Html exposing (Html, div, h2, pre, text)
-import Batch.Queries as Queries exposing (UserQuery, MessagesQuery)
+import Html exposing (Html, div, h3, ul, li, dl, dt, dd, text)
+import Batch.Queries as Queries
+    exposing
+        ( UserQuery
+        , MessagesQuery
+        , User
+        , Message
+        )
 import GraphqlToElm.Batch as Batch exposing (Batch, Error)
 import GraphqlToElm.Errors exposing (Errors)
+import Helpers exposing (endpoint, viewQueryAndResult)
+
+
+-- Model
 
 
 type alias Model =
@@ -25,8 +33,7 @@ type alias Data =
 init : ( Model, Cmd Msg )
 init =
     ( Nothing
-    , Batch.send ResponseReceived <|
-        Batch.post "/graphql" query
+    , Batch.send ResponseReceived (Batch.post endpoint query)
     )
 
 
@@ -35,6 +42,10 @@ query =
     Batch.batch Data
         |> Batch.query Queries.user
         |> Batch.query Queries.messages
+
+
+
+-- Update
 
 
 type Msg
@@ -48,34 +59,78 @@ update msg model =
             ( Just response, Cmd.none )
 
 
+
+-- View
+
+
 view : Model -> Html Msg
 view model =
+    viewQueryAndResult
+        viewData
+        (Batch.encode query)
+        model
+
+
+viewData : Data -> Html Msg
+viewData data =
     div []
-        [ h2 [] [ text "Query" ]
-        , pre [] [ text (Batch.encode query |> Encode.encode 4) ]
-        , h2 [] [ text "Response" ]
-        , case model of
-            Nothing ->
-                text ""
-
-            Just (Err error) ->
-                text ("Http error: " ++ toString error)
-
-            Just (Ok (Err errors)) ->
-                text ("GraphQL errors: " ++ toString errors)
-
-            Just (Ok (Ok data)) ->
-                pre [] [ text (format data) ]
+        [ h3 [] [ text "User query" ]
+        , viewUser data.userQuery.user
+        , h3 [] [ text "Messages query" ]
+        , viewMessages data.messagesQuery.messages
         ]
 
 
-format : a -> String
-format a =
-    a
-        |> toString
-        |> Regex.replace Regex.All
-            (Regex.regex "[,{}\\[\\]]")
-            (\{ match } -> match ++ "\n")
+viewUser : User -> Html msg
+viewUser user =
+    dl []
+        [ dt [] [ text "User" ]
+        , dd []
+            [ dl []
+                [ dt [] [ text "id" ]
+                , dd [] [ text user.id ]
+                , dt [] [ text "name" ]
+                , dd [] [ text user.name ]
+                , dt [] [ text "email" ]
+                , dd [] [ text user.email ]
+                ]
+            ]
+        ]
+
+
+viewMessages : List Message -> Html msg
+viewMessages messages =
+    dl []
+        [ dt [] [ text "Messages" ]
+        , dd []
+            [ ul []
+                (List.map
+                    (\message -> li [] [ viewMessage message ])
+                    messages
+                )
+            ]
+        ]
+
+
+viewMessage : Message -> Html msg
+viewMessage message =
+    dl []
+        [ dt [] [ text "Message" ]
+        , dd []
+            [ dl []
+                [ dt [] [ text "id" ]
+                , dd [] [ text message.id ]
+                , dt [] [ text "message" ]
+                , dd [] [ text message.message ]
+                , dt [] [ text "from" ]
+                , dd [] [ viewUser message.from ]
+                ]
+            ]
+        ]
+
+
+
+-- Main
 
 
 main : Program Never Model Msg

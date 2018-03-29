@@ -25,7 +25,7 @@ module GraphqlToElm.Batch
             )
 
 Sending a batch returns `Result` of the combined data
-or the first error encountered.
+or the errors of one of the queries.
 
 
 # Batch

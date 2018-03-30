@@ -1,12 +1,14 @@
 module InterfacePlain
     exposing
-        ( InterfacePlainQuery
+        ( InterfacePlainResponse
+        , InterfacePlainQuery
         , Animal
         , interfacePlain
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -21,6 +23,10 @@ color
         Maybe.Nothing
         interfacePlainQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InterfacePlainResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfacePlainQuery
 
 
 type alias InterfacePlainQuery =

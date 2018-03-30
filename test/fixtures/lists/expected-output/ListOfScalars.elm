@@ -1,11 +1,13 @@
 module ListOfScalars
     exposing
-        ( Query
+        ( Response
+        , Query
         , query
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -21,6 +23,10 @@ petsOrNull_petOrNull
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

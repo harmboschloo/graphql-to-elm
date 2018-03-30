@@ -1,12 +1,14 @@
 module AnonymousMutation
     exposing
-        ( Mutation
+        ( Response
+        , Mutation
         , Fragment
         , mutation
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -21,6 +23,10 @@ name
         Maybe.Nothing
         mutationDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Mutation
 
 
 type alias Mutation =

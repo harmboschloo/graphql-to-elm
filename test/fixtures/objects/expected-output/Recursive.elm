@@ -1,6 +1,7 @@
 module Recursive
     exposing
-        ( Query
+        ( Response
+        , Query
         , Comment4
         , Comment3
         , Comment2
@@ -10,6 +11,7 @@ module Recursive
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -33,6 +35,10 @@ message
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

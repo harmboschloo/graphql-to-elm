@@ -1,6 +1,7 @@
 module InterfaceList
     exposing
-        ( InterfaceListQuery
+        ( InterfaceListResponse
+        , InterfaceListQuery
         , Animal(..)
         , Dog
         , Dolphin
@@ -10,6 +11,7 @@ module InterfaceList
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -35,6 +37,10 @@ color
         Maybe.Nothing
         interfaceListQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InterfaceListResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceListQuery
 
 
 type alias InterfaceListQuery =

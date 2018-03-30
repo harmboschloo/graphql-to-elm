@@ -1,6 +1,7 @@
 module Inputs
     exposing
-        ( InputsVariables
+        ( InputsResponse
+        , InputsVariables
         , Inputs
         , OtherInputs
         , InputsQuery
@@ -9,6 +10,7 @@ module Inputs
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -22,6 +24,10 @@ inputs(inputs: $inputs)
         (Maybe.Just <| encodeInputsVariables variables)
         inputsQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InputsResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsQuery
 
 
 type alias InputsVariables =

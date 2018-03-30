@@ -1,6 +1,7 @@
 module InterfaceShared
     exposing
-        ( InterfaceSharedQuery
+        ( InterfaceSharedResponse
+        , InterfaceSharedQuery
         , Animal
         , OnAnimal(..)
         , Dog
@@ -11,6 +12,7 @@ module InterfaceShared
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -34,6 +36,10 @@ canFly
         Maybe.Nothing
         interfaceSharedQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InterfaceSharedResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceSharedQuery
 
 
 type alias InterfaceSharedQuery =

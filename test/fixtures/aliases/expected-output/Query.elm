@@ -1,6 +1,7 @@
 module Query
     exposing
-        ( AliasesQuery
+        ( AliasesResponse
+        , AliasesQuery
         , User
         , User2
         , aliases
@@ -8,6 +9,7 @@ module Query
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -43,6 +45,10 @@ name
         Maybe.Nothing
         aliasesQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias AliasesResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors AliasesQuery
 
 
 type alias AliasesQuery =

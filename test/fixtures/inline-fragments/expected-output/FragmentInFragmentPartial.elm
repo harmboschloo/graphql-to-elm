@@ -1,6 +1,7 @@
 module FragmentInFragmentPartial
     exposing
-        ( FragmentInFragmentPartialQuery
+        ( FragmentInFragmentPartialResponse
+        , FragmentInFragmentPartialQuery
         , Animal
         , OnAnimal(..)
         , Mammal(..)
@@ -11,6 +12,7 @@ module FragmentInFragmentPartial
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -30,6 +32,10 @@ hairy
         Maybe.Nothing
         fragmentInFragmentPartialQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias FragmentInFragmentPartialResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentInFragmentPartialQuery
 
 
 type alias FragmentInFragmentPartialQuery =

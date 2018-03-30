@@ -1,6 +1,7 @@
 module Skip
     exposing
-        ( SkipVariables
+        ( SkipResponse
+        , SkipVariables
         , SkipQuery
         , skip
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ city @skip(if: $withCity)
         (Maybe.Just <| encodeSkipVariables variables)
         skipQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias SkipResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors SkipQuery
 
 
 type alias SkipVariables =

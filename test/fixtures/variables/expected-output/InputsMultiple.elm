@@ -1,6 +1,7 @@
 module InputsMultiple
     exposing
-        ( InputsMultipleVariables
+        ( InputsMultipleResponse
+        , InputsMultipleVariables
         , Inputs
         , OtherInputs
         , InputsMultipleQuery
@@ -11,6 +12,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ inputsMultiple(inputs: $inputs, inputs2: $inputs2)
         (Maybe.Just <| encodeInputsMultipleVariables variables)
         inputsMultipleQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InputsMultipleResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsMultipleQuery
 
 
 type alias InputsMultipleVariables =

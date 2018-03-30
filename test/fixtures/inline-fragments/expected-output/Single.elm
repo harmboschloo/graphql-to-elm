@@ -1,12 +1,14 @@
 module Single
     exposing
-        ( SingleQuery
+        ( SingleResponse
+        , SingleQuery
         , Animal
         , single
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -30,6 +32,10 @@ color
         Maybe.Nothing
         singleQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias SingleResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors SingleQuery
 
 
 type alias SingleQuery =

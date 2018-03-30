@@ -63,7 +63,7 @@ interface OperationNodeInfo {
 
 export interface QueryOperation {
   type: QueryOperationType;
-  name: string;
+  name: string | undefined;
   query: string;
   fragmentNames: string[];
   inputs: QueryObjectInput | undefined;
@@ -179,7 +179,7 @@ const getOperation = (schema: GraphQLSchema) => (
   info: OperationNodeInfo
 ): QueryOperation => ({
   type: info.node.operation,
-  name: info.node.name ? info.node.name.value : info.node.operation,
+  name: info.node.name ? info.node.name.value : undefined,
   query: info.query,
   fragmentNames: info.fragmentNames,
   inputs: getInputs(info.node, schema),

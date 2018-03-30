@@ -1,6 +1,7 @@
 module FragmentInFragment
     exposing
-        ( FragmentInFragmentQuery
+        ( FragmentInFragmentResponse
+        , FragmentInFragmentQuery
         , Animal
         , OnAnimal(..)
         , Mammal(..)
@@ -12,6 +13,7 @@ module FragmentInFragment
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -37,6 +39,10 @@ canFly
         Maybe.Nothing
         fragmentInFragmentQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias FragmentInFragmentResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentInFragmentQuery
 
 
 type alias FragmentInFragmentQuery =

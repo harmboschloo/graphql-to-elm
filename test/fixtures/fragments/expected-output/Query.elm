@@ -1,6 +1,7 @@
 module Query
     exposing
-        ( FragmentsVariables
+        ( FragmentsResponse
+        , FragmentsVariables
         , FragmentsQuery
         , User
         , Flip(..)
@@ -11,6 +12,7 @@ module Query
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -60,6 +62,10 @@ heads =
     """fragment heads on Heads {
 name
 }"""
+
+
+type alias FragmentsResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentsQuery
 
 
 type alias FragmentsVariables =

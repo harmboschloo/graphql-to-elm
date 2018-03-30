@@ -1,12 +1,14 @@
 module ListOfObjects
     exposing
-        ( Query
+        ( Response
+        , Query
         , Friend
         , query
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -30,6 +32,10 @@ name
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

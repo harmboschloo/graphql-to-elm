@@ -1,6 +1,7 @@
 module Typename
     exposing
-        ( TypenameQuery
+        ( TypenameResponse
+        , TypenameQuery
         , Animal(..)
         , Dog
         , Dolphin
@@ -11,6 +12,7 @@ module Typename
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -35,6 +37,10 @@ color
         Maybe.Nothing
         typenameQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias TypenameResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TypenameQuery
 
 
 type alias TypenameQuery =

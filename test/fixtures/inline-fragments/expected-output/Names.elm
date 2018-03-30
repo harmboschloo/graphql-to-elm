@@ -1,6 +1,7 @@
 module Names
     exposing
-        ( NamesQuery
+        ( NamesResponse
+        , NamesQuery
         , Flip(..)
         , Heads
         , Tails
@@ -12,6 +13,7 @@ module Names
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -49,6 +51,10 @@ length
         Maybe.Nothing
         namesQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias NamesResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors NamesQuery
 
 
 type alias NamesQuery =

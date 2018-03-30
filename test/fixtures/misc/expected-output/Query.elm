@@ -1,6 +1,7 @@
 module Query
     exposing
-        ( TestQueryQuery
+        ( TestQueryResponse
+        , TestQueryQuery
         , User
         , User2
         , User4
@@ -11,6 +12,7 @@ module Query
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -47,6 +49,10 @@ age
         Maybe.Nothing
         testQueryQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias TestQueryResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TestQueryQuery
 
 
 type alias TestQueryQuery =

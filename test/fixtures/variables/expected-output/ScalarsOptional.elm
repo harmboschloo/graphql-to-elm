@@ -1,6 +1,7 @@
 module ScalarsOptional
     exposing
-        ( ScalarsOptionalVariables
+        ( ScalarsOptionalResponse
+        , ScalarsOptionalVariables
         , ScalarsOptionalQuery
         , scalarsOptional
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -22,6 +24,10 @@ scalarsOptional(string: $string, int: $int)
         (Maybe.Just <| encodeScalarsOptionalVariables variables)
         scalarsOptionalQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias ScalarsOptionalResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ScalarsOptionalQuery
 
 
 type alias ScalarsOptionalVariables =

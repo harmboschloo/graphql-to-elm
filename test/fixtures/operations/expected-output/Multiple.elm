@@ -1,10 +1,13 @@
 module Multiple
     exposing
-        ( Query1Variables
+        ( Query1Response
+        , Query1Variables
         , Query1Query
         , Operation
+        , Query2Response
         , Query2Query
         , Operation2
+        , MutationResponse
         , MutationMutation
         , Fragment
         , query1
@@ -16,6 +19,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -57,6 +61,18 @@ name
         Maybe.Nothing
         mutationMutationDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Query1Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query1Query
+
+
+type alias Query2Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query2Query
+
+
+type alias MutationResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors MutationMutation
 
 
 type alias Query1Variables =

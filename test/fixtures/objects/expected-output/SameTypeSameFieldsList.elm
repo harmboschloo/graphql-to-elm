@@ -1,6 +1,7 @@
 module SameTypeSameFieldsList
     exposing
-        ( Query
+        ( Response
+        , Query
         , Person
         , Person2
         , query
@@ -8,6 +9,7 @@ module SameTypeSameFieldsList
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -29,6 +31,10 @@ age
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

@@ -1,6 +1,7 @@
 module ScalarsMixed
     exposing
-        ( ScalarsMixedVariables
+        ( ScalarsMixedResponse
+        , ScalarsMixedVariables
         , ScalarsMixedQuery
         , scalarsMixed
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -22,6 +24,10 @@ scalarsMixed(string: $string, int: $int)
         (Maybe.Just <| encodeScalarsMixedVariables variables)
         scalarsMixedQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias ScalarsMixedResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ScalarsMixedQuery
 
 
 type alias ScalarsMixedVariables =

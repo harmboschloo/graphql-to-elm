@@ -1,6 +1,7 @@
 module InterfacePartial
     exposing
-        ( InterfacePartialQuery
+        ( InterfacePartialResponse
+        , InterfacePartialQuery
         , Animal(..)
         , Dog
         , interfacePartial
@@ -9,6 +10,7 @@ module InterfacePartial
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -26,6 +28,10 @@ hairy
         Maybe.Nothing
         interfacePartialQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InterfacePartialResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfacePartialQuery
 
 
 type alias InterfacePartialQuery =

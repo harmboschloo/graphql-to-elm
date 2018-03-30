@@ -1,6 +1,7 @@
 module Mixed2
     exposing
-        ( Mixed2Variables
+        ( Mixed2Response
+        , Mixed2Variables
         , Mixed2Query
         , mixed2
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ city @include(if: $withCity)
         (Maybe.Just <| encodeMixed2Variables variables)
         mixed2QueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Mixed2Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Mixed2Query
 
 
 type alias Mixed2Variables =

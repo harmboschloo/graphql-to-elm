@@ -1,6 +1,7 @@
 module InputsOptional
     exposing
-        ( InputsOptionalVariables
+        ( InputsOptionalResponse
+        , InputsOptionalVariables
         , OptionalInputs
         , OtherInputs
         , InputsOptionalQuery
@@ -11,6 +12,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ inputsOptional(inputs: $inputs)
         (Maybe.Just <| encodeInputsOptionalVariables variables)
         inputsOptionalQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InputsOptionalResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsOptionalQuery
 
 
 type alias InputsOptionalVariables =

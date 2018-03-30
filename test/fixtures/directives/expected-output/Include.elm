@@ -1,6 +1,7 @@
 module Include
     exposing
-        ( IncludeVariables
+        ( IncludeResponse
+        , IncludeVariables
         , IncludeQuery
         , include
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ city @include(if: $withCity)
         (Maybe.Just <| encodeIncludeVariables variables)
         includeQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias IncludeResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors IncludeQuery
 
 
 type alias IncludeVariables =

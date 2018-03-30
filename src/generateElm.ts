@@ -34,6 +34,9 @@ ${generateImports(intel)}
 ${generateOperations(intel)}${generateFragments(intel)}
 
 
+${generateOperationResponses(intel)}
+
+
 ${generateEncodersAndDecoders(intel)}
 `;
 
@@ -49,6 +52,7 @@ const generateExports = (intel: ElmIntel): string => {
   const addVariable = variable => addOnce(variable, variables);
 
   intel.operations.forEach(operation => {
+    addType(operation.responseTypeName);
     addVariable(operation.name);
 
     if (operation.variables) {
@@ -127,6 +131,7 @@ const generateImports = (intel: ElmIntel): string => {
 
   intel.operations.forEach(operation => {
     addImport("GraphqlToElm.Operation");
+    addImport("GraphqlToElm.Response");
 
     if (operation.variables) {
       visitEncoders(operation.variables, {
@@ -239,6 +244,15 @@ const generateFragment = (fragment: ElmFragment): string =>
   `\n\n\n${fragment.name} : String\n${fragment.name} =\n    """${
     fragment.query
   }"""`;
+
+const generateOperationResponses = (intel: ElmIntel): string =>
+  intel.operations.map(generateOperationResponse).join("\n\n\n");
+
+const generateOperationResponse = (operation: ElmOperation): string =>
+  `type alias ${operation.responseTypeName} =
+    GraphqlToElm.Response.Response ${operation.errors.type} ${
+    operation.data.type
+  }`;
 
 //
 // ENCODERS AND DECODERS

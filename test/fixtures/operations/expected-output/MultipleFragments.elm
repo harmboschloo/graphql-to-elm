@@ -1,11 +1,14 @@
 module MultipleFragments
     exposing
-        ( Query1Variables
+        ( Query1Response
+        , Query1Variables
         , Query1Query
         , Operation
+        , Query2Response
         , Query2Query
         , Operation2
         , Fragment
+        , MutationResponse
         , MutationMutation
         , query1
         , query2
@@ -16,6 +19,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -92,6 +96,18 @@ fields3 =
     """fragment fields3 on Fragment {
 name
 }"""
+
+
+type alias Query1Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query1Query
+
+
+type alias Query2Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query2Query
+
+
+type alias MutationResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors MutationMutation
 
 
 type alias Query1Variables =

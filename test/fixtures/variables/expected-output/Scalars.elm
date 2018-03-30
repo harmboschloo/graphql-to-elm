@@ -1,12 +1,14 @@
 module Scalars
     exposing
-        ( ScalarsVariables
+        ( ScalarsResponse
+        , ScalarsVariables
         , ScalarsQuery
         , scalars
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -20,6 +22,10 @@ scalars(string: $string, int: $int)
         (Maybe.Just <| encodeScalarsVariables variables)
         scalarsQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias ScalarsResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ScalarsQuery
 
 
 type alias ScalarsVariables =

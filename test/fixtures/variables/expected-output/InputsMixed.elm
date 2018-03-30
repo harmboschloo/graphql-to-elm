@@ -1,6 +1,7 @@
 module InputsMixed
     exposing
-        ( InputsMixedVariables
+        ( InputsMixedResponse
+        , InputsMixedVariables
         , MixedInputs
         , OtherInputs
         , InputsMixedQuery
@@ -11,6 +12,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Encode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ inputsMixed(inputs: $inputs, inputs2: $inputs2)
         (Maybe.Just <| encodeInputsMixedVariables variables)
         inputsMixedQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InputsMixedResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsMixedQuery
 
 
 type alias InputsMixedVariables =

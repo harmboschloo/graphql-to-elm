@@ -1,6 +1,7 @@
 module Query
     exposing
-        ( Query
+        ( Response
+        , Query
         , ElmKeywords
         , OtherElmKeywords
         , ElmBasics
@@ -13,6 +14,7 @@ module Query
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -83,6 +85,10 @@ decoder2
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

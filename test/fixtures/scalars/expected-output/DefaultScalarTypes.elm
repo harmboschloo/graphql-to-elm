@@ -1,11 +1,13 @@
 module DefaultScalarTypes
     exposing
-        ( Query
+        ( Response
+        , Query
         , query
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -22,6 +24,10 @@ id
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

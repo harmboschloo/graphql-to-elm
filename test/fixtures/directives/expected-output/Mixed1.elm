@@ -1,6 +1,7 @@
 module Mixed1
     exposing
-        ( Mixed1Variables
+        ( Mixed1Response
+        , Mixed1Variables
         , Mixed1Query
         , mixed1
         )
@@ -9,6 +10,7 @@ import GraphqlToElm.Errors
 import GraphqlToElm.Operation
 import GraphqlToElm.Optional
 import GraphqlToElm.Optional.Decode
+import GraphqlToElm.Response
 import Json.Decode
 import Json.Encode
 
@@ -24,6 +26,10 @@ city @skip(if: $withCity)
         (Maybe.Just <| encodeMixed1Variables variables)
         mixed1QueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Mixed1Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Mixed1Query
 
 
 type alias Mixed1Variables =

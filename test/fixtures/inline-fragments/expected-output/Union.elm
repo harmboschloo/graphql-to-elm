@@ -1,6 +1,7 @@
 module Union
     exposing
-        ( UnionQuery
+        ( UnionResponse
+        , UnionQuery
         , Flip(..)
         , Heads
         , Tails
@@ -9,6 +10,7 @@ module Union
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -28,6 +30,10 @@ length
         Maybe.Nothing
         unionQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias UnionResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UnionQuery
 
 
 type alias UnionQuery =

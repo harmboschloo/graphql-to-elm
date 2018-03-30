@@ -118,6 +118,7 @@ export interface ElmQueryOperation {
   variables: ElmRecordEncoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
+  responseTypeName: String;
 }
 
 export interface ElmNamedOperation {
@@ -128,6 +129,7 @@ export interface ElmNamedOperation {
   variables: ElmRecordEncoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
+  responseTypeName: String;
 }
 
 export type ElmOperationType = "Query" | "Mutation" | "Subscription";
@@ -139,7 +141,10 @@ const getOperation = (
 ): ElmOperation => {
   const type = getOperationType(queryOperation.type);
 
-  const name = newOperationName(queryOperation.name, scope);
+  const name = newOperationName(
+    queryOperation.name || queryOperation.type,
+    scope
+  );
 
   const variables: ElmRecordEncoder | undefined = queryOperation.inputs
     ? getRecordEncoder(queryOperation.inputs, scope, options)
@@ -153,6 +158,11 @@ const getOperation = (
 
   const errors: TypeDecoder = options.errorsDecoder;
 
+  const responseTypeName = newOperationResponseTypeName(
+    queryOperation.name || "",
+    scope
+  );
+
   switch (options.operationKind) {
     case "query":
       return {
@@ -163,17 +173,22 @@ const getOperation = (
         fragments: queryOperation.fragmentNames,
         variables,
         data,
-        errors
+        errors,
+        responseTypeName
       };
     case "named":
       return {
         type: getOperationType(queryOperation.type),
         kind: "named",
         name,
-        gqlName: queryOperation.name,
+        gqlName: assertOk(
+          queryOperation.name,
+          `operation for type ${queryOperation.type} does not have a name`
+        ),
         variables,
         data,
-        errors
+        errors,
+        responseTypeName
       };
   }
 };
@@ -191,6 +206,9 @@ const getOperationType = (type: QueryOperationType): ElmOperationType => {
 
 const newOperationName = (name: string, scope: ElmScope): string =>
   getUnusedName(`${validVariableName(name)}`, scope.names);
+
+const newOperationResponseTypeName = (name: string, scope: ElmScope): string =>
+  getUnusedName(`${validTypeName(`${name}Response`)}`, scope.names);
 
 const fixFragmentNames = (
   operations: ElmOperation[],

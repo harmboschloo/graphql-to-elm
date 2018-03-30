@@ -1,6 +1,7 @@
 module Big
     exposing
-        ( Query
+        ( Response
+        , Query
         , Person
         , Intel
         , query
@@ -9,6 +10,7 @@ module Big
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -36,6 +38,10 @@ field12
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

@@ -1,6 +1,7 @@
 module TypenameSharedMore
     exposing
-        ( TypenameSharedMoreQuery
+        ( TypenameSharedMoreResponse
+        , TypenameSharedMoreQuery
         , Animal
         , OnAnimal(..)
         , Dog
@@ -12,6 +13,7 @@ module TypenameSharedMore
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -36,6 +38,10 @@ color
         Maybe.Nothing
         typenameSharedMoreQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias TypenameSharedMoreResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TypenameSharedMoreQuery
 
 
 type alias TypenameSharedMoreQuery =

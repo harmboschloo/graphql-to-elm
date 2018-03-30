@@ -1,6 +1,7 @@
 module InterfaceMultiple
     exposing
-        ( InterfaceMultipleQuery
+        ( InterfaceMultipleResponse
+        , InterfaceMultipleQuery
         , Animal(..)
         , Mammal
         , Bird
@@ -9,6 +10,7 @@ module InterfaceMultiple
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -29,6 +31,10 @@ canFly
         Maybe.Nothing
         interfaceMultipleQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias InterfaceMultipleResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceMultipleQuery
 
 
 type alias InterfaceMultipleQuery =

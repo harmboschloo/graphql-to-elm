@@ -1,6 +1,7 @@
 module UnionPartial
     exposing
-        ( UnionPartialQuery
+        ( UnionPartialResponse
+        , UnionPartialQuery
         , Flip(..)
         , Heads
         , Flip2(..)
@@ -11,6 +12,7 @@ module UnionPartial
 import GraphqlToElm.Errors
 import GraphqlToElm.Helpers.Decode
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -32,6 +34,10 @@ length
         Maybe.Nothing
         unionPartialQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias UnionPartialResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UnionPartialQuery
 
 
 type alias UnionPartialQuery =

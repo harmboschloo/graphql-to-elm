@@ -1,12 +1,14 @@
 module SameTypeSameFieldsNullable
     exposing
-        ( Query
+        ( Response
+        , Query
         , Person2
         , query
         )
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -26,6 +28,10 @@ email
         Maybe.Nothing
         queryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias Response =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
 
 
 type alias Query =

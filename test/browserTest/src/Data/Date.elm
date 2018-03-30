@@ -7,6 +7,7 @@ import Json.Decode
 type alias Date =
     Date.Date
 
+
 decoder : Json.Decode.Decoder Date
 decoder =
     Json.Decode.string

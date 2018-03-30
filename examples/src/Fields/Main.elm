@@ -1,7 +1,7 @@
 module Fields.Main exposing (main)
 
 import Http
-import Html exposing (Html, div, h3, ul, li, dl, dt, dd, text)
+import Html exposing (Html, div, ul, li, dl, dt, dd, text)
 import Fields.Queries as Queries
     exposing
         ( BasicResponse

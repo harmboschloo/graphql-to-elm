@@ -1,5 +1,5 @@
 const glob = require("glob");
-const { graphqlToElm } = require("graphql-to-elm");
+const { graphqlToElm } = require("../lib");
 
 const schema = "./src/schema.gql";
 const queries = glob.sync("./src/*/**/*.gql");

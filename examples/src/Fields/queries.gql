@@ -1,0 +1,18 @@
+query Basic {
+  user {
+    name
+    email
+  }
+}
+
+query Maybe {
+  lastMessage {
+    message
+  }
+}
+
+query List {
+  messages {
+    message
+  }
+}

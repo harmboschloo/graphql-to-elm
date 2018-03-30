@@ -2,18 +2,10 @@
   "name": "graphql-to-elm-examples",
   "version": "0.0.0",
   "description": "Examples for graphql-to-elm",
-  "devDependencies": {
-    "body-parser": "^1.18.2",
-    "express": "^4.16.2",
-    "glob": "^7.1.2",
-    "graphql": "^0.12.3",
-    "graphql-server-express": "^1.3.2",
-    "graphql-tools": "^2.21.0",
-    "graphql-to-elm": "file:.."
-  },
   "scripts": {
     "build": "node graphql-to-elm && node build",
-    "start": "node server"
+    "serve": "node server",
+    "start": "npm run build && npm run serve"
   },
   "author": "Harm Boschloo",
   "repository": {

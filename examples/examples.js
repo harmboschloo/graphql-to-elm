@@ -1,1 +1,1 @@
-module.exports.examples = ["Batch"];
+module.exports.examples = ["Batch", "Fields"];

@@ -9,6 +9,7 @@ schema {
 type Query {
   user: User!
   messages: [Message!]!
+  lastMessage: Message
 }
 
 type User {

@@ -1,7 +1,9 @@
 module Batch.Queries
     exposing
-        ( UserQuery
+        ( UserResponse
+        , UserQuery
         , User
+        , MessagesResponse
         , MessagesQuery
         , Message
         , user
@@ -10,6 +12,7 @@ module Batch.Queries
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -45,6 +48,14 @@ message
         Maybe.Nothing
         messagesQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias UserResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UserQuery
+
+
+type alias MessagesResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors MessagesQuery
 
 
 type alias UserQuery =

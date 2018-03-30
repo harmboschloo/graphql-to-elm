@@ -1,9 +1,12 @@
 module Fields.Queries
     exposing
-        ( BasicQuery
+        ( BasicResponse
+        , BasicQuery
         , User
+        , MaybeResponse
         , MaybeQuery
         , Message
+        , ListResponse
         , ListQuery
         , basic
         , maybe
@@ -12,6 +15,7 @@ module Fields.Queries
 
 import GraphqlToElm.Errors
 import GraphqlToElm.Operation
+import GraphqlToElm.Response
 import Json.Decode
 
 
@@ -53,6 +57,18 @@ message
         Maybe.Nothing
         listQueryDecoder
         GraphqlToElm.Errors.decoder
+
+
+type alias BasicResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors BasicQuery
+
+
+type alias MaybeResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors MaybeQuery
+
+
+type alias ListResponse =
+    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ListQuery
 
 
 type alias BasicQuery =

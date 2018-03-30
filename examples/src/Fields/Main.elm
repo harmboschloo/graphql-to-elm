@@ -3,15 +3,16 @@ module Fields.Main exposing (main)
 import Html exposing (Html, div, h3, ul, li, dl, dt, dd, text)
 import Fields.Queries as Queries
     exposing
-        ( BasicQuery
+        ( BasicResponse
+        , MaybeResponse
+        , ListResponse
+        , BasicQuery
         , MaybeQuery
         , ListQuery
         , User
         , Message
         )
 import GraphqlToElm.Operation as Operation
-import GraphqlToElm.Response as Response exposing (Response)
-import GraphqlToElm.Errors exposing (Errors)
 import GraphqlToElm.Http as Http
 import Helpers exposing (endpoint, viewQueryAndResponse)
 
@@ -24,18 +25,6 @@ type alias Model =
     , maybe : Maybe (Result Http.Error MaybeResponse)
     , list : Maybe (Result Http.Error ListResponse)
     }
-
-
-type alias BasicResponse =
-    Response Errors Queries.BasicQuery
-
-
-type alias MaybeResponse =
-    Response Errors Queries.MaybeQuery
-
-
-type alias ListResponse =
-    Response Errors Queries.ListQuery
 
 
 init : ( Model, Cmd Msg )

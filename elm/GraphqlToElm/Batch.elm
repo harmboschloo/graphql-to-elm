@@ -1,31 +1,22 @@
 module GraphqlToElm.Batch
     exposing
         ( Batch
-        , Request
-        , Error
         , batch
         , query
         , mutation
         , map
         , mapError
-        , post
-        , send
         , encode
         , decoder
         )
 
-{-| Batch operations together in one request.
+{-| Batch operations together.
 
-    send BatchReceived <|
-        post "/graphql" <|
-            (batch (,,)
-                |> query operation1
-                |> query operation2
-                |> mutation operation3
-            )
-
-Sending a batch returns `Result` of the combined data
-or the errors of one of the queries.
+    (batch (,,)
+        |> query operation1
+        |> query operation2
+        |> mutation operation3
+    )
 
 
 # Batch
@@ -38,18 +29,12 @@ or the errors of one of the queries.
 @docs map, mapError
 
 
-# Http
-
-@docs Request, Error, post, send
-
-
 # JSON
 
 @docs encode, decoder
 
 -}
 
-import Http
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
 import GraphqlToElm.Helpers.Decode as DecodeHelpers
@@ -64,16 +49,6 @@ type Batch e a
         , decoder :
             List Decode.Value -> ( List Decode.Value, Decoder (Result e a) )
         }
-
-
-{-| -}
-type alias Request a =
-    Http.Request a
-
-
-{-| -}
-type alias Error =
-    Http.Error
 
 
 {-| -}
@@ -167,31 +142,6 @@ mapError mapper (Batch batch) =
             batch.decoder
                 >> Tuple.mapSecond (Decode.map <| Result.mapError mapper)
         }
-
-
-{-| Simple helper to create a http post request.
-Implemented as:
-
-    post url batch =
-        Http.post
-            url
-            (Http.jsonBody <| encode batch)
-            (decoder batch)
-
--}
-post : String -> Batch e a -> Request (Result e a)
-post url batch =
-    Http.post
-        url
-        (Http.jsonBody <| encode batch)
-        (decoder batch)
-
-
-{-| The same as `Http.send`.
--}
-send : (Result Error (Result e a) -> msg) -> Request (Result e a) -> Cmd msg
-send =
-    Http.send
 
 
 {-| Encode the batch operations for a request.

@@ -1,5 +1,6 @@
 module Fields.Main exposing (main)
 
+import Http
 import Html exposing (Html, div, h3, ul, li, dl, dt, dd, text)
 import Fields.Queries as Queries
     exposing
@@ -13,7 +14,7 @@ import Fields.Queries as Queries
         , Message
         )
 import GraphqlToElm.Operation as Operation
-import GraphqlToElm.Http as Http
+import GraphqlToElm.Http exposing (postQuery)
 import Helpers exposing (endpoint, viewQueryAndResponse)
 
 
@@ -32,11 +33,11 @@ init =
     ( Model Nothing Nothing Nothing
     , Cmd.batch
         [ Http.send BasicResponseReceived
-            (Http.postQuery endpoint Queries.basic)
+            (postQuery endpoint Queries.basic)
         , Http.send MaybeResponseReceived
-            (Http.postQuery endpoint Queries.maybe)
+            (postQuery endpoint Queries.maybe)
         , Http.send ListResponseReceived
-            (Http.postQuery endpoint Queries.list)
+            (postQuery endpoint Queries.list)
         ]
     )
 

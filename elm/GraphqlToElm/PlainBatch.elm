@@ -1,14 +1,10 @@
 module GraphqlToElm.PlainBatch
     exposing
         ( Batch
-        , Request
-        , Error
         , batch
         , query
         , mutation
         , map
-        , post
-        , send
         , encode
         , decoder
         )
@@ -29,18 +25,12 @@ Returns a `Response` for every operation.
 @docs map
 
 
-# Http
-
-@docs Request, Error, post, send
-
-
 # JSON
 
 @docs encode, decoder
 
 -}
 
-import Http
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
 import GraphqlToElm.Helpers.Decode as DecodeHelpers
@@ -54,16 +44,6 @@ type Batch a
         { operations : List Encode.Value
         , decoder : List Decode.Value -> ( List Decode.Value, Decoder a )
         }
-
-
-{-| -}
-type alias Request a =
-    Http.Request a
-
-
-{-| -}
-type alias Error =
-    Http.Error
 
 
 {-| -}
@@ -136,31 +116,6 @@ map mapper (Batch batch) =
         { operations = batch.operations
         , decoder = batch.decoder >> Tuple.mapSecond (Decode.map mapper)
         }
-
-
-{-| Simple helper to create a http post request.
-Implemented as:
-
-    post url batch =
-        Http.post
-            url
-            (Http.jsonBody <| encode batch)
-            (decoder batch)
-
--}
-post : String -> Batch a -> Request a
-post url batch =
-    Http.post
-        url
-        (Http.jsonBody <| encode batch)
-        (decoder batch)
-
-
-{-| The same as `Http.send`.
--}
-send : (Result Error a -> msg) -> Request a -> Cmd msg
-send =
-    Http.send
 
 
 {-| Encode the batch operations for a request.

@@ -1,13 +1,21 @@
 module Main exposing (main)
 
 import Set
-import Tests exposing (Test, queryTests, mutationTests)
+import Http
 import Html exposing (Html)
 import GraphqlToElm.Operation exposing (Query, Mutation)
 import GraphqlToElm.Response as Response exposing (Response(Data, Errors))
-import GraphqlToElm.Http as Http
+import GraphqlToElm.Http
+    exposing
+        ( getQuery
+        , postQuery
+        , postMutation
+        , postBatch
+        , postPlainBatch
+        )
 import GraphqlToElm.Batch as Batch exposing (Batch)
 import GraphqlToElm.PlainBatch as PlainBatch
+import Tests exposing (Test, queryTests, mutationTests)
 
 
 numberOfRounds : Int
@@ -226,31 +234,31 @@ init =
 sendPostQuery : Test Query -> Cmd Msg
 sendPostQuery test =
     Http.send (TestResponseReceived test.id) <|
-        Http.postQuery ("/graphql/" ++ test.schemaId) test.operation
+        postQuery ("/graphql/" ++ test.schemaId) test.operation
 
 
 sendPostMutation : Test Mutation -> Cmd Msg
 sendPostMutation test =
     Http.send (TestResponseReceived test.id) <|
-        Http.postMutation ("/graphql/" ++ test.schemaId) test.operation
+        postMutation ("/graphql/" ++ test.schemaId) test.operation
 
 
 sendBatch : ( String, String, Batch String (List String) ) -> Cmd Msg
 sendBatch ( schemaId, id, batch ) =
-    Batch.send (TestBatchResponseReceived id) <|
-        Batch.post ("/graphql/" ++ schemaId) batch
+    Http.send (TestBatchResponseReceived id) <|
+        postBatch ("/graphql/" ++ schemaId) batch
 
 
 sendPlainBatch : ( String, String, PlainBatch.Batch PlainBatchData ) -> Cmd Msg
 sendPlainBatch ( schemaId, id, batch ) =
-    PlainBatch.send (TestPlainBatchResponseReceived id) <|
-        PlainBatch.post ("/graphql/" ++ schemaId) batch
+    Http.send (TestPlainBatchResponseReceived id) <|
+        postPlainBatch ("/graphql/" ++ schemaId) batch
 
 
 sendGet : Test Query -> Cmd Msg
 sendGet test =
     Http.send (TestResponseReceived test.id) <|
-        Http.getQuery ("/graphql/" ++ test.schemaId) test.operation
+        getQuery ("/graphql/" ++ test.schemaId) test.operation
 
 
 
@@ -259,8 +267,8 @@ sendGet test =
 
 type Msg
     = TestResponseReceived String (Result Http.Error (Response String String))
-    | TestBatchResponseReceived String (Result Batch.Error (Result String (List String)))
-    | TestPlainBatchResponseReceived String (Result PlainBatch.Error PlainBatchData)
+    | TestBatchResponseReceived String (Result Http.Error (Result String (List String)))
+    | TestPlainBatchResponseReceived String (Result Http.Error PlainBatchData)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

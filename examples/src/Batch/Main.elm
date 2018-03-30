@@ -1,5 +1,6 @@
 module Batch.Main exposing (main)
 
+import Http
 import Html exposing (Html, div, h3, ul, li, dl, dt, dd, text)
 import Batch.Queries as Queries
     exposing
@@ -8,7 +9,8 @@ import Batch.Queries as Queries
         , User
         , Message
         )
-import GraphqlToElm.Batch as Batch exposing (Batch, Error)
+import GraphqlToElm.Http exposing (postBatch)
+import GraphqlToElm.Batch as Batch exposing (Batch)
 import GraphqlToElm.Errors exposing (Errors)
 import Helpers exposing (endpoint, viewQueryAndResult)
 
@@ -21,7 +23,7 @@ type alias Model =
 
 
 type alias Response =
-    Result Batch.Error (Result Errors Data)
+    Result Http.Error (Result Errors Data)
 
 
 type alias Data =
@@ -33,7 +35,7 @@ type alias Data =
 init : ( Model, Cmd Msg )
 init =
     ( Nothing
-    , Batch.send ResponseReceived (Batch.post endpoint query)
+    , Http.send ResponseReceived (postBatch endpoint query)
     )
 
 

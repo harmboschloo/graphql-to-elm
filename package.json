@@ -41,8 +41,9 @@
     "start": "npm run test:gen-watch",
     "test": "tape -r ts-node/register test/index.ts | tap-diff",
     "build": "rimraf lib && tsc",
+    "build:examples": "npm run build --prefix examples",
     "docs": "elm-make --docs=documentation.json",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "npm test && npm run build && npm run build:examples"
   },
   "author": "Harm Boschloo",
   "repository": {

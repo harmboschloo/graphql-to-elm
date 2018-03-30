@@ -2,7 +2,7 @@ import { resolve, relative } from "path";
 import { readFileSync } from "fs";
 import * as rimraf from "rimraf";
 import * as glob from "glob";
-import { test } from "tape";
+import * as test from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import { graphqlToElm } from "../src";
 

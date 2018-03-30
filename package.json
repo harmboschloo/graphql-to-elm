@@ -17,8 +17,9 @@
   "devDependencies": {
     "@types/graphql": "^0.12.4",
     "@types/node": "^9.4.6",
+    "@types/rimraf": "^2.0.2",
+    "@types/tape": "^4.2.32",
     "body-parser": "^1.18.2",
-    "chokidar": "^2.0.2",
     "elm": "^0.18.0",
     "express": "^4.16.2",
     "glob": "^7.1.2",

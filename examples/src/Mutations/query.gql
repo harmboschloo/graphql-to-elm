@@ -1,0 +1,3 @@
+mutation PostMessage($message: String!) {
+  postMessage(message: $message)
+}

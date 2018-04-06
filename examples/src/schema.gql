@@ -9,6 +9,7 @@ enum Language {
 
 schema {
   query: Query
+  mutation: Mutation
 }
 
 # Query
@@ -17,7 +18,7 @@ type Query {
   user: User!
   messages: [Message!]!
   lastMessage: Message
-  translation(id: ID!, language: Language!): String
+  translation(id: ID!, language: Language): String
 }
 
 type User {
@@ -30,4 +31,10 @@ type Message {
   id: ID!
   from: User!
   message: String!
+}
+
+# Mutation
+
+type Mutation {
+  postMessage(message: String!): ID
 }

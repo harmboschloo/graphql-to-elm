@@ -34,11 +34,10 @@
     "typescript": "^2.7.2"
   },
   "scripts": {
+    "test:options": "tape -r ts-node/register test/optionsTest.ts | tap-diff",
     "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
     "test:gen-update": "tape -r ts-node/register test/genTest.ts --update | tap-diff",
-    "test:gen-watch": "ts-node test/genWatch.ts",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
-    "start": "npm run test:gen-watch",
     "test": "tape -r ts-node/register test/index.ts | tap-diff",
     "build": "rimraf lib && tsc",
     "build:examples": "npm run build --prefix examples",

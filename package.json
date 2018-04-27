@@ -7,7 +7,7 @@
     "lib",
     "src"
   ],
-  "main": "lib/index.js",
+  "main": "index.js",
   "dependencies": {
     "mkdirp": "^0.5.1"
   },

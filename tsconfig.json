@@ -3,8 +3,7 @@
     "strictNullChecks": true,
     "module": "commonjs",
     "lib": ["es2017", "esnext.asynciterable"],
-    "outDir": "lib",
-    "declaration": true
+    "outDir": "lib"
   },
-  "files": ["src/index.ts"]
+  "files": ["src/graphqlToElm.ts"]
 }

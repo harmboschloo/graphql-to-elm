@@ -8,13 +8,13 @@ import * as test from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import {
   Result,
-  Options,
-  ElmIntel,
   QueryResult,
   getGraphqlToElm,
-  generateElm,
   writeResult
-} from "../src";
+} from "../src/graphqlToElm";
+import { Options } from "../src/options";
+import { ElmIntel } from "../src/elmIntel";
+import { generateElm } from "../src/generateElm";
 import { ElmEncoder, ElmOperationType, validModuleName } from "../src/elmIntel";
 import { writeFile } from "../src/utils";
 

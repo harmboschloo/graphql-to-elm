@@ -1,28 +1,24 @@
+// @ts-check
+
 const rimraf = require("rimraf");
 const glob = require("glob");
-const { graphqlToElm } = require("../lib");
+const { graphqlToElm } = require("..");
 
-// configuration
-const schema = "./src/schema.gql";
-const queries = glob.sync("./src/*/**/*.gql");
-const src = "./src";
-const dest = "./src-generated";
-
-const enumEncoders = {
-  Language: {
-    type: "Language.Language",
-    encoder: "Language.encode"
-  }
+const options = {
+  schema: "./src/schema.gql",
+  queries: glob.sync("./src/*/**/*.gql"),
+  enumEncoders: {
+    Language: {
+      type: "Language.Language",
+      encoder: "Language.encode"
+    }
+  },
+  src: "./src",
+  dest: "./src-generated"
 };
 
 // remove previously generated files
-rimraf.sync(dest);
+rimraf.sync(options.dest);
 
 // generate new elm files
-graphqlToElm({
-  schema,
-  queries,
-  enumEncoders,
-  src,
-  dest
-});
+graphqlToElm(options);

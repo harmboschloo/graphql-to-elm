@@ -4,7 +4,7 @@ import * as rimraf from "rimraf";
 import * as glob from "glob";
 import * as test from "tape";
 import { Fixture, getFixtures } from "./fixtures";
-import { graphqlToElm } from "../src";
+import { graphqlToElm } from "..";
 
 const fixtureId = "";
 

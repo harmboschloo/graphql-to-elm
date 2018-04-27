@@ -32,7 +32,11 @@ Object.keys(schemas).forEach(id => {
     mocks["Date"] = () => "Wed, 14 Feb 2018 21:27:07 GMT";
   }
 
-  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+    resolverValidationOptions: { requireResolversForResolveType: false }
+  });
 
   addMockFunctionsToSchema({ schema, mocks });
 

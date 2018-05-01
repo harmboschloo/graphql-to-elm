@@ -1,8 +1,8 @@
-**This package is Work In Progress**
-
 # graphql-to-elm
 
 [![Build Status](https://travis-ci.org/harmboschloo/graphql-to-elm.svg?branch=master)](https://travis-ci.org/harmboschloo/graphql-to-elm)
+
+**This package is Work In Progress**
 
 `graphql-to-elm` validates graphql queries and converts them to elm code.
 
@@ -13,7 +13,7 @@ or [jamesmacaulay/elm-graphql](https://github.com/jamesmacaulay/elm-graphql).
 
 ## Overview
 
-For every query document `graphql-to-elm` will generate valid Elm types, encoders and decoders that you can use in your code.
+For every query document `graphql-to-elm` will generate valid Elm **types**, **encoders** and **decoders** that you can use in your code.
 
 It includes support for:
 
@@ -50,7 +50,7 @@ See the [examples folder](examples) or [test fixtures folder](test/fixtures) for
 | errorsDecoder  | `TypeDecoder`               | `GraphqlToElm.Errors` decoder | GraphQL response errors decoder                               |
 | src            | `string`                    | `.`                           | Base folder of the queries.                                   |
 | dest           | `string`                    | `src` option                  | Destination folder for the generateed elm files.              |
-| operationKind  | `"query"` or `"named"`      | `"named"`                     | Send the full query to the server or only the operation name. |
+| operationKind  | `"query"` or `"named"`      | `"query"`                     | Send the full query to the server or only the operation name. |
 | log            | `(message: string) => void` | `console.log`                 | Callback for log messages. Set to `null` to disable.          |
 
 ```TypeScript

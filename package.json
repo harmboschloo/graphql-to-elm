@@ -40,7 +40,7 @@
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
     "test": "tape -r ts-node/register test/index.ts | tap-diff",
     "build": "rimraf lib && tsc",
-    "build:examples": "npm run build --prefix examples",
+    "build:examples": "npm run build --prefix examples/features",
     "docs": "elm-make --docs=documentation.json",
     "prepublishOnly": "npm test && npm run build && npm run build:examples"
   },

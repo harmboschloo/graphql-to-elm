@@ -2,7 +2,7 @@
 
 const rimraf = require("rimraf");
 const glob = require("glob");
-const { graphqlToElm } = require("..");
+const { graphqlToElm } = require("../..");
 
 const options = {
   schema: "./src/schema.gql",

@@ -13,5 +13,8 @@
     "url": "git://github.com/harmboschloo/graphql-to-elm.git"
   },
   "homepage": "https://github.com/harmboschloo/graphql-to-elm",
-  "license": "BSD-3-Clause"
+  "license": "BSD-3-Clause",
+  "devDependencies": {
+    "elm": "^0.18.0"
+  }
 }

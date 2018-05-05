@@ -1,0 +1,11 @@
+type Query {
+  messages: [Message!]!
+}
+
+type Message {
+  message: String!
+}
+
+schema {
+  query: Query
+}

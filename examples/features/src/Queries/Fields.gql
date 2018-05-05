@@ -1,0 +1,14 @@
+{
+  user {
+    name
+    email
+  }
+
+  lastMessage {
+    message
+  }
+
+  messages {
+    message
+  }
+}

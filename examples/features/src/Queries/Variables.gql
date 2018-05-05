@@ -1,0 +1,3 @@
+query Translation($id: ID!, $language: Language) {
+  translation(id: $id, language: $language)
+}

@@ -1,5 +1,0 @@
-{
-  helloWorldEn: translation(id: "hello.world", language: EN)
-
-  helloWorldNl: translation(id: "hello.world", language: NL)
-}

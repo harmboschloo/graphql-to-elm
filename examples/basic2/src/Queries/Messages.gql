@@ -1,0 +1,18 @@
+query Messages {
+  messages {
+    id
+    message
+  }
+}
+
+mutation PostMessage($message: String!) {
+  postMessage(message: $message) {
+    ... on Message {
+      id
+      message
+    }
+    ... on MutationError {
+      error
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{
+  en: translation(id: "hello.world", language: EN)
+  nl: translation(id: "hello.world", language: NL)
+}

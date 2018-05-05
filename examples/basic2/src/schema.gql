@@ -1,0 +1,29 @@
+# Query
+
+type Query {
+  messages: [Message!]!
+}
+
+type Message {
+  id: Int!
+  message: String!
+}
+
+# Mutation
+
+type Mutation {
+  postMessage(message: String!): PostMessageResponse!
+}
+
+union PostMessageResponse = Message | MutationError
+
+type MutationError {
+  error: String!
+}
+
+# Schema
+
+schema {
+  query: Query
+  mutation: Mutation
+}

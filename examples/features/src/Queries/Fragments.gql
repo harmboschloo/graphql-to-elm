@@ -1,0 +1,27 @@
+query {
+  user {
+    ...userFields
+  }
+
+  lastMessage {
+    ...messageFields
+  }
+
+  messages {
+    ...messageFields
+  }
+}
+
+fragment userFields on User {
+  id
+  name
+  email
+}
+
+fragment messageFields on Message {
+  id
+  from {
+    ...userFields
+  }
+  message
+}

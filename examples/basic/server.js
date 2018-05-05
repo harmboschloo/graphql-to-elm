@@ -2,14 +2,17 @@ const { readFileSync } = require("fs");
 const express = require("express");
 const bodyParser = require("body-parser");
 const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
-const {
-  makeExecutableSchema,
-  addMockFunctionsToSchema
-} = require("graphql-tools");
+const { makeExecutableSchema } = require("graphql-tools");
+
+const messages = [{ message: "Hello" }, { message: "World" }];
 
 const typeDefs = readFileSync("src/schema.gql", "utf8");
-const schema = makeExecutableSchema({ typeDefs });
-addMockFunctionsToSchema({ schema });
+const resolvers = {
+  Query: {
+    messages: () => messages
+  }
+};
+const schema = makeExecutableSchema({ typeDefs, resolvers });
 
 const app = express();
 app.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));

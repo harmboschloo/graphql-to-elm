@@ -1,10 +1,9 @@
 {
   "name": "graphql-to-elm-examples",
   "version": "0.0.0",
-  "description": "Feature examples for graphql-to-elm",
+  "description": "Basic example 2 for graphql-to-elm",
   "scripts": {
-    "clean": "rimraf src-generated",
-    "prebuild": "npm run clean && node prebuild",
+    "prebuild": "node prebuild",
     "build": "elm make src/Main.elm",
     "serve": "node server",
     "start": "npm run build && npm run serve"
@@ -24,11 +23,7 @@
     "graphql-tools": "^3.0.0"
   },
   "devDependencies": {
-    "@types/glob": "^5.0.35",
-    "@types/node": "^10.0.4",
     "elm": "^0.18.0",
-    "glob": "^7.1.2",
-    "graphql-to-elm": "^0.4.1",
-    "rimraf": "^2.6.2"
+    "graphql-to-elm": "^0.4.1"
   }
 }

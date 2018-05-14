@@ -1,4 +1,4 @@
-module GraphqlToElm.Optional
+module GraphQL.Optional
     exposing
         ( Optional(Present, Null, Absent)
         , map

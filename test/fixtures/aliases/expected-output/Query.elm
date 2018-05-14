@@ -7,15 +7,15 @@ module Query
         , aliases
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-aliases : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors AliasesQuery
+aliases : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors AliasesQuery
 aliases =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Aliases {
 user1: user {
 id
@@ -44,11 +44,11 @@ name
 }"""
         Maybe.Nothing
         aliasesQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias AliasesResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors AliasesQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors AliasesQuery
 
 
 type alias AliasesQuery =

@@ -8,41 +8,41 @@ module InputsMultiple
         , inputsMultiple
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Encode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Encode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-inputsMultiple : InputsMultipleVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InputsMultipleQuery
+inputsMultiple : InputsMultipleVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InputsMultipleQuery
 inputsMultiple variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InputsMultiple($inputs: Inputs!, $inputs2: Inputs) {
 inputsMultiple(inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeInputsMultipleVariables variables)
         inputsMultipleQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InputsMultipleResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsMultipleQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InputsMultipleQuery
 
 
 type alias InputsMultipleVariables =
     { inputs : Inputs
-    , inputs2 : GraphqlToElm.Optional.Optional Inputs
+    , inputs2 : GraphQL.Optional.Optional Inputs
     }
 
 
 encodeInputsMultipleVariables : InputsMultipleVariables -> Json.Encode.Value
 encodeInputsMultipleVariables inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "inputs", (encodeInputs >> GraphqlToElm.Optional.Present) inputs.inputs )
-        , ( "inputs2", (GraphqlToElm.Optional.map encodeInputs) inputs.inputs2 )
+    GraphQL.Optional.Encode.object
+        [ ( "inputs", (encodeInputs >> GraphQL.Optional.Present) inputs.inputs )
+        , ( "inputs2", (GraphQL.Optional.map encodeInputs) inputs.inputs2 )
         ]
 
 

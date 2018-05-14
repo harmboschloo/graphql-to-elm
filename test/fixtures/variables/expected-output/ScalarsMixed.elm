@@ -6,41 +6,41 @@ module ScalarsMixed
         , scalarsMixed
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Encode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Encode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-scalarsMixed : ScalarsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors ScalarsMixedQuery
+scalarsMixed : ScalarsMixedVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors ScalarsMixedQuery
 scalarsMixed variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query ScalarsMixed($string: String, $int: Int!) {
 scalarsMixed(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsMixedVariables variables)
         scalarsMixedQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias ScalarsMixedResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ScalarsMixedQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors ScalarsMixedQuery
 
 
 type alias ScalarsMixedVariables =
-    { string : GraphqlToElm.Optional.Optional String
+    { string : GraphQL.Optional.Optional String
     , int : Int
     }
 
 
 encodeScalarsMixedVariables : ScalarsMixedVariables -> Json.Encode.Value
 encodeScalarsMixedVariables inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "string", (GraphqlToElm.Optional.map Json.Encode.string) inputs.string )
-        , ( "int", (Json.Encode.int >> GraphqlToElm.Optional.Present) inputs.int )
+    GraphQL.Optional.Encode.object
+        [ ( "string", (GraphQL.Optional.map Json.Encode.string) inputs.string )
+        , ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
         ]
 
 

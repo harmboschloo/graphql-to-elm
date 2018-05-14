@@ -8,15 +8,15 @@ module Union
         , union
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-union : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionQuery
+union : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors UnionQuery
 union =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Union {
 flip {
 ... on Heads {
@@ -29,11 +29,11 @@ length
 }"""
         Maybe.Nothing
         unionQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias UnionResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UnionQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors UnionQuery
 
 
 type alias UnionQuery =

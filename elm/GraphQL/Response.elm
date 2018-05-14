@@ -1,4 +1,4 @@
-module GraphqlToElm.Response
+module GraphQL.Response
     exposing
         ( Response(Data, Errors)
         , mapData
@@ -15,9 +15,9 @@ See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
 -}
 
 import Json.Decode as Decode exposing (Decoder)
-import GraphqlToElm.Operation as Operation exposing (Operation)
-import GraphqlToElm.Optional as Optional exposing (Optional(..))
-import GraphqlToElm.Optional.Decode as OptionalDecode
+import GraphQL.Operation as Operation exposing (Operation)
+import GraphQL.Optional as Optional exposing (Optional(..))
+import GraphQL.Optional.Decode as OptionalDecode
 
 
 {-| -}

@@ -10,15 +10,15 @@ module InterfaceListShared
         , interfaceListShared
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-interfaceListShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceListSharedQuery
+interfaceListShared : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InterfaceListSharedQuery
 interfaceListShared =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InterfaceListShared {
 animals {
 color
@@ -35,11 +35,11 @@ canFly
 }"""
         Maybe.Nothing
         interfaceListSharedQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InterfaceListSharedResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceListSharedQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InterfaceListSharedQuery
 
 
 type alias InterfaceListSharedQuery =

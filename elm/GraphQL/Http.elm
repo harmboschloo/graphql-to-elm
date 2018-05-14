@@ -1,4 +1,4 @@
-module GraphqlToElm.Http
+module GraphQL.Http
     exposing
         ( getQuery
         , postQuery
@@ -14,21 +14,22 @@ module GraphqlToElm.Http
 -}
 
 import Http
-import GraphqlToElm.Operation as Operation exposing (Operation, Query, Mutation)
-import GraphqlToElm.Response as Response exposing (Response)
-import GraphqlToElm.Batch as Batch
-import GraphqlToElm.PlainBatch as PlainBatch
-import GraphqlToElm.Helpers.Url as Url
+import GraphQL.Operation as Operation exposing (Operation, Query, Mutation)
+import GraphQL.Response as Response exposing (Response)
+import GraphQL.Batch as Batch
+import GraphQL.PlainBatch as PlainBatch
+import GraphQL.Helpers.Url as Url
 
 
 {-|
+
     getQuery url operation =
         Http.get
             (UrlHelper.withParameters url <| Operation.encodeParameters operation)
             (Response.decoder operation)
 
-    For `UrlHelper` see `GraphqlToElm.Helpers.Url`.
- -}
+    For `UrlHelper` see `GraphQL.Helpers.Url`.
+-}
 getQuery : String -> Operation Query e a -> Http.Request (Response e a)
 getQuery url operation =
     Http.get

@@ -6,41 +6,41 @@ module ScalarsOptional
         , scalarsOptional
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Encode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Encode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-scalarsOptional : ScalarsOptionalVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors ScalarsOptionalQuery
+scalarsOptional : ScalarsOptionalVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors ScalarsOptionalQuery
 scalarsOptional variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query ScalarsOptional($string: String, $int: Int) {
 scalarsOptional(string: $string, int: $int)
 }"""
         (Maybe.Just <| encodeScalarsOptionalVariables variables)
         scalarsOptionalQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias ScalarsOptionalResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors ScalarsOptionalQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors ScalarsOptionalQuery
 
 
 type alias ScalarsOptionalVariables =
-    { string : GraphqlToElm.Optional.Optional String
-    , int : GraphqlToElm.Optional.Optional Int
+    { string : GraphQL.Optional.Optional String
+    , int : GraphQL.Optional.Optional Int
     }
 
 
 encodeScalarsOptionalVariables : ScalarsOptionalVariables -> Json.Encode.Value
 encodeScalarsOptionalVariables inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "string", (GraphqlToElm.Optional.map Json.Encode.string) inputs.string )
-        , ( "int", (GraphqlToElm.Optional.map Json.Encode.int) inputs.int )
+    GraphQL.Optional.Encode.object
+        [ ( "string", (GraphQL.Optional.map Json.Encode.string) inputs.string )
+        , ( "int", (GraphQL.Optional.map Json.Encode.int) inputs.int )
         ]
 
 

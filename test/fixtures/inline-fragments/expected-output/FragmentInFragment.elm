@@ -11,15 +11,15 @@ module FragmentInFragment
         , fragmentInFragment
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-fragmentInFragment : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentInFragmentQuery
+fragmentInFragment : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors FragmentInFragmentQuery
 fragmentInFragment =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query FragmentInFragment {
 animal {
 color
@@ -38,11 +38,11 @@ canFly
 }"""
         Maybe.Nothing
         fragmentInFragmentQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias FragmentInFragmentResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentInFragmentQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors FragmentInFragmentQuery
 
 
 type alias FragmentInFragmentQuery =

@@ -1,4 +1,4 @@
-module GraphqlToElm.Helpers.Decode
+module GraphQL.Helpers.Decode
     exposing
         ( andMap
         , fromResult

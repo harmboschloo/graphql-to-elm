@@ -6,15 +6,15 @@ module AnonymousMutation
         , mutation
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-mutation : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors Mutation
+mutation : GraphQL.Operation.Operation GraphQL.Operation.Mutation GraphQL.Errors.Errors Mutation
 mutation =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """mutation {
 fragment {
 name
@@ -22,11 +22,11 @@ name
 }"""
         Maybe.Nothing
         mutationDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias Response =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Mutation
+    GraphQL.Response.Response GraphQL.Errors.Errors Mutation
 
 
 type alias Mutation =

@@ -1,13 +1,13 @@
-module GraphqlToElm.Optional.Decode exposing (field, nonNullField)
+module GraphQL.Optional.Decode exposing (field, nonNullField)
 
-{-| Decode [`Optionals`](# GraphqlToElm.Optional.Optional) from JSON.
+{-| Decode [`Optionals`](# GraphQL.Optional.Optional) from JSON.
 
 @docs field, nonNullField
 
 -}
 
 import Json.Decode as Decode exposing (Decoder)
-import GraphqlToElm.Optional exposing (Optional(Absent, Null, Present))
+import GraphQL.Optional exposing (Optional(Absent, Null, Present))
 
 
 {-| Decode a JSON object with a `Optional` field.

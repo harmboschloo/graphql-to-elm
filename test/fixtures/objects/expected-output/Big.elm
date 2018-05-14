@@ -7,16 +7,16 @@ module Big
         , query
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Helpers.Decode
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Helpers.Decode
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-query : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+query : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors Query
 query =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """{
 i {
 intel {
@@ -37,11 +37,11 @@ field12
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias Response =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
+    GraphQL.Response.Response GraphQL.Errors.Errors Query
 
 
 type alias Query =
@@ -93,7 +93,7 @@ intelDecoder =
         (Json.Decode.field "field6" (Json.Decode.list Json.Decode.float))
         (Json.Decode.field "field7" Json.Decode.int)
         (Json.Decode.field "field8" Json.Decode.string)
-        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field9" Json.Decode.float)
-        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field10" (Json.Decode.list Json.Decode.int))
-        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field11" (Json.Decode.list Json.Decode.string))
-        |> GraphqlToElm.Helpers.Decode.andMap (Json.Decode.field "field12" (Json.Decode.list Json.Decode.float))
+        |> GraphQL.Helpers.Decode.andMap (Json.Decode.field "field9" Json.Decode.float)
+        |> GraphQL.Helpers.Decode.andMap (Json.Decode.field "field10" (Json.Decode.list Json.Decode.int))
+        |> GraphQL.Helpers.Decode.andMap (Json.Decode.field "field11" (Json.Decode.list Json.Decode.string))
+        |> GraphQL.Helpers.Decode.andMap (Json.Decode.field "field12" (Json.Decode.list Json.Decode.float))

@@ -9,15 +9,15 @@ module InterfaceList
         , interfaceList
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-interfaceList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceListQuery
+interfaceList : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InterfaceListQuery
 interfaceList =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InterfaceList {
 animals {
 ... on Dog {
@@ -36,11 +36,11 @@ color
 }"""
         Maybe.Nothing
         interfaceListQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InterfaceListResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceListQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InterfaceListQuery
 
 
 type alias InterfaceListQuery =

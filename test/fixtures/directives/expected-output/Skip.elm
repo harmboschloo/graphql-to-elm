@@ -6,18 +6,18 @@ module Skip
         , skip
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Decode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Decode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-skip : SkipVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors SkipQuery
+skip : SkipVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors SkipQuery
 skip variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Skip($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @skip(if: $withSchool)
@@ -25,11 +25,11 @@ city @skip(if: $withCity)
 }"""
         (Maybe.Just <| encodeSkipVariables variables)
         skipQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias SkipResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors SkipQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors SkipQuery
 
 
 type alias SkipVariables =
@@ -49,7 +49,7 @@ encodeSkipVariables inputs =
 type alias SkipQuery =
     { name : String
     , school : Maybe.Maybe String
-    , city : GraphqlToElm.Optional.Optional String
+    , city : GraphQL.Optional.Optional String
     }
 
 
@@ -57,5 +57,5 @@ skipQueryDecoder : Json.Decode.Decoder SkipQuery
 skipQueryDecoder =
     Json.Decode.map3 SkipQuery
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
-        (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)
+        (GraphQL.Optional.Decode.nonNullField "school" Json.Decode.string)
+        (GraphQL.Optional.Decode.field "city" Json.Decode.string)

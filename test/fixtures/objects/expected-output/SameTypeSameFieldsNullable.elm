@@ -6,15 +6,15 @@ module SameTypeSameFieldsNullable
         , query
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-query : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Query
+query : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors Query
 query =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """{
 you {
 email
@@ -27,11 +27,11 @@ email
 }"""
         Maybe.Nothing
         queryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias Response =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Query
+    GraphQL.Response.Response GraphQL.Errors.Errors Query
 
 
 type alias Query =

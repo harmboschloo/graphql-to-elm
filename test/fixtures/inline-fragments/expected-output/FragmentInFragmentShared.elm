@@ -12,15 +12,15 @@ module FragmentInFragmentShared
         , fragmentInFragmentShared
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-fragmentInFragmentShared : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentInFragmentSharedQuery
+fragmentInFragmentShared : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors FragmentInFragmentSharedQuery
 fragmentInFragmentShared =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query FragmentInFragmentShared {
 animal {
 color
@@ -40,11 +40,11 @@ canFly
 }"""
         Maybe.Nothing
         fragmentInFragmentSharedQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias FragmentInFragmentSharedResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentInFragmentSharedQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors FragmentInFragmentSharedQuery
 
 
 type alias FragmentInFragmentSharedQuery =

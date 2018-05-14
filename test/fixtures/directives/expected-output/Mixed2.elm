@@ -6,18 +6,18 @@ module Mixed2
         , mixed2
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Decode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Decode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-mixed2 : Mixed2Variables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors Mixed2Query
+mixed2 : Mixed2Variables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors Mixed2Query
 mixed2 variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Mixed2($withSchool: Boolean!, $withCity: Boolean!) {
 name
 school @skip(if: $withSchool)
@@ -25,11 +25,11 @@ city @include(if: $withCity)
 }"""
         (Maybe.Just <| encodeMixed2Variables variables)
         mixed2QueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias Mixed2Response =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors Mixed2Query
+    GraphQL.Response.Response GraphQL.Errors.Errors Mixed2Query
 
 
 type alias Mixed2Variables =
@@ -49,7 +49,7 @@ encodeMixed2Variables inputs =
 type alias Mixed2Query =
     { name : String
     , school : Maybe.Maybe String
-    , city : GraphqlToElm.Optional.Optional String
+    , city : GraphQL.Optional.Optional String
     }
 
 
@@ -57,5 +57,5 @@ mixed2QueryDecoder : Json.Decode.Decoder Mixed2Query
 mixed2QueryDecoder =
     Json.Decode.map3 Mixed2Query
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphqlToElm.Optional.Decode.nonNullField "school" Json.Decode.string)
-        (GraphqlToElm.Optional.Decode.field "city" Json.Decode.string)
+        (GraphQL.Optional.Decode.nonNullField "school" Json.Decode.string)
+        (GraphQL.Optional.Decode.field "city" Json.Decode.string)

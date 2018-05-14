@@ -9,16 +9,16 @@ module FragmentInFragmentPartial
         , fragmentInFragmentPartial
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Helpers.Decode
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Helpers.Decode
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-fragmentInFragmentPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentInFragmentPartialQuery
+fragmentInFragmentPartial : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors FragmentInFragmentPartialQuery
 fragmentInFragmentPartial =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query FragmentInFragmentPartial {
 animal {
 color
@@ -31,11 +31,11 @@ hairy
 }"""
         Maybe.Nothing
         fragmentInFragmentPartialQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias FragmentInFragmentPartialResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentInFragmentPartialQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors FragmentInFragmentPartialQuery
 
 
 type alias FragmentInFragmentPartialQuery =
@@ -84,7 +84,7 @@ mammalDecoder : Json.Decode.Decoder Mammal
 mammalDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnDog dogDecoder
-        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherMammal
+        , GraphQL.Helpers.Decode.emptyObject OnOtherMammal
         ]
 
 

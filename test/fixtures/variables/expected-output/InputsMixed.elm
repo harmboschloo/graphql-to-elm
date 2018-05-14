@@ -8,57 +8,57 @@ module InputsMixed
         , inputsMixed
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Encode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Optional.Encode
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-inputsMixed : InputsMixedVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InputsMixedQuery
+inputsMixed : InputsMixedVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InputsMixedQuery
 inputsMixed variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InputsMixed($inputs: MixedInputs!, $inputs2: MixedInputs) {
 inputsMixed(inputs: $inputs, inputs2: $inputs2)
 }"""
         (Maybe.Just <| encodeInputsMixedVariables variables)
         inputsMixedQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InputsMixedResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InputsMixedQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InputsMixedQuery
 
 
 type alias InputsMixedVariables =
     { inputs : MixedInputs
-    , inputs2 : GraphqlToElm.Optional.Optional MixedInputs
+    , inputs2 : GraphQL.Optional.Optional MixedInputs
     }
 
 
 encodeInputsMixedVariables : InputsMixedVariables -> Json.Encode.Value
 encodeInputsMixedVariables inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "inputs", (encodeMixedInputs >> GraphqlToElm.Optional.Present) inputs.inputs )
-        , ( "inputs2", (GraphqlToElm.Optional.map encodeMixedInputs) inputs.inputs2 )
+    GraphQL.Optional.Encode.object
+        [ ( "inputs", (encodeMixedInputs >> GraphQL.Optional.Present) inputs.inputs )
+        , ( "inputs2", (GraphQL.Optional.map encodeMixedInputs) inputs.inputs2 )
         ]
 
 
 type alias MixedInputs =
     { int : Int
-    , float : GraphqlToElm.Optional.Optional Float
+    , float : GraphQL.Optional.Optional Float
     , other : OtherInputs
     }
 
 
 encodeMixedInputs : MixedInputs -> Json.Encode.Value
 encodeMixedInputs inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "int", (Json.Encode.int >> GraphqlToElm.Optional.Present) inputs.int )
-        , ( "float", (GraphqlToElm.Optional.map Json.Encode.float) inputs.float )
-        , ( "other", (encodeOtherInputs >> GraphqlToElm.Optional.Present) inputs.other )
+    GraphQL.Optional.Encode.object
+        [ ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
+        , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
+        , ( "other", (encodeOtherInputs >> GraphQL.Optional.Present) inputs.other )
         ]
 
 

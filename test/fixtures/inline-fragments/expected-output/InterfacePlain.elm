@@ -6,15 +6,15 @@ module InterfacePlain
         , interfacePlain
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-interfacePlain : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfacePlainQuery
+interfacePlain : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InterfacePlainQuery
 interfacePlain =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InterfacePlain {
 animal {
 color
@@ -22,11 +22,11 @@ color
 }"""
         Maybe.Nothing
         interfacePlainQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InterfacePlainResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfacePlainQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InterfacePlainQuery
 
 
 type alias InterfacePlainQuery =

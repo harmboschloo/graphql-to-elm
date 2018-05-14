@@ -8,15 +8,15 @@ module InterfaceMultiple
         , interfaceMultiple
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-interfaceMultiple : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceMultipleQuery
+interfaceMultiple : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InterfaceMultipleQuery
 interfaceMultiple =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query InterfaceMultiple {
 animal {
 ... on Mammal {
@@ -30,11 +30,11 @@ canFly
 }"""
         Maybe.Nothing
         interfaceMultipleQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InterfaceMultipleResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceMultipleQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InterfaceMultipleQuery
 
 
 type alias InterfaceMultipleQuery =

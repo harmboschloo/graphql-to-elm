@@ -9,16 +9,16 @@ module Typename
         , typename
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Helpers.Decode
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Helpers.Decode
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-typename : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TypenameQuery
+typename : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors TypenameQuery
 typename =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Typename {
 animal {
 ... on Dog {
@@ -36,11 +36,11 @@ color
 }"""
         Maybe.Nothing
         typenameQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias TypenameResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TypenameQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors TypenameQuery
 
 
 type alias TypenameQuery =
@@ -78,7 +78,7 @@ type alias Dog =
 dogDecoder : Json.Decode.Decoder Dog
 dogDecoder =
     Json.Decode.map2 Dog
-        (Json.Decode.field "__typename" (GraphqlToElm.Helpers.Decode.constant "Dog" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Dog" Json.Decode.string))
         (Json.Decode.field "color" Json.Decode.string)
 
 
@@ -91,7 +91,7 @@ type alias Dolphin =
 dolphinDecoder : Json.Decode.Decoder Dolphin
 dolphinDecoder =
     Json.Decode.map2 Dolphin
-        (Json.Decode.field "__typename" (GraphqlToElm.Helpers.Decode.constant "Dolphin" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Dolphin" Json.Decode.string))
         (Json.Decode.field "color" Json.Decode.string)
 
 

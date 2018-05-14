@@ -10,15 +10,15 @@ module Query
         , testQuery
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-testQuery : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TestQueryQuery
+testQuery : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors TestQueryQuery
 testQuery =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query TestQuery {
 i {
 name
@@ -48,11 +48,11 @@ age
 }"""
         Maybe.Nothing
         testQueryQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias TestQueryResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TestQueryQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors TestQueryQuery
 
 
 type alias TestQueryQuery =

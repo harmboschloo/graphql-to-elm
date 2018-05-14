@@ -9,16 +9,16 @@ module UnionPartial
         , unionPartial
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Helpers.Decode
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Helpers.Decode
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-unionPartial : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionPartialQuery
+unionPartial : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors UnionPartialQuery
 unionPartial =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query UnionPartial {
 flip {
 ... on Heads {
@@ -33,11 +33,11 @@ length
 }"""
         Maybe.Nothing
         unionPartialQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias UnionPartialResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UnionPartialQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors UnionPartialQuery
 
 
 type alias UnionPartialQuery =
@@ -62,7 +62,7 @@ flipDecoder : Json.Decode.Decoder Flip
 flipDecoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads headsDecoder
-        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip
+        , GraphQL.Helpers.Decode.emptyObject OnOtherFlip
         ]
 
 
@@ -86,7 +86,7 @@ flip2Decoder : Json.Decode.Decoder Flip2
 flip2Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnTails tailsDecoder
-        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip2
+        , GraphQL.Helpers.Decode.emptyObject OnOtherFlip2
         ]
 
 

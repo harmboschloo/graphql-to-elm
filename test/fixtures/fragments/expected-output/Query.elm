@@ -10,16 +10,16 @@ module Query
         , fragments
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-fragments : FragmentsVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors FragmentsQuery
+fragments : FragmentsVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors FragmentsQuery
 fragments variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         ("""query Fragments($id: String!) {
 user1: user {
 ...fields
@@ -45,7 +45,7 @@ length
         )
         (Maybe.Just <| encodeFragmentsVariables variables)
         fragmentsQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 fields : String
@@ -65,7 +65,7 @@ name
 
 
 type alias FragmentsResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors FragmentsQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors FragmentsQuery
 
 
 type alias FragmentsVariables =

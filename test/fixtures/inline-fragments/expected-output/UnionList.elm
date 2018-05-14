@@ -8,15 +8,15 @@ module UnionList
         , unionList
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-unionList : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors UnionListQuery
+unionList : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors UnionListQuery
 unionList =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query UnionList {
 flips {
 ... on Heads {
@@ -29,11 +29,11 @@ length
 }"""
         Maybe.Nothing
         unionListQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias UnionListResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors UnionListQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors UnionListQuery
 
 
 type alias UnionListQuery =

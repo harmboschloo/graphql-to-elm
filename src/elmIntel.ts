@@ -582,7 +582,7 @@ const getUnionConstructorDecoder = (
       return {
         kind: "empty-decoder",
         type: `Other${validNameUpper(fragment.typeName)}`,
-        decoder: "GraphqlToElm.Helpers.Decode.emptyObject"
+        decoder: "GraphQL.Helpers.Decode.emptyObject"
       };
 
     case "other-fragment": {

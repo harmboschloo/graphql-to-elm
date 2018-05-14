@@ -1,18 +1,18 @@
-module GraphqlToElm.Optional.Encode
+module GraphQL.Optional.Encode
     exposing
         ( optional
         , list
         , object
         )
 
-{-| Encode [`Optionals`](# GraphqlToElm.Optional.Optional) to JSON.
+{-| Encode [`Optionals`](# GraphQL.Optional.Optional) to JSON.
 
 @docs optional, list, object
 
 -}
 
 import Json.Encode as Encode
-import GraphqlToElm.Optional exposing (Optional(Absent, Null, Present))
+import GraphQL.Optional exposing (Optional(Absent, Null, Present))
 
 
 {-| Encode an `Optional` value.

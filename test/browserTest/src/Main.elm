@@ -3,9 +3,9 @@ module Main exposing (main)
 import Set
 import Http
 import Html exposing (Html)
-import GraphqlToElm.Operation exposing (Query, Mutation)
-import GraphqlToElm.Response as Response exposing (Response(Data, Errors))
-import GraphqlToElm.Http
+import GraphQL.Operation exposing (Query, Mutation)
+import GraphQL.Response as Response exposing (Response(Data, Errors))
+import GraphQL.Http
     exposing
         ( getQuery
         , postQuery
@@ -13,8 +13,8 @@ import GraphqlToElm.Http
         , postBatch
         , postPlainBatch
         )
-import GraphqlToElm.Batch as Batch exposing (Batch)
-import GraphqlToElm.PlainBatch as PlainBatch
+import GraphQL.Batch as Batch exposing (Batch)
+import GraphQL.PlainBatch as PlainBatch
 import Tests exposing (Test, queryTests, mutationTests)
 
 
@@ -364,7 +364,7 @@ end model =
 
 view : Model -> Html Msg
 view model =
-    Html.text "GraphqlToElm Integration Tests (see console)"
+    Html.text "GraphQL Integration Tests (see console)"
 
 
 

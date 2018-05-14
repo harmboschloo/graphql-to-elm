@@ -9,15 +9,15 @@ module Interface
         , interface
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-interface : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors InterfaceQuery
+interface : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors InterfaceQuery
 interface =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Interface {
 animal {
 ... on Dog {
@@ -36,11 +36,11 @@ canFly
 }"""
         Maybe.Nothing
         interfaceQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias InterfaceResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors InterfaceQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors InterfaceQuery
 
 
 type alias InterfaceQuery =

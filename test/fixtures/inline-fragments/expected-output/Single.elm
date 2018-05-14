@@ -6,15 +6,15 @@ module Single
         , single
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-single : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors SingleQuery
+single : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors SingleQuery
 single =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Single {
 single: animal {
 ... on Animal {
@@ -31,11 +31,11 @@ color
 }"""
         Maybe.Nothing
         singleQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias SingleResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors SingleQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors SingleQuery
 
 
 type alias SingleQuery =

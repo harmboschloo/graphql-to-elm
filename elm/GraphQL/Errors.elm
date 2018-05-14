@@ -1,4 +1,4 @@
-module GraphqlToElm.Errors
+module GraphQL.Errors
     exposing
         ( Errors
         , Error
@@ -14,7 +14,7 @@ See <http://facebook.github.io/graphql/October2016/#sec-Errors>.
 -}
 
 import Json.Decode as Decode exposing (Decoder)
-import GraphqlToElm.Optional.Decode as OptionalDecode
+import GraphQL.Optional.Decode as OptionalDecode
 
 
 {-| -}

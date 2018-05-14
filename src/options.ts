@@ -94,8 +94,8 @@ const defaultScalarDecoders: TypeDecoders = {
 };
 
 const defaultErrorsDecoder: TypeDecoder = {
-  type: "GraphqlToElm.Errors.Errors",
-  decoder: "GraphqlToElm.Errors.decoder"
+  type: "GraphQL.Errors.Errors",
+  decoder: "GraphQL.Errors.decoder"
 };
 
 export const finalizeOptions = (options: Options): FinalOptions => {

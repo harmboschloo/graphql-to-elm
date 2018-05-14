@@ -1,4 +1,4 @@
-module GraphqlToElm.Batch
+module GraphQL.Batch
     exposing
         ( Batch
         , batch
@@ -37,9 +37,9 @@ module GraphqlToElm.Batch
 
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
-import GraphqlToElm.Helpers.Decode as DecodeHelpers
-import GraphqlToElm.Operation as Operation exposing (Operation, Query, Mutation)
-import GraphqlToElm.Response as Response exposing (Response)
+import GraphQL.Helpers.Decode as DecodeHelpers
+import GraphQL.Operation as Operation exposing (Operation, Query, Mutation)
+import GraphQL.Response as Response exposing (Response)
 
 
 {-| -}

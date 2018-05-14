@@ -10,16 +10,16 @@ module Names
         , names
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Helpers.Decode
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Helpers.Decode
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 
 
-names : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors NamesQuery
+names : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors NamesQuery
 names =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Names {
 flip1: flip {
 ... on Heads {
@@ -50,11 +50,11 @@ length
 }"""
         Maybe.Nothing
         namesQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias NamesResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors NamesQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors NamesQuery
 
 
 type alias NamesQuery =
@@ -118,7 +118,7 @@ flip2Decoder : Json.Decode.Decoder Flip2
 flip2Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnHeads2 headsDecoder
-        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip
+        , GraphQL.Helpers.Decode.emptyObject OnOtherFlip
         ]
 
 
@@ -131,5 +131,5 @@ flip3Decoder : Json.Decode.Decoder Flip3
 flip3Decoder =
     Json.Decode.oneOf
         [ Json.Decode.map OnTails2 tailsDecoder
-        , GraphqlToElm.Helpers.Decode.emptyObject OnOtherFlip2
+        , GraphQL.Helpers.Decode.emptyObject OnOtherFlip2
         ]

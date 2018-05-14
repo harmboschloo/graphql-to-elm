@@ -1,4 +1,4 @@
-module GraphqlToElm.Helpers.Url
+module GraphQL.Helpers.Url
     exposing
         ( withParameters
         , joinParameters

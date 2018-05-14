@@ -1,4 +1,4 @@
-module GraphQL.Http
+module GraphQL.Http.Basic
     exposing
         ( getQuery
         , postQuery

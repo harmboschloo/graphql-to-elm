@@ -5,7 +5,7 @@ import Http
 import Html exposing (Html)
 import GraphQL.Operation exposing (Query, Mutation)
 import GraphQL.Response as Response exposing (Response(Data, Errors))
-import GraphQL.Http
+import GraphQL.Http.Basic
     exposing
         ( getQuery
         , postQuery

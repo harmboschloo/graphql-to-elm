@@ -11,7 +11,6 @@ module InputsOptional
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Encode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -39,7 +38,7 @@ type alias InputsOptionalVariables =
 
 encodeInputsOptionalVariables : InputsOptionalVariables -> Json.Encode.Value
 encodeInputsOptionalVariables inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "inputs", (GraphQL.Optional.map encodeOptionalInputs) inputs.inputs )
         ]
 
@@ -53,7 +52,7 @@ type alias OptionalInputs =
 
 encodeOptionalInputs : OptionalInputs -> Json.Encode.Value
 encodeOptionalInputs inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "int", (GraphQL.Optional.map Json.Encode.int) inputs.int )
         , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (GraphQL.Optional.map encodeOtherInputs) inputs.other )

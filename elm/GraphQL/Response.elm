@@ -17,7 +17,6 @@ See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
 import Json.Decode as Decode exposing (Decoder)
 import GraphQL.Operation as Operation exposing (Operation)
 import GraphQL.Optional as Optional exposing (Optional(..))
-import GraphQL.Optional.Decode as OptionalDecode
 
 
 {-| -}
@@ -79,7 +78,7 @@ decoder operation =
     Decode.oneOf
         [ Decode.map2 Errors
             (Decode.field "errors" <| Operation.errorsDecoder operation)
-            (OptionalDecode.field "data" <| Operation.dataDecoder operation)
+            (Optional.fieldDecoder "data" <| Operation.dataDecoder operation)
         , Decode.map Data
             (Decode.field "data" <| Operation.dataDecoder operation)
         ]

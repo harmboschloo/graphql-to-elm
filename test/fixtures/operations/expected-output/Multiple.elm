@@ -18,7 +18,6 @@ module Multiple
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Encode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -82,7 +81,7 @@ type alias Query1Variables =
 
 encodeQuery1Variables : Query1Variables -> Json.Encode.Value
 encodeQuery1Variables inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "name", (GraphQL.Optional.map Json.Encode.string) inputs.name )
         ]
 

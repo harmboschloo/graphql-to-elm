@@ -99,30 +99,25 @@ const generateImports = (intel: ElmIntel): string => {
     }
   };
 
-  const addWrapperImports = (kind: "encode" | "decode") => ({
+  const addWrapperImports = ({
     valueWrapper,
     valueListItemWrapper
   }: {
     valueWrapper: TypeWrapper;
     valueListItemWrapper: ListItemWrapper;
   }) => {
-    const kindImport =
-      kind === "encode" ? "GraphQL.Optional.Encode" : "GraphQL.Optional.Decode";
-
     switch (valueWrapper) {
       case "optional":
         addImport("GraphQL.Optional");
-        addImport(kindImport);
         break;
       case "non-null-optional":
-        addImport(kindImport);
+        addImport("GraphQL.Optional");
         break;
     }
 
     switch (valueListItemWrapper) {
       case "optional":
         addImport("GraphQL.Optional");
-        addImport(kindImport);
         break;
     }
   };
@@ -134,7 +129,7 @@ const generateImports = (intel: ElmIntel): string => {
     if (operation.variables) {
       visitEncoders(operation.variables, {
         record: (encoder: ElmRecordEncoder) => {
-          encoder.fields.map(addWrapperImports("encode"));
+          encoder.fields.map(addWrapperImports);
         },
         value: (encoder: ElmValueEncoder) => {
           addImportOf(encoder.type);
@@ -153,7 +148,7 @@ const generateImports = (intel: ElmIntel): string => {
         addImport("GraphQL.Helpers.Decode");
       },
       record: (decoder: ElmRecordDecoder) => {
-        decoder.fields.map(addWrapperImports("decode"));
+        decoder.fields.map(addWrapperImports);
         if (decoder.fields.length > 8) {
           addImport("GraphQL.Helpers.Decode");
         }
@@ -297,7 +292,7 @@ const generateRecordEncoder = (encoder: ElmRecordEncoder): string => {
   );
 
   const objectEncoder = hasOptionals
-    ? "GraphQL.Optional.Encode.object"
+    ? "GraphQL.Optional.encodeObject"
     : "Json.Encode.object";
 
   const fieldEncoders = encoder.fields
@@ -323,7 +318,7 @@ const wrapEncoder = (
   let encoder = field.value.encoder;
 
   if (field.valueListItemWrapper === "optional") {
-    encoder = `(GraphQL.Optional.Encode.list ${encoder})`;
+    encoder = `(GraphQL.Optional.encodeList ${encoder})`;
   } else if (field.valueListItemWrapper === "non-null") {
     encoder = `(List.map ${encoder} >> Json.Encode.list)`;
   }
@@ -392,9 +387,9 @@ const generateRecordDecoder = (decoder: ElmRecordDecoder): string => {
 const fieldDecoder = (field: ElmDecoderField): string => {
   switch (field.valueWrapper) {
     case "optional":
-      return "GraphQL.Optional.Decode.field";
+      return "GraphQL.Optional.fieldDecoder";
     case "non-null-optional":
-      return "GraphQL.Optional.Decode.nonNullField";
+      return "GraphQL.Optional.nonNullFieldDecoder";
     default:
       return "Json.Decode.field";
   }

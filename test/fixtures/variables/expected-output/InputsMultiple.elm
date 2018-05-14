@@ -11,7 +11,6 @@ module InputsMultiple
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Encode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -40,7 +39,7 @@ type alias InputsMultipleVariables =
 
 encodeInputsMultipleVariables : InputsMultipleVariables -> Json.Encode.Value
 encodeInputsMultipleVariables inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "inputs", (encodeInputs >> GraphQL.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphQL.Optional.map encodeInputs) inputs.inputs2 )
         ]

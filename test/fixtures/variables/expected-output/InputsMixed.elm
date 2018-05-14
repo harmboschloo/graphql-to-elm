@@ -11,7 +11,6 @@ module InputsMixed
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Encode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -40,7 +39,7 @@ type alias InputsMixedVariables =
 
 encodeInputsMixedVariables : InputsMixedVariables -> Json.Encode.Value
 encodeInputsMixedVariables inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "inputs", (encodeMixedInputs >> GraphQL.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphQL.Optional.map encodeMixedInputs) inputs.inputs2 )
         ]
@@ -55,7 +54,7 @@ type alias MixedInputs =
 
 encodeMixedInputs : MixedInputs -> Json.Encode.Value
 encodeMixedInputs inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
         , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (encodeOtherInputs >> GraphQL.Optional.Present) inputs.other )

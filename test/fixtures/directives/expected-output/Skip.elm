@@ -9,7 +9,6 @@ module Skip
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Decode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -57,5 +56,5 @@ skipQueryDecoder : Json.Decode.Decoder SkipQuery
 skipQueryDecoder =
     Json.Decode.map3 SkipQuery
         (Json.Decode.field "name" Json.Decode.string)
-        (GraphQL.Optional.Decode.nonNullField "school" Json.Decode.string)
-        (GraphQL.Optional.Decode.field "city" Json.Decode.string)
+        (GraphQL.Optional.nonNullFieldDecoder "school" Json.Decode.string)
+        (GraphQL.Optional.fieldDecoder "city" Json.Decode.string)

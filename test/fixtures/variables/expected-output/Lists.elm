@@ -12,7 +12,6 @@ module Lists
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Optional
-import GraphQL.Optional.Encode
 import GraphQL.Response
 import Json.Decode
 import Json.Encode
@@ -48,11 +47,11 @@ type alias ListsVariables =
 
 encodeListsVariables : ListsVariables -> Json.Encode.Value
 encodeListsVariables inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "ints", (GraphQL.Optional.map (List.map Json.Encode.int >> Json.Encode.list)) inputs.ints )
-        , ( "floats", (GraphQL.Optional.map (GraphQL.Optional.Encode.list Json.Encode.float)) inputs.floats )
+        , ( "floats", (GraphQL.Optional.map (GraphQL.Optional.encodeList Json.Encode.float)) inputs.floats )
         , ( "inputs", ((List.map encodeInputs >> Json.Encode.list) >> GraphQL.Optional.Present) inputs.inputs )
-        , ( "inputs2", ((GraphQL.Optional.Encode.list encodeOptionalInputs) >> GraphQL.Optional.Present) inputs.inputs2 )
+        , ( "inputs2", ((GraphQL.Optional.encodeList encodeOptionalInputs) >> GraphQL.Optional.Present) inputs.inputs2 )
         ]
 
 
@@ -93,7 +92,7 @@ type alias OptionalInputs =
 
 encodeOptionalInputs : OptionalInputs -> Json.Encode.Value
 encodeOptionalInputs inputs =
-    GraphQL.Optional.Encode.object
+    GraphQL.Optional.encodeObject
         [ ( "int", (GraphQL.Optional.map Json.Encode.int) inputs.int )
         , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
         , ( "other", (GraphQL.Optional.map encodeOtherInputs) inputs.other )

@@ -4,6 +4,8 @@ module GraphQL.Errors
         , Error
         , Location
         , decoder
+        , errorDecoder
+        , locationDecoder
         )
 
 {-| Types and decoder for the errors field in the GraphQL response.
@@ -14,7 +16,7 @@ See <http://facebook.github.io/graphql/October2016/#sec-Errors>.
 -}
 
 import Json.Decode as Decode exposing (Decoder)
-import GraphQL.Optional.Decode as OptionalDecode
+import GraphQL.Optional as Optional
 
 
 {-| -}
@@ -42,13 +44,15 @@ decoder =
     Decode.list errorDecoder
 
 
+{-| -}
 errorDecoder : Decoder Error
 errorDecoder =
     Decode.map2 Error
         (Decode.field "message" Decode.string)
-        (OptionalDecode.nonNullField "locations" <| Decode.list locationDecoder)
+        (Optional.nonNullFieldDecoder "locations" <| Decode.list locationDecoder)
 
 
+{-| -}
 locationDecoder : Decoder Location
 locationDecoder =
     Decode.map2 Location

@@ -6,42 +6,41 @@ module Queries.Variables
         , translation
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Optional
-import GraphqlToElm.Optional.Encode
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Optional
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 import Language
 
 
-translation : TranslationVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors TranslationQuery
+translation : TranslationVariables -> GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors TranslationQuery
 translation variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Translation($id: ID!, $language: Language) {
 translation(id: $id, language: $language)
 }"""
         (Maybe.Just <| encodeTranslationVariables variables)
         translationQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias TranslationResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors TranslationQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors TranslationQuery
 
 
 type alias TranslationVariables =
     { id : String
-    , language : GraphqlToElm.Optional.Optional Language.Language
+    , language : GraphQL.Optional.Optional Language.Language
     }
 
 
 encodeTranslationVariables : TranslationVariables -> Json.Encode.Value
 encodeTranslationVariables inputs =
-    GraphqlToElm.Optional.Encode.object
-        [ ( "id", (Json.Encode.string >> GraphqlToElm.Optional.Present) inputs.id )
-        , ( "language", (GraphqlToElm.Optional.map Language.encode) inputs.language )
+    GraphQL.Optional.encodeObject
+        [ ( "id", (Json.Encode.string >> GraphQL.Optional.Present) inputs.id )
+        , ( "language", (GraphQL.Optional.map Language.encode) inputs.language )
         ]
 
 

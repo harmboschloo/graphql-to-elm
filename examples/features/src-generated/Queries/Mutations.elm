@@ -6,26 +6,26 @@ module Queries.Mutations
         , postMessage
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-postMessage : PostMessageVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors PostMessageMutation
+postMessage : PostMessageVariables -> GraphQL.Operation.Operation GraphQL.Operation.Mutation GraphQL.Errors.Errors PostMessageMutation
 postMessage variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """mutation PostMessage($message: String!) {
 postMessage(message: $message)
 }"""
         (Maybe.Just <| encodePostMessageVariables variables)
         postMessageMutationDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias PostMessageResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors PostMessageMutation
+    GraphQL.Response.Response GraphQL.Errors.Errors PostMessageMutation
 
 
 type alias PostMessageVariables =

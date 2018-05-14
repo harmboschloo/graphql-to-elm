@@ -2,9 +2,9 @@ module Main exposing (main)
 
 import Html exposing (Html, div, h1, ul, li, text)
 import Http
-import GraphQL exposing (Response, send, getQuery)
-import GraphqlToElm.Optional as Optional exposing (Optional)
-import GraphqlToElm.Response as Response
+import GraphQL.Http exposing (Response, send, getQuery)
+import GraphQL.Optional as Optional exposing (Optional)
+import GraphQL.Response as Response
 import Queries.Messages as Messages exposing (Message)
 
 

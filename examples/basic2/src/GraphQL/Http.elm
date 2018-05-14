@@ -1,4 +1,4 @@
-module GraphQL
+module GraphQL.Http
     exposing
         ( Errors
         , Query
@@ -11,26 +11,26 @@ module GraphQL
         )
 
 import Http
-import GraphqlToElm.Errors
-import GraphqlToElm.Http
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Http.Basic
+import GraphQL.Operation
+import GraphQL.Response
 
 
 type alias Errors =
-    GraphqlToElm.Errors.Errors
+    GraphQL.Errors.Errors
 
 
 type alias Query a =
-    GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query Errors a
+    GraphQL.Operation.Operation GraphQL.Operation.Query Errors a
 
 
 type alias Mutation a =
-    GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation Errors a
+    GraphQL.Operation.Operation GraphQL.Operation.Mutation Errors a
 
 
 type alias Response a =
-    GraphqlToElm.Response.Response Errors a
+    GraphQL.Response.Response Errors a
 
 
 type alias Request a =
@@ -44,12 +44,12 @@ endpoint =
 
 getQuery : Query a -> Request a
 getQuery =
-    GraphqlToElm.Http.getQuery endpoint
+    GraphQL.Http.Basic.getQuery endpoint
 
 
 postMutation : Mutation a -> Request a
 postMutation =
-    GraphqlToElm.Http.postMutation endpoint
+    GraphQL.Http.Basic.postMutation endpoint
 
 
 send : (Result String a -> msg) -> Request a -> Cmd msg
@@ -79,11 +79,11 @@ mapResult result =
 
         Ok response ->
             case response of
-                GraphqlToElm.Response.Data data ->
+                GraphQL.Response.Data data ->
                     Ok data
 
-                GraphqlToElm.Response.Errors [] _ ->
+                GraphQL.Response.Errors [] _ ->
                     Err "GraphQL something went wrong"
 
-                GraphqlToElm.Response.Errors (first :: rest) _ ->
+                GraphQL.Response.Errors (first :: rest) _ ->
                     Err first.message

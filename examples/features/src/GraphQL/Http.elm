@@ -1,4 +1,4 @@
-module GraphQL
+module GraphQL.Http
     exposing
         ( Errors
         , Query
@@ -13,31 +13,31 @@ module GraphQL
         )
 
 import Http
-import GraphqlToElm.Batch
-import GraphqlToElm.Errors
-import GraphqlToElm.Http
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Batch
+import GraphQL.Errors
+import GraphQL.Http.Basic
+import GraphQL.Operation
+import GraphQL.Response
 
 
 type alias Errors =
-    GraphqlToElm.Errors.Errors
+    GraphQL.Errors.Errors
 
 
 type alias Query a =
-    GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query Errors a
+    GraphQL.Operation.Operation GraphQL.Operation.Query Errors a
 
 
 type alias Mutation a =
-    GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation Errors a
+    GraphQL.Operation.Operation GraphQL.Operation.Mutation Errors a
 
 
 type alias Batch a =
-    GraphqlToElm.Batch.Batch Errors a
+    GraphQL.Batch.Batch Errors a
 
 
 type alias Response a =
-    GraphqlToElm.Response.Response Errors a
+    GraphQL.Response.Response Errors a
 
 
 endpoint : String
@@ -47,17 +47,17 @@ endpoint =
 
 postQuery : Query a -> Http.Request (Response a)
 postQuery =
-    GraphqlToElm.Http.postQuery endpoint
+    GraphQL.Http.Basic.postQuery endpoint
 
 
 postMutation : Mutation a -> Http.Request (Response a)
 postMutation =
-    GraphqlToElm.Http.postMutation endpoint
+    GraphQL.Http.Basic.postMutation endpoint
 
 
 postBatch : Batch a -> Http.Request (Result Errors a)
 postBatch =
-    GraphqlToElm.Http.postBatch endpoint
+    GraphQL.Http.Basic.postBatch endpoint
 
 
 send : (Result String a -> msg) -> Http.Request (Response a) -> Cmd msg
@@ -72,7 +72,7 @@ sendBatch resultMsg =
 
 mapResult : Result Http.Error (Response a) -> Result String a
 mapResult =
-    Result.map (GraphqlToElm.Response.toResult) >> mapBatchResult
+    Result.map (GraphQL.Response.toResult) >> mapBatchResult
 
 
 mapBatchResult : Result Http.Error (Result Errors a) -> Result String a

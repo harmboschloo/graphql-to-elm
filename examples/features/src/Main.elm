@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Html exposing (Html, div, h1, h2, dl, dt, dd, ul, li, button, text)
 import Html.Events exposing (onClick)
-import GraphQL
+import GraphQL.Http
     exposing
         ( Response
         , send
@@ -11,8 +11,8 @@ import GraphQL
         , postMutation
         , postBatch
         )
-import GraphqlToElm.Batch as Batch
-import GraphqlToElm.Optional as Optional
+import GraphQL.Batch as Batch
+import GraphQL.Optional as Optional
 import Language
 import Queries.Aliases as Aliases
 import Queries.Fields as Fields

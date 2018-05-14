@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf src-generated",
     "prebuild": "npm run clean && node prebuild",
-    "build": "elm make src/Main.elm",
+    "build": "elm make src/Main.elm --yes",
     "serve": "node server",
     "start": "npm run build && npm run serve"
   },
@@ -28,7 +28,7 @@
     "@types/node": "^10.0.4",
     "elm": "^0.18.0",
     "glob": "^7.1.2",
-    "graphql-to-elm": "^0.4.1",
+    "graphql-to-elm": "file:../..",
     "rimraf": "^2.6.2"
   }
 }

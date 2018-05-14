@@ -12,16 +12,16 @@ module Queries.Messages
         , postMessage
         )
 
-import GraphqlToElm.Errors
-import GraphqlToElm.Operation
-import GraphqlToElm.Response
+import GraphQL.Errors
+import GraphQL.Operation
+import GraphQL.Response
 import Json.Decode
 import Json.Encode
 
 
-messages : GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Query GraphqlToElm.Errors.Errors MessagesQuery
+messages : GraphQL.Operation.Operation GraphQL.Operation.Query GraphQL.Errors.Errors MessagesQuery
 messages =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """query Messages {
 messages {
 id
@@ -30,12 +30,12 @@ message
 }"""
         Maybe.Nothing
         messagesQueryDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
-postMessage : PostMessageVariables -> GraphqlToElm.Operation.Operation GraphqlToElm.Operation.Mutation GraphqlToElm.Errors.Errors PostMessageMutation
+postMessage : PostMessageVariables -> GraphQL.Operation.Operation GraphQL.Operation.Mutation GraphQL.Errors.Errors PostMessageMutation
 postMessage variables =
-    GraphqlToElm.Operation.withQuery
+    GraphQL.Operation.withQuery
         """mutation PostMessage($message: String!) {
 postMessage(message: $message) {
 ... on Message {
@@ -49,15 +49,15 @@ error
 }"""
         (Maybe.Just <| encodePostMessageVariables variables)
         postMessageMutationDecoder
-        GraphqlToElm.Errors.decoder
+        GraphQL.Errors.decoder
 
 
 type alias MessagesResponse =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors MessagesQuery
+    GraphQL.Response.Response GraphQL.Errors.Errors MessagesQuery
 
 
 type alias PostMessageResponse2 =
-    GraphqlToElm.Response.Response GraphqlToElm.Errors.Errors PostMessageMutation
+    GraphQL.Response.Response GraphQL.Errors.Errors PostMessageMutation
 
 
 type alias MessagesQuery =

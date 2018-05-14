@@ -4,5 +4,6 @@ node_js:
   - "7"
   - "6"
 script:
+  - npm run build
   - npm run test:options
   - npm run test:gen

@@ -4,7 +4,7 @@
   "description": "Basic example for graphql-to-elm",
   "scripts": {
     "prebuild": "node prebuild",
-    "build": "elm make src/Main.elm",
+    "build": "elm make src/Main.elm --yes",
     "serve": "node server",
     "start": "npm run build && npm run serve"
   },
@@ -24,6 +24,6 @@
   },
   "devDependencies": {
     "elm": "^0.18.0",
-    "graphql-to-elm": "^0.4.1"
+    "graphql-to-elm": "file:../.."
   }
 }

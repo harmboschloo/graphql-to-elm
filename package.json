@@ -34,15 +34,16 @@
     "typescript": "^2.8.3"
   },
   "scripts": {
-    "test:options": "tape -r ts-node/register test/optionsTest.ts | tap-diff",
-    "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
-    "test:gen-update": "tape -r ts-node/register test/genTest.ts --update | tap-diff",
-    "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
-    "test": "tape -r ts-node/register test/index.ts | tap-diff",
     "build": "rimraf lib && tsc",
-    "build:examples": "npm run build --prefix examples/basic && npm run build --prefix examples/basic2 && npm run build --prefix examples/features",
     "docs": "elm-make --docs=documentation.json",
-    "prepublishOnly": "npm test && npm run build && npm run build:examples"
+    "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build",
+    "examples:install": "cd examples/basic && npm install && cd ../basic2 && npm install && cd ../features && npm install",
+    "prepublishOnly": "npm test && npm run build && npm run build:examples",
+    "test:options": "tape -r ts-node/register test/optionsTest.ts | tap-diff",
+    "test": "tape -r ts-node/register test/index.ts | tap-diff",
+    "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",
+    "test:gen": "tape -r ts-node/register test/genTest.ts | tap-diff",
+    "test:gen-update": "tape -r ts-node/register test/genTest.ts --update | tap-diff"
   },
   "author": "Harm Boschloo",
   "repository": {

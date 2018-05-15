@@ -38,7 +38,7 @@
     "docs": "elm-make --docs=documentation.json",
     "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build",
     "examples:install": "cd examples/basic && npm install && cd ../basic2 && npm install && cd ../features && npm install",
-    "prepublishOnly": "npm test && npm run build && npm run build:examples",
+    "prepublishOnly": "npm test && npm run build && npm run examples:build",
     "test:options": "tape -r ts-node/register test/optionsTest.ts | tap-diff",
     "test": "tape -r ts-node/register test/index.ts | tap-diff",
     "test:browser": "tape -r ts-node/register test/browserTest.ts | tap-diff",

@@ -37,7 +37,7 @@ It includes support for:
 
 * improve documentation
 * generate union types from graphql enum types
-* copy elm library files destination folder
+* copy elm library files to destination folder
 
 ## Usage
 

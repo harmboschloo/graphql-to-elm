@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { Options, TypeDecoders } from "../src/options";
 
 export interface Fixture {
@@ -24,7 +25,7 @@ interface Config {
   enumDecoders?: TypeDecoders;
   src?: string;
   dest?: string;
-  operationKind?: "query" | "named";
+  operationKind?: "query" | "named" | "named_prefixed";
   expect?: string;
   throws?: string;
 }
@@ -157,6 +158,19 @@ const data: { [key: string]: FinalConfig } = {
   "operations-named": create({
     queries: ["query.gql"],
     operationKind: "named"
+  }),
+
+  "operations-named_prefixed": create({
+    src: resolve(__dirname, "fixtures/operations-named_prefixed"),
+    queries: [
+      "query.gql",
+      resolve(
+        __dirname,
+        "fixtures/operations-named_prefixed/Queries/Query.gql"
+      ),
+      "queries2/Queries/query2.gql"
+    ],
+    operationKind: "named_prefixed"
   }),
 
   scalars: create({

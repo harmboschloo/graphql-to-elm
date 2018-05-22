@@ -186,6 +186,11 @@ const writeNamedQueries = (results: FixtureResult[]) => {
             id: `${fixture.id}/${operation.gqlName}`,
             query: query.queryIntel.query
           });
+        } else if (operation.kind === "named_prefixed") {
+          namedQueries.push({
+            id: `${fixture.id}/${operation.gqlFilename}:${operation.gqlName}`,
+            query: query.queryIntel.query
+          });
         }
       })
     );

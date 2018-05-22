@@ -11,7 +11,7 @@ export interface Options {
   errorsDecoder?: TypeDecoder;
   src?: string;
   dest?: string;
-  operationKind?: "query" | "named";
+  operationKind?: "query" | "named" | "named_prefixed";
   log?: (message: string) => void;
 }
 
@@ -25,7 +25,7 @@ export interface FinalOptions {
   errorsDecoder: TypeDecoder;
   src: string;
   dest: string;
-  operationKind: "query" | "named";
+  operationKind: "query" | "named" | "named_prefixed";
   log: (message: string) => void;
 }
 
@@ -269,9 +269,11 @@ const validateOperationKind = (operationKind?: string) => {
   }
 
   assert.strictEqual(
-    operationKind === "query" || operationKind === "named",
+    operationKind === "query" ||
+      operationKind === "named" ||
+      operationKind === "named_prefixed",
     true,
-    `options.operationKind must be "query" or "named", but found: ${operationKind}`
+    `options.operationKind must be "query", "named" or "named_prefixed", but found: ${operationKind}`
   );
 };
 

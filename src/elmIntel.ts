@@ -32,6 +32,7 @@ import {
 } from "./queryIntel";
 
 export interface ElmIntel {
+  relativeSrc: string;
   dest: string;
   module: string;
   operations: ElmOperation[];
@@ -50,15 +51,17 @@ export const queryToElmIntel = (
   queryIntel: QueryIntel,
   options: FinalOptions
 ): ElmIntel => {
+  let relativeSrc;
   let dest;
   let module;
 
   if (!queryIntel.src) {
+    relativeSrc = "";
     dest = "./Query.elm";
     module = "Query";
   } else {
-    const srcPath = path.relative(options.src, queryIntel.src);
-    const srcInfo = path.parse(srcPath);
+    relativeSrc = path.relative(options.src, queryIntel.src);
+    const srcInfo = path.parse(relativeSrc);
 
     const moduleParts = srcInfo.dir
       .split(/[\\/]/)
@@ -79,7 +82,7 @@ export const queryToElmIntel = (
   };
 
   const operations = queryIntel.operations.map(operation =>
-    getOperation(operation, scope, options)
+    getOperation(relativeSrc, operation, scope, options)
   );
 
   const fragments = getFragments(queryIntel.fragments, scope, options);
@@ -87,6 +90,7 @@ export const queryToElmIntel = (
   fixFragmentNames(operations, scope);
 
   const intel: ElmIntel = {
+    relativeSrc,
     dest,
     module,
     operations,
@@ -107,7 +111,10 @@ const reservedNames = ["Int", "Float", "Bool", "String", "List"];
 // OPERATIONS
 //
 
-export type ElmOperation = ElmQueryOperation | ElmNamedOperation;
+export type ElmOperation =
+  | ElmQueryOperation
+  | ElmNamedOperation
+  | ElmNamedPrefixedOperation;
 
 export interface ElmQueryOperation {
   type: ElmOperationType;
@@ -132,9 +139,22 @@ export interface ElmNamedOperation {
   responseTypeName: String;
 }
 
+export interface ElmNamedPrefixedOperation {
+  type: ElmOperationType;
+  kind: "named_prefixed";
+  name: string;
+  gqlName: string;
+  gqlFilename: string;
+  variables: ElmRecordEncoder | undefined;
+  data: ElmDecoder;
+  errors: TypeDecoder;
+  responseTypeName: String;
+}
+
 export type ElmOperationType = "Query" | "Mutation" | "Subscription";
 
 const getOperation = (
+  relativeSrc: string,
   queryOperation: QueryOperation,
   scope: ElmScope,
   options: FinalOptions
@@ -181,10 +201,19 @@ const getOperation = (
         type: getOperationType(queryOperation.type),
         kind: "named",
         name,
-        gqlName: assertOk(
-          queryOperation.name,
-          `operation for type ${queryOperation.type} does not have a name`
-        ),
+        gqlName: assertOperationName(queryOperation),
+        variables,
+        data,
+        errors,
+        responseTypeName
+      };
+    case "named_prefixed":
+      return {
+        type: getOperationType(queryOperation.type),
+        kind: "named_prefixed",
+        name,
+        gqlName: assertOperationName(queryOperation),
+        gqlFilename: relativeSrc.replace(/\\/g, "/"),
         variables,
         data,
         errors,
@@ -203,6 +232,12 @@ const getOperationType = (type: QueryOperationType): ElmOperationType => {
       return "Subscription";
   }
 };
+
+const assertOperationName = (queryOperation: QueryOperation) =>
+  assertOk(
+    queryOperation.name,
+    `operation for type ${queryOperation.type} does not have a name`
+  );
 
 const newOperationName = (name: string, scope: ElmScope): string =>
   getUnusedName(`${validVariableName(name)}`, scope.names);
@@ -241,6 +276,7 @@ const getFragments = (
     case "query":
       return fragments.map(fragment => getFragment(fragment, scope));
     case "named":
+    case "named_prefixed":
       return [];
   }
 };

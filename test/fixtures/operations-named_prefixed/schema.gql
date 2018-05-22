@@ -1,0 +1,26 @@
+# Schema
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# Query
+
+type Query {
+  operation(name: String): Operation
+}
+
+type Operation {
+  name: String
+  query: String!
+  fragmentNames: [String!]
+}
+
+type Mutation {
+  fragment: Fragment
+}
+
+type Fragment {
+  name: String!
+}

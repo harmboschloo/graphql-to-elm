@@ -478,8 +478,12 @@ const getOutputs = (
       value: output,
       valueWrapper:
         type instanceof GraphQLNonNull
-          ? hasDirective ? "non-null-optional" : false
-          : hasDirective ? "optional" : "nullable",
+          ? hasDirective
+            ? "non-null-optional"
+            : false
+          : hasDirective
+            ? "optional"
+            : "nullable",
       valueListItemWrapper:
         nullableType instanceof GraphQLList
           ? nullableType.ofType instanceof GraphQLNonNull

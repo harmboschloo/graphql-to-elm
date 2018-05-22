@@ -216,6 +216,14 @@ ${operation.name}${variables.parameter} =
         ${variables.value}
         ${operation.data.decoder}
         ${operation.errors.decoder}`;
+    case "named_prefixed":
+      return `${declaration}
+${operation.name}${variables.parameter} =
+    GraphQL.Operation.withName
+        "${operation.gqlFilename}:${operation.gqlName}"
+        ${variables.value}
+        ${operation.data.decoder}
+        ${operation.errors.decoder}`;
   }
 };
 

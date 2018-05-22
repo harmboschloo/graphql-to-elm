@@ -20,6 +20,10 @@ Object.keys(schemas).forEach(id => {
   const setNamedQuery = payload => {
     if (payload.operationName && !payload.query) {
       payload.query = namedQueries[`${id}/${payload.operationName}`];
+      const split = payload.operationName.split(":");
+      if (split.length > 1) {
+        payload.operationName = split[1];
+      }
     }
   };
 

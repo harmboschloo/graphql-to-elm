@@ -1,5 +1,5 @@
 import { resolve, relative } from "path";
-import { readFileSync } from "fs";
+import { readFileSync, lstatSync } from "fs";
 import * as rimraf from "rimraf";
 import * as glob from "glob";
 import * as test from "tape";
@@ -78,15 +78,27 @@ const compareDirs = (t, { actual, expect }) => {
   actualFiles.forEach(file => {
     const actualFile = resolve(actual, file);
     const expectedFile = resolve(expect, file);
-    const actualContent = readFileSync(actualFile, "utf8");
-    const expectedContent = readFileSync(expectedFile, "utf8");
-    t.equal(
-      actualContent,
-      expectedContent,
-      `${relative(process.cwd(), actualFile)} === ${relative(
-        process.cwd(),
-        expectedFile
-      )}`
-    );
+
+    if (lstatSync(actualFile).isDirectory()) {
+      t.equal(
+        true,
+        lstatSync(expectedFile).isDirectory(),
+        `${relative(process.cwd(), actualFile)} === ${relative(
+          process.cwd(),
+          expectedFile
+        )}`
+      );
+    } else {
+      const actualContent = readFileSync(actualFile, "utf8");
+      const expectedContent = readFileSync(expectedFile, "utf8");
+      t.equal(
+        actualContent,
+        expectedContent,
+        `${relative(process.cwd(), actualFile)} === ${relative(
+          process.cwd(),
+          expectedFile
+        )}`
+      );
+    }
   });
 };

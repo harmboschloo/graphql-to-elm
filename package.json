@@ -5,9 +5,12 @@
   "files": [
     "elm",
     "lib",
-    "src"
+    "src",
+    "index.js",
+    "index.d.ts"
   ],
   "main": "index.js",
+  "types": "index.d.ts",
   "dependencies": {
     "mkdirp": "^0.5.1"
   },

@@ -12,8 +12,8 @@ import GraphQL.Http
         , postBatch
         )
 import GraphQL.Batch as Batch
+import GraphQL.Enum.Language as Language
 import GraphQL.Optional as Optional
-import Language
 import Queries.Aliases as Aliases
 import Queries.Fields as Fields
 import Queries.Fragments as Fragments

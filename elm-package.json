@@ -5,16 +5,15 @@
   "license": "BSD-3-Clause",
   "source-directories": ["elm"],
   "exposed-modules": [
-    "GraphqlToElm.Helpers.Decode",
-    "GraphqlToElm.Helpers.Url",
-    "GraphqlToElm.Optional.Decode",
-    "GraphqlToElm.Optional.Encode",
-    "GraphqlToElm.Batch",
-    "GraphqlToElm.Errors",
-    "GraphqlToElm.Http",
-    "GraphqlToElm.Operation",
-    "GraphqlToElm.Optional",
-    "GraphqlToElm.Response"
+    "GraphQL.Helpers.Decode",
+    "GraphQL.Helpers.Url",
+    "GraphQL.Http.Basic",
+    "GraphQL.Batch",
+    "GraphQL.Errors",
+    "GraphQL.Operation",
+    "GraphQL.Optional",
+    "GraphQL.PlainBatch",
+    "GraphQL.Response"
   ],
   "dependencies": {
     "elm-lang/core": "5.1.1 <= v < 6.0.0",

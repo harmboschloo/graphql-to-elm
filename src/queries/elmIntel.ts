@@ -5,13 +5,13 @@ import {
   TypeEncoder,
   TypeDecoders,
   TypeDecoder
-} from "./options";
+} from "../options";
 import {
   cachedValue,
   firstToUpperCase,
   firstToLowerCase,
   assertOk
-} from "./utils";
+} from "../utils";
 import {
   QueryIntel,
   QueryOperation,
@@ -30,6 +30,15 @@ import {
   QueryFragmentedFragmentOutput,
   QueryFragmentOutput
 } from "./queryIntel";
+import {
+  validModuleName,
+  validVariableName,
+  validTypeName,
+  validFieldName,
+  validTypeConstructorName,
+  validWord,
+  validNameUpper
+} from "../elmUtils";
 
 export interface ElmIntel {
   relativeSrc: string;
@@ -788,55 +797,3 @@ const getUnusedName = (name: string, usedNames: string[]): string => {
     return name2;
   }
 };
-
-export const validModuleName = (name: string): string => validNameUpper(name);
-
-const validTypeName = (name: string): string => validNameUpper(name);
-
-const validTypeConstructorName = (name: string): string => validNameUpper(name);
-
-const validVariableName = (name: string): string => validNameLower(name);
-
-const validFieldName = (name: string): string => validNameLower(name);
-
-const validNameLower = (name: string): string =>
-  validWord(firstToLowerCase(validNameUpper(name)));
-
-const validNameUpper = (name: string): string =>
-  name
-    .split(/[^A-Za-z0-9_]/g)
-    .filter(x => !!x)
-    .map(firstToUpperCase)
-    .join("")
-    .replace(/^_+/, "");
-
-const validWord = keyword =>
-  elmKeywords.includes(keyword) ? `${keyword}_` : keyword;
-
-const elmKeywords = [
-  "as",
-  "case",
-  "else",
-  "exposing",
-  "if",
-  "import",
-  "in",
-  "let",
-  "module",
-  "of",
-  "port",
-  "then",
-  "type",
-  "where"
-  // "alias",
-  // "command",
-  // "effect",
-  // "false",
-  // "infix",
-  // "left",
-  // "non",
-  // "null",
-  // "right",
-  // "subscription",
-  // "true",
-];

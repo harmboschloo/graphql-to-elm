@@ -1,0 +1,55 @@
+# query NAMES_UPPER {
+#   NAMES_UPPER
+# }
+
+# query names_lower {
+#   names_lower
+# }
+
+# query names_lowerAndUpper {
+#   names_lowerAndUpper
+# }
+
+query UserName {
+  user {
+    name
+  }
+}
+
+query UserEmail {
+  user {
+    email
+  }
+}
+
+query Node($ID_UPPER: ID!, $id_lower: ID!, $id_lowerAndUpper: ID!) {
+  NODE_UPPER(ID_UPPER: $ID_UPPER) {
+    ... on User {
+      name
+    }
+  }
+  node_lower(id_lower: $id_lower) {
+    ... on User {
+      name
+    }
+    ... on Group {
+      name
+      __typename
+    }
+  }
+  node_lowerAndUpper(id_lowerAndUpper: $id_lowerAndUpper) {
+    ... on User {
+      id
+      email
+    }
+    ... on Group {
+      id
+    }
+  }
+}
+
+query Underscores {
+  _UNDERSCORE_UPPER
+  _underscore_lower
+  _underscore_lowerAndUpper
+}

@@ -18,7 +18,7 @@ import {
   ElmDecoderField,
   ElmRecordField
 } from "./elmIntel";
-import { withParentheses, addOnce } from "./utils";
+import { withParentheses, addOnce } from "../utils";
 
 type TypeWrapper = false | "nullable" | "optional" | "non-null-optional";
 type ListItemWrapper = false | "non-null" | "nullable" | "optional";

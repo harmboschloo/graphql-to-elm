@@ -6,6 +6,7 @@ module Enum
         )
 
 import Data.Binary
+import GraphQL.Enum.UserType
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Response
@@ -17,6 +18,7 @@ query =
     GraphQL.Operation.withQuery
         """{
 binary
+userType
 }"""
         Maybe.Nothing
         queryDecoder
@@ -29,10 +31,12 @@ type alias Response =
 
 type alias Query =
     { binary : Data.Binary.Binary
+    , userType : GraphQL.Enum.UserType.UserType
     }
 
 
 queryDecoder : Json.Decode.Decoder Query
 queryDecoder =
-    Json.Decode.map Query
+    Json.Decode.map2 Query
         (Json.Decode.field "binary" Data.Binary.decoder)
+        (Json.Decode.field "userType" GraphQL.Enum.UserType.decoder)

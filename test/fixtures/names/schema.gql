@@ -1,0 +1,56 @@
+# Enums
+
+enum NAMES_UPPER {
+  ONE
+  TWO
+  FOURTY_TWO
+}
+
+enum names_lower {
+  one
+  two
+  fourty_two
+}
+
+enum names_lowerAndUpper {
+  oneAndTwo
+  twoOrTwenty_even
+  fourtyTwo
+}
+
+# Schema
+
+schema {
+  query: Query
+}
+
+# Query
+
+type Query {
+  # NAMES_UPPER: NAMES_UPPER
+  # names_lower: names_lower!
+  # names_lowerAndUpper: names_lowerAndUpper!
+  user: User!
+  NODE_UPPER(ID_UPPER: ID!): Node
+  node_lower(id_lower: ID!): Node
+  node_lowerAndUpper(id_lowerAndUpper: ID!): Node
+  _UNDERSCORE_UPPER: String!
+  _underscore_lower: String!
+  _underscore_lowerAndUpper: String!
+}
+
+interface Node {
+  id: ID!
+}
+
+type User implements Node {
+  id: ID!
+  name: String!
+  email: String!
+  group: Group
+}
+
+type Group implements Node {
+  id: ID!
+  name: String!
+}

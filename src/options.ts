@@ -3,6 +3,7 @@ import { withDefault } from "./utils";
 
 export interface Options {
   schema: string;
+  enums?: EnumOptions;
   queries: string[];
   scalarEncoders?: TypeEncoders;
   enumEncoders?: TypeEncoders;
@@ -15,8 +16,13 @@ export interface Options {
   log?: (message: string) => void;
 }
 
+export interface EnumOptions {
+  baseModule?: string;
+}
+
 export interface FinalOptions {
   schema: string;
+  enums: FinalEnumOptions;
   queries: string[];
   scalarEncoders: TypeEncoders;
   enumEncoders: TypeEncoders;
@@ -27,6 +33,10 @@ export interface FinalOptions {
   dest: string;
   operationKind: "query" | "named" | "named_prefixed";
   log: (message: string) => void;
+}
+
+export interface FinalEnumOptions {
+  baseModule: string;
 }
 
 export interface TypeEncoders {
@@ -46,6 +56,10 @@ export interface TypeDecoder {
   type: string;
   decoder: string;
 }
+
+const defaultEnumOptions: FinalEnumOptions = {
+  baseModule: "GraphQL.Enum"
+};
 
 const defaultScalarEncoders: TypeEncoders = {
   Int: {
@@ -102,6 +116,12 @@ export const finalizeOptions = (options: Options): FinalOptions => {
   validateOptions(options);
 
   const { schema, queries } = options;
+
+  const enums = {
+    ...defaultEnumOptions,
+    ...withDefault({}, options.enums)
+  };
+
   const scalarEncoders = {
     ...defaultScalarEncoders,
     ...withDefault({}, options.scalarEncoders)
@@ -126,6 +146,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
 
   return {
     schema,
+    enums,
     queries,
     scalarEncoders,
     enumEncoders,
@@ -143,6 +164,7 @@ const validateOptions = (options: Options) => {
   assert.strictEqual(typeof options, "object", "options must be an object");
 
   validateSchema(options.schema);
+  validateEnums(options.enums);
   validateQueries(options.queries);
   validateTypeEncoders("scalarEncoders", options.scalarEncoders);
   validateTypeEncoders("enumEncoders", options.enumEncoders);
@@ -161,6 +183,28 @@ const validateSchema = (schema: string) => {
     "string",
     `options.schema must be a string, but found: ${schema}`
   );
+};
+
+const validateEnums = (enums?: EnumOptions) => {
+  if (typeof enums === "undefined") {
+    return;
+  }
+
+  assert.strictEqual(
+    enums && typeof enums,
+    "object",
+    `options.enums must be an object, but found: ${enums}`
+  );
+
+  if (typeof enums.baseModule !== "undefined") {
+    assert.strictEqual(
+      typeof enums.baseModule,
+      "string",
+      `options.enums.baseModule must be a string, but found: ${
+        enums.baseModule
+      }`
+    );
+  }
 };
 
 const validateQueries = (queries: string[]) => {

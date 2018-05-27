@@ -14,6 +14,23 @@ test("# options test #", t => {
     t.end();
   });
 
+  t.test("enums", t => {
+    t.throws(
+      () => finalizeOptions({ schema: "", queries: [], enums: null }),
+      /enums.*object/,
+      "invalid enums"
+    );
+
+    t.throws(
+      () =>
+        finalizeOptions({ schema: "", queries: [], enums: { baseModule: 1 } }),
+      /enums.baseModule.*string/,
+      "invalid enums.baseModule"
+    );
+
+    t.end();
+  });
+
   t.test("queries", t => {
     t.throws(
       () => finalizeOptions({ schema: "" }),

@@ -131,6 +131,8 @@ const data: { [key: string]: FinalConfig } = {
 
   misc: create({ queries: ["query.gql"] }),
 
+  names: create({ queries: ["queries.gql"] }),
+
   objects: create({
     queries: [
       "basic.gql",

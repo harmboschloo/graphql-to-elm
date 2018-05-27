@@ -70,7 +70,7 @@ animalDecoder =
 
 
 type alias Dog =
-    { typename : String
+    { typename__ : String
     , color : String
     }
 
@@ -83,7 +83,7 @@ dogDecoder =
 
 
 type alias Dolphin =
-    { typename : String
+    { typename__ : String
     , color : String
     }
 

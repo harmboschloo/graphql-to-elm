@@ -2,6 +2,7 @@ export as namespace graphqlToElm;
 import { Options } from "./src/options";
 export {
   Options,
+  EnumOptions,
   TypeEncoders,
   TypeEncoder,
   TypeDecoders,

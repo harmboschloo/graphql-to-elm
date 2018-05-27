@@ -34,14 +34,14 @@ import {
   visitWithTypeInfo,
   validate
 } from "graphql";
-import { FinalOptions } from "./options";
+import { FinalOptions } from "../options";
 import {
   readFile,
   removeIndents,
   assertOk,
   addOnce,
   firstToUpperCase
-} from "./utils";
+} from "../utils";
 
 export interface QueryIntel {
   src: string;

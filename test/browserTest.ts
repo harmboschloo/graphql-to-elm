@@ -13,9 +13,9 @@ import {
   writeResult
 } from "../src/graphqlToElm";
 import { Options } from "../src/options";
-import { ElmIntel } from "../src/elmIntel";
-import { generateElm } from "../src/generateElm";
-import { ElmEncoder, ElmOperationType, validModuleName } from "../src/elmIntel";
+import { ElmIntel } from "../src/queries/elmIntel";
+import { ElmEncoder, ElmOperationType } from "../src/queries/elmIntel";
+import { validModuleName } from "../src/elmUtils";
 import { writeFile } from "../src/utils";
 
 interface FixtureResult {
@@ -51,22 +51,39 @@ const generateTestFiles = t => {
 const writeQueries = t => (fixture: Fixture): FixtureResult => {
   const { id, dir, options } = fixture;
 
+  const baseModule = `Tests.${validModuleName(id)}`;
+
+  const enumOptions = {
+    baseModule: "GraphQL.Enum",
+    ...(options.enums || {})
+  };
+
   const result: Result = getGraphqlToElm({
     ...options,
     schema: resolve(__dirname, dir, options.schema),
+    enums: {
+      ...enumOptions,
+      baseModule: `${baseModule}.${enumOptions.baseModule}`
+    },
     queries: options.queries.map(query => resolve(__dirname, dir, query)),
     src: resolve(__dirname, dir, options.src || ""),
     log: t.comment
   });
 
+  result.enums = result.enums.map(enumIntel => {
+    enumIntel.dest = resolve(
+      generatePath,
+      `${enumIntel.module.replace(/\./g, "/")}.elm`
+    );
+    return enumIntel;
+  });
+
   result.queries = result.queries.map(query => {
-    const moduleName = validModuleName(id);
-    query.elmIntel.module = `Tests.${moduleName}.${query.elmIntel.module}`;
+    query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
     query.elmIntel.dest = resolve(
       generatePath,
       `${query.elmIntel.module.replace(/\./g, "/")}.elm`
     );
-    query.elm = generateElm(query.elmIntel);
     return query;
   });
 
@@ -149,7 +166,7 @@ const generateVariables = (encoder: ElmEncoder): string => {
     case "record-encoder": {
       const fields = encoder.fields.map(
         field =>
-          `${field.jsonName} = ${
+          `${field.name} = ${
             field.valueWrapper === "optional"
               ? "Optional.Absent"
               : field.valueListItemWrapper

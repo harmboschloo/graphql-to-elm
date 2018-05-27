@@ -9,9 +9,15 @@ schema {
 type Query {
   binaryOrNull: Binary
   binary: Binary!
+  userType: USER_TYPE!
 }
 
 enum Binary {
   ZERO
   ONE
+}
+
+enum USER_TYPE {
+  REGULAR_USER
+  ADMIN_USER
 }

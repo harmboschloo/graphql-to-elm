@@ -36,7 +36,6 @@ It includes support for:
 ### To do
 
 * improve documentation
-* generate union types from graphql enum types
 * copy elm library files to destination folder
 
 ## Usage
@@ -94,21 +93,26 @@ You'll need to have [node/npm](https://nodejs.org) installed.
 
 ## Options
 
-| option         | type                                       | default                       | description                                                                                                                                             |
-| -------------- | ------------------------------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| schema         | `string`                                   |                               | Filename of the schema document.                                                                                                                        |
-| queries        | `string[]`                                 |                               | Array of filenames of the query documents.                                                                                                              |
-| scalarEncoders | `TypeEncoders`                             | `{}`                          | Scalar type encoders.                                                                                                                                   |
-| enumEncoders   | `TypeEncoders`                             | `{}`                          | Enum type encoders.                                                                                                                                     |
-| scalarDecoders | `TypeDecoders`                             | `{}`                          | Scalar type decoders.                                                                                                                                   |
-| enumDecoders   | `TypeDecoders`                             | `{}`                          | Enum type decoders.                                                                                                                                     |
-| errorsDecoder  | `TypeDecoder`                              | `GraphqlToElm.Errors` decoder | GraphQL response errors decoder                                                                                                                         |
-| src            | `string`                                   | `.`                           | Base folder of the queries.                                                                                                                             |
-| dest           | `string`                                   | `src` option                  | Destination folder for the generateed elm files.                                                                                                        |
-| operationKind  | `"query"`, `"named"` or `"named_prefixed"` | `"query"`                     | Send the full query to the server or only the operation name. The operation name can be prefixed with the query filename: `[filename]:[operationName]`. |
-| log            | `(message: string) => void`                | `console.log`                 | Callback for log messages. Set to `null` to disable.                                                                                                    |
+| option         | type                                       | default                          | description                                                                                                                                             |
+| -------------- | ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| schema         | `string`                                   |                                  | Filename of the schema document.                                                                                                                        |
+| enums          | `EnumOptions`                              | `{ baseModule: "GraphQL.Enum" }` | Options for generating union types from GraphQL enums. 'baseModule' is the base module name for the union types.                                        |
+| queries        | `string[]`                                 |                                  | Array of filenames of the query documents.                                                                                                              |
+| scalarEncoders | `TypeEncoders`                             | `{}`                             | Scalar type encoders.                                                                                                                                   |
+| enumEncoders   | `TypeEncoders`                             | `{}`                             | Enum type encoders.                                                                                                                                     |
+| scalarDecoders | `TypeDecoders`                             | `{}`                             | Scalar type decoders.                                                                                                                                   |
+| enumDecoders   | `TypeDecoders`                             | `{}`                             | Enum type decoders.                                                                                                                                     |
+| errorsDecoder  | `TypeDecoder`                              | `GraphqlToElm.Errors` decoder    | GraphQL response errors decoder                                                                                                                         |
+| src            | `string`                                   | `.`                              | Base folder of the queries.                                                                                                                             |
+| dest           | `string`                                   | `src` option                     | Destination folder for the generateed elm files.                                                                                                        |
+| operationKind  | `"query"`, `"named"` or `"named_prefixed"` | `"query"`                        | Send the full query to the server or only the operation name. The operation name can be prefixed with the query filename: `[filename]:[operationName]`. |
+| log            | `(message: string) => void`                | `console.log`                    | Callback for log messages. Set to `null` to disable.                                                                                                    |
 
 ```TypeScript
+interface EnumOptions {
+  baseModule?: string;
+}
+
 interface TypeEncoders {
   [graphqlType: string]: TypeEncoder;
 }

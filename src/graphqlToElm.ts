@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { GraphQLSchema, buildSchema } from "graphql";
 import { Options, FinalOptions, finalizeOptions } from "./options";
 import * as enums from "./enums";
@@ -67,5 +68,24 @@ export const writeResult = (result: Result): void => {
     writeFile(elmIntel.dest, generateElm(elmIntel));
   });
 
+  elmFiles.forEach(filename => {
+    const src = resolve(__dirname, "../elm/GraphQL", filename);
+    const dest = resolve(result.options.dest, "GraphQL", filename);
+    result.options.log(`writing ${dest}`);
+    writeFile(dest, readFile(src));
+  });
+
   result.options.log("done");
 };
+
+const elmFiles = [
+  "Batch.elm",
+  "Errors.elm",
+  "Operation.elm",
+  "Optional.elm",
+  "PlainBatch.elm",
+  "Response.elm",
+  "Helpers/Decode.elm",
+  "Helpers/Url.elm",
+  "Http/Basic.elm"
+];

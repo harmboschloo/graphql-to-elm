@@ -36,7 +36,6 @@ It includes support for:
 ### To do
 
 * improve documentation
-* copy elm library files to destination folder
 
 ## Usage
 
@@ -80,8 +79,7 @@ You'll need to have [node/npm](https://nodejs.org) installed.
     ```json
     "source-directories": [
         "src",
-        "src-generated",
-        "node_modules/graphql-to-elm/elm"
+        "src-generated"
     ],
     ```
 

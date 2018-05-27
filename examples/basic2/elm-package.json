@@ -5,8 +5,7 @@
     "license": "BSD3",
     "source-directories": [
         "src",
-        "src-generated",
-        "node_modules/graphql-to-elm/elm"
+        "src-generated"
     ],
     "exposed-modules": [],
     "dependencies": {

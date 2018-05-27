@@ -87,6 +87,8 @@ const writeQueries = t => (fixture: Fixture): FixtureResult => {
     return query;
   });
 
+  result.options.dest = generatePath;
+
   writeResult(result);
 
   return { fixture, result };

@@ -28,6 +28,7 @@ It includes support for:
 * variables
 * aliases
 * directives
+* enums
 * custom scalar encoders and decoders
 * custom enum encoders and decoders
 * custom error decoder
@@ -73,8 +74,7 @@ You'll need to have [node/npm](https://nodejs.org) installed.
 
 4.  To use the generated files in your project you have to include the
     destination folder in the `source-directories` field of your `elm-package.json`.
-    You'll also have to include the `node_modules/graphql-to-elm/elm` folder
-    to include the `graphql-to-elm` [library](elm/GraphQL). It should look something like this:
+    It should look something like this:
 
     ```json
     "source-directories": [
@@ -83,8 +83,9 @@ You'll need to have [node/npm](https://nodejs.org) installed.
     ],
     ```
 
-5.  Now you can import the `graphql-to-elm` [library files](elm/GraphQL) and generated
-    Elm files in your project and use them.
+5.  Now you can import the generated Elm files
+    (which include the `graphql-to-elm` [library files](elm/GraphQL) files)
+    in your project and use them.
 
     For full usage examples see the [examples folder](examples)
     or have a look at the [test fixtures folder](test/fixtures).

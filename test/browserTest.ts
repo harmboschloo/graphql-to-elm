@@ -10,6 +10,7 @@ import {
   Result,
   QueryResult,
   getGraphqlToElm,
+  getSchemaString,
   writeResult
 } from "../src/graphqlToElm";
 import { Options } from "../src/options";
@@ -41,7 +42,15 @@ test("graphqlToElm browser test", t => {
 
 const generateTestFiles = t => {
   rimraf.sync(generatePath);
-  const fixtures = getFixtures().filter(fixture => !fixture.throws);
+  const fixtures = getFixtures()
+    .filter(fixture => !fixture.throws)
+    .map(fixture => {
+      fixture.options.schema =
+        typeof fixture.options.schema === "string"
+          ? resolve(__dirname, fixture.dir, fixture.options.schema)
+          : fixture.options.schema;
+      return fixture;
+    });
   const results: FixtureResult[] = fixtures.map(writeQueries(t));
   writeTests(results);
   writeNamedQueries(results);
@@ -60,7 +69,7 @@ const writeQueries = t => (fixture: Fixture): FixtureResult => {
 
   const result: Result = getGraphqlToElm({
     ...options,
-    schema: resolve(__dirname, dir, options.schema),
+    schema: { string: getSchemaString(options) },
     enums: {
       ...enumOptions,
       baseModule: `${baseModule}.${enumOptions.baseModule}`
@@ -228,10 +237,10 @@ const writeNamedQueries = (results: FixtureResult[]) => {
 const writeSchemas = (fixtures: Fixture[]) => {
   const schemas = fixtures.map(({ id, dir, options }) => ({
     id,
-    path: normalize(resolve(__dirname, dir, options.schema)).replace(/\\/g, "/")
+    schema: getSchemaString(options)
   }));
 
-  const entries = schemas.map(({ id, path }) => `  "${id}": "${path}"`);
+  const entries = schemas.map(({ id, schema }) => `  "${id}": \`${schema}\``);
   const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
 
   const path = resolve(generatePath, "schemas.ts");

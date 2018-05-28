@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { Options, TypeDecoders } from "../src/options";
+import { Options, SchemaString, TypeDecoders } from "../src/options";
 
 export interface Fixture {
   id: string;
@@ -19,7 +19,7 @@ export const getFixtures = (fixtureId?: string): Fixture[] =>
     .filter(fixture => !fixtureId || fixture.id === fixtureId);
 
 interface Config {
-  schema?: string;
+  schema?: string | SchemaString;
   queries: string[];
   scalarDecoders?: TypeDecoders;
   enumDecoders?: TypeDecoders;
@@ -177,6 +177,24 @@ const data: { [key: string]: FinalConfig } = {
 
   scalars: create({
     queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"]
+  }),
+
+  "schema-string": create({
+    schema: {
+      string: `# Schema
+
+      schema {
+        query: Query
+      }
+      
+      # Query
+      
+      type Query {
+        hello: String!
+      }
+      `
+    },
+    queries: ["query.gql"]
   }),
 
   variables: create({

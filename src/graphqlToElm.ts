@@ -1,6 +1,11 @@
 import { resolve } from "path";
 import { GraphQLSchema, buildSchema } from "graphql";
-import { Options, FinalOptions, finalizeOptions } from "./options";
+import {
+  Options,
+  FinalOptions,
+  SchemaString,
+  finalizeOptions
+} from "./options";
 import * as enums from "./enums";
 import { EnumIntel } from "./enums";
 import { QueryIntel, readQueryIntel } from "./queries/queryIntel";
@@ -28,8 +33,7 @@ export const graphqlToElm = (options: Options): Result => {
 export const getGraphqlToElm = (userOptions: Options): Result => {
   let options: FinalOptions = finalizeOptions(userOptions);
 
-  options.log(`reading schema ${options.schema}`);
-  const schema: GraphQLSchema = buildSchema(readFile(options.schema));
+  const schema: GraphQLSchema = buildSchema(getSchemaString(options));
 
   options.log(`processing enums`);
   const enumsIntel: EnumIntel[] = enums.getIntel(schema, options);
@@ -55,6 +59,22 @@ export const getGraphqlToElm = (userOptions: Options): Result => {
     queries: queriesResults,
     options
   };
+};
+
+export const getSchemaString = ({
+  schema,
+  log
+}: {
+  schema: string | SchemaString;
+  log?: (message: string) => void;
+}): string => {
+  if (typeof schema === "string") {
+    log && log(`reading schema ${schema}`);
+    return readFile(schema);
+  } else {
+    log && log("reading schema from string");
+    return schema.string;
+  }
 };
 
 export const writeResult = (result: Result): void => {

@@ -2,7 +2,7 @@ import * as assert from "assert";
 import { withDefault } from "./utils";
 
 export interface Options {
-  schema: string;
+  schema: string | SchemaString;
   enums?: EnumOptions;
   queries: string[];
   scalarEncoders?: TypeEncoders;
@@ -16,12 +16,16 @@ export interface Options {
   log?: (message: string) => void;
 }
 
+export interface SchemaString {
+  string: string;
+}
+
 export interface EnumOptions {
   baseModule?: string;
 }
 
 export interface FinalOptions {
-  schema: string;
+  schema: string | SchemaString;
   enums: FinalEnumOptions;
   queries: string[];
   scalarEncoders: TypeEncoders;
@@ -177,11 +181,21 @@ const validateOptions = (options: Options) => {
   validateLog(options.log);
 };
 
-const validateSchema = (schema: string) => {
-  assert.strictEqual(
-    typeof schema,
-    "string",
-    `options.schema must be a string, but found: ${schema}`
+const validateSchema = (schema: string | SchemaString) => {
+  if (typeof schema === "string") {
+    // ok
+    return;
+  }
+
+  if (typeof schema === "object" && schema !== null) {
+    if (typeof schema.string === "string") {
+      //ok
+      return;
+    }
+  }
+
+  assert.fail(
+    `options.schema must be a string or and object of type SchemaString, but found: ${schema}`
   );
 };
 

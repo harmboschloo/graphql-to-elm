@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 import express = require("express");
 import bodyParser = require("body-parser");
 import { GraphQLScalarType } from "graphql";
@@ -27,7 +26,7 @@ Object.keys(schemas).forEach(id => {
     }
   };
 
-  const typeDefs = readFileSync(schemas[id], "utf8");
+  const typeDefs = schemas[id];
   let resolvers = {};
   let mocks = {};
 

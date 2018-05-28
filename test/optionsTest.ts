@@ -11,6 +11,13 @@ test("# options test #", t => {
 
   t.test("schema", t => {
     t.throws(() => finalizeOptions({}), /schema.*string/, "not undefined");
+
+    t.throws(
+      () => finalizeOptions({ schema: { string: 123 } }),
+      /schema.*SchemaString/,
+      "invalid schema string"
+    );
+
     t.end();
   });
 

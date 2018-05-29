@@ -1,5 +1,4 @@
 import { resolve, relative, normalize } from "path";
-import { readFileSync } from "fs";
 import { execSync, spawn, ChildProcess } from "child_process";
 import * as rimraf from "rimraf";
 import * as glob from "glob";
@@ -28,21 +27,23 @@ const basePath = resolve(__dirname, "browserTest");
 const generatePath = resolve(basePath, "generated");
 
 test("graphqlToElm browser test", t => {
-  generateTestFiles(t);
-  makeElm(t);
+  generateTestFiles(t).then(() => {
+    makeElm(t);
 
-  const killServer = runServer(t);
-  const killBrowser = openTestPage(t);
+    const killServer = runServer(t);
+    const killBrowser = openTestPage(t);
 
-  test.onFinish(() => {
-    killServer();
-    killBrowser();
+    test.onFinish(() => {
+      killServer();
+      killBrowser();
+    });
   });
 });
 
-const generateTestFiles = t => {
+const generateTestFiles = (t: test.Test): Promise<any> => {
   rimraf.sync(generatePath);
-  const fixtures = getFixtures()
+
+  const fixtures: Fixture[] = getFixtures()
     .filter(fixture => !fixture.throws)
     .map(fixture => {
       fixture.options.schema =
@@ -51,13 +52,18 @@ const generateTestFiles = t => {
           : fixture.options.schema;
       return fixture;
     });
-  const results: FixtureResult[] = fixtures.map(writeQueries(t));
-  writeTests(results);
-  writeNamedQueries(results);
-  writeSchemas(fixtures);
+
+  return Promise.all(fixtures.map(writeQueries(t))).then(
+    (results: FixtureResult[]) =>
+      Promise.all([
+        writeTests(results),
+        writeNamedQueries(results),
+        writeSchemas(fixtures)
+      ])
+  );
 };
 
-const writeQueries = t => (fixture: Fixture): FixtureResult => {
+const writeQueries = t => (fixture: Fixture): Promise<FixtureResult> => {
   const { id, dir, options } = fixture;
 
   const baseModule = `Tests.${validModuleName(id)}`;
@@ -67,40 +73,42 @@ const writeQueries = t => (fixture: Fixture): FixtureResult => {
     ...(options.enums || {})
   };
 
-  const result: Result = getGraphqlToElm({
-    ...options,
-    schema: { string: getSchemaString(options) },
-    enums: {
-      ...enumOptions,
-      baseModule: `${baseModule}.${enumOptions.baseModule}`
-    },
-    queries: options.queries.map(query => resolve(__dirname, dir, query)),
-    src: resolve(__dirname, dir, options.src || ""),
-    log: t.comment
-  });
+  return getSchemaString(options)
+    .then((schemaString: string): Options => ({
+      ...options,
+      schema: { string: schemaString },
+      enums: {
+        ...enumOptions,
+        baseModule: `${baseModule}.${enumOptions.baseModule}`
+      },
+      queries: options.queries.map(query => resolve(__dirname, dir, query)),
+      src: resolve(__dirname, dir, options.src || ""),
+      log: t.comment
+    }))
+    .then(getGraphqlToElm)
+    .then((result: Result) => {
+      result.enums = result.enums.map(enumIntel => {
+        enumIntel.dest = resolve(
+          generatePath,
+          `${enumIntel.module.replace(/\./g, "/")}.elm`
+        );
+        return enumIntel;
+      });
 
-  result.enums = result.enums.map(enumIntel => {
-    enumIntel.dest = resolve(
-      generatePath,
-      `${enumIntel.module.replace(/\./g, "/")}.elm`
-    );
-    return enumIntel;
-  });
+      result.queries = result.queries.map(query => {
+        query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
+        query.elmIntel.dest = resolve(
+          generatePath,
+          `${query.elmIntel.module.replace(/\./g, "/")}.elm`
+        );
+        return query;
+      });
 
-  result.queries = result.queries.map(query => {
-    query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
-    query.elmIntel.dest = resolve(
-      generatePath,
-      `${query.elmIntel.module.replace(/\./g, "/")}.elm`
-    );
-    return query;
-  });
-
-  result.options.dest = generatePath;
-
-  writeResult(result);
-
-  return { fixture, result };
+      result.options.dest = generatePath;
+      return result;
+    })
+    .then(writeResult)
+    .then(result => ({ fixture, result }));
 };
 
 interface FixtureElmIntel {
@@ -108,7 +116,7 @@ interface FixtureElmIntel {
   elmIntel: ElmIntel;
 }
 
-const writeTests = (results: FixtureResult[]) => {
+const writeTests = (results: FixtureResult[]): Promise<void> => {
   const elmIntels: FixtureElmIntel[] = results.reduce(
     (elmIntels: FixtureElmIntel[], { fixture, result }: FixtureResult) =>
       result.queries.reduce(
@@ -169,7 +177,7 @@ mutationTests =
 
   const testsPath = resolve(generatePath, "Tests.elm");
 
-  writeFile(testsPath, content);
+  return writeFile(testsPath, content);
 };
 
 const generateVariables = (encoder: ElmEncoder): string => {
@@ -203,7 +211,7 @@ const generateVariables = (encoder: ElmEncoder): string => {
   }
 };
 
-const writeNamedQueries = (results: FixtureResult[]) => {
+const writeNamedQueries = (results: FixtureResult[]): Promise<void> => {
   const namedQueries = [];
 
   results.forEach(({ result, fixture }) => {
@@ -231,22 +239,22 @@ const writeNamedQueries = (results: FixtureResult[]) => {
 
   const path = resolve(generatePath, "namedQueries.ts");
 
-  writeFile(path, content);
+  return writeFile(path, content);
 };
 
-const writeSchemas = (fixtures: Fixture[]) => {
-  const schemas = fixtures.map(({ id, dir, options }) => ({
-    id,
-    schema: getSchemaString(options)
-  }));
+const writeSchemas = (fixtures: Fixture[]): Promise<void> =>
+  Promise.all(
+    fixtures.map(({ id, options }) =>
+      getSchemaString(options).then(schema => ({ id, schema }))
+    )
+  ).then(schemas => {
+    const entries = schemas.map(({ id, schema }) => `  "${id}": \`${schema}\``);
+    const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
 
-  const entries = schemas.map(({ id, schema }) => `  "${id}": \`${schema}\``);
-  const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
+    const path = resolve(generatePath, "schemas.ts");
 
-  const path = resolve(generatePath, "schemas.ts");
-
-  writeFile(path, content);
-};
+    return writeFile(path, content);
+  });
 
 export const makeElm = t => {
   t.comment("running elm-make");

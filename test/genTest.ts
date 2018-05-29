@@ -20,23 +20,48 @@ test("graphqlToElm generate test", t => {
   t.end(fixtureId ? "with fixture filter" : undefined);
 });
 
-const testFixture = t => ({ id, dir, options, expect, throws }: Fixture) =>
+const testFixture = (t: test.Test) => ({
+  id,
+  dir,
+  options,
+  expect,
+  throws
+}: Fixture) =>
   t.test(`== fixture ${id} ==`, t => {
     process.chdir(resolve(__dirname, dir));
 
-    const throwsTest = throws
-      ? (fn, msg) => {
-          try {
-            fn();
-            t.fail(`Expected error message: ${throws}`);
-          } catch (error) {
-            t.equal(error.message, throws, "Expected error message");
-          }
-        }
-      : t.doesNotThrow;
+    const runTest = (fn: () => Promise<void>, msg): Promise<void> => {
+      if (throws) {
+        return fn()
+          .then(() => t.fail(`Expected error message: ${throws}`))
+          .catch(error =>
+            t.equal(error.message, throws, "Expected error message")
+          );
+      } else {
+        return fn()
+          .then(() => t.pass())
+          .catch(t.fail);
+      }
+    };
+
+    const runFixtureTest = (): Promise<void> =>
+      runTest(
+        () =>
+          graphqlToElm({
+            ...options,
+            log: t.comment
+          }),
+        "graphqlToElm"
+      ).then(() => {
+        t.doesNotThrow(
+          () => compareDirs(t, { actual: options.dest, expect }),
+          "compare generated and expected should not throw"
+        );
+        t.end();
+      });
 
     if (process.argv.slice(2).includes("--update")) {
-      throwsTest(
+      runTest(
         () =>
           graphqlToElm({
             ...options,
@@ -44,27 +69,16 @@ const testFixture = t => ({ id, dir, options, expect, throws }: Fixture) =>
             log: t.comment
           }),
         "graphqlToElm UPDATE"
-      );
+      ).then(runFixtureTest);
+    } else {
+      runFixtureTest();
     }
-
-    throwsTest(
-      () =>
-        graphqlToElm({
-          ...options,
-          log: t.comment
-        }),
-      "graphqlToElm"
-    );
-
-    t.doesNotThrow(
-      () => compareDirs(t, { actual: options.dest, expect }),
-      "compare generated and expected should not throw"
-    );
-
-    t.end();
   });
 
-const compareDirs = (t, { actual, expect }) => {
+const compareDirs = (
+  t: test.Test,
+  { actual, expect }: { actual: string; expect: string }
+) => {
   const actualFiles = glob
     .sync(resolve(actual, "**/*"))
     .map(path => relative(actual, path));

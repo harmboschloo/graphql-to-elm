@@ -24,41 +24,47 @@ export interface QueryResult {
   elmIntel: ElmIntel;
 }
 
-export const graphqlToElm = (options: Options): Result => {
-  const result: Result = getGraphqlToElm(options);
-  writeResult(result);
-  return result;
+export const graphqlToElm = (options: Options): Promise<void> => {
+  return getGraphqlToElm(options)
+    .then(writeResult)
+    .then(() => {});
 };
 
-export const getGraphqlToElm = (userOptions: Options): Result => {
+export const getGraphqlToElm = (userOptions: Options): Promise<Result> => {
   let options: FinalOptions = finalizeOptions(userOptions);
 
-  const schema: GraphQLSchema = buildSchema(getSchemaString(options));
+  return getSchemaString(options).then((schemaString: string) => {
+    options.log(`processing schema`);
+    const schema: GraphQLSchema = buildSchema(schemaString);
 
-  options.log(`processing enums`);
-  const enumsIntel: EnumIntel[] = enums.getIntel(schema, options);
+    options.log(`processing enums`);
+    const enumsIntel: EnumIntel[] = enums.getIntel(schema, options);
 
-  options = {
-    ...options,
-    enumEncoders: { ...enums.getEncoders(enumsIntel), ...options.enumEncoders },
-    enumDecoders: { ...enums.getDecoders(enumsIntel), ...options.enumDecoders }
-  };
-
-  const queriesResults = options.queries.map(src => {
-    const queryIntel = readQueryIntel(src, schema, options);
-    const elmIntel = queryToElmIntel(queryIntel, options);
-
-    return {
-      queryIntel,
-      elmIntel
+    options = {
+      ...options,
+      enumEncoders: {
+        ...enums.getEncoders(enumsIntel),
+        ...options.enumEncoders
+      },
+      enumDecoders: {
+        ...enums.getDecoders(enumsIntel),
+        ...options.enumDecoders
+      }
     };
-  });
 
-  return {
-    enums: enumsIntel,
-    queries: queriesResults,
-    options
-  };
+    return Promise.all(
+      options.queries.map(src =>
+        readQueryIntel(src, schema, options).then(queryIntel => ({
+          queryIntel,
+          elmIntel: queryToElmIntel(queryIntel, options)
+        }))
+      )
+    ).then(queriesResults => ({
+      enums: enumsIntel,
+      queries: queriesResults,
+      options
+    }));
+  });
 };
 
 export const getSchemaString = ({
@@ -67,35 +73,46 @@ export const getSchemaString = ({
 }: {
   schema: string | SchemaString;
   log?: (message: string) => void;
-}): string => {
+}): Promise<string> => {
   if (typeof schema === "string") {
     log && log(`reading schema ${schema}`);
     return readFile(schema);
   } else {
-    log && log("reading schema from string");
-    return schema.string;
+    log && log("schema from string");
+    return Promise.resolve(schema.string);
   }
 };
 
-export const writeResult = (result: Result): void => {
-  result.enums.forEach(enumIntel => {
-    result.options.log(`writing ${enumIntel.dest}`);
-    writeFile(enumIntel.dest, enums.generateElm(enumIntel));
-  });
+export const writeResult = (result: Result): Promise<Result> => {
+  const writeEnums = Promise.all(
+    result.enums.map(enumIntel => {
+      return writeFile(enumIntel.dest, enums.generateElm(enumIntel)).then(() =>
+        result.options.log(`enum written: ${enumIntel.dest}`)
+      );
+    })
+  );
 
-  result.queries.forEach(({ elmIntel }) => {
-    result.options.log(`writing ${elmIntel.dest}`);
-    writeFile(elmIntel.dest, generateElm(elmIntel));
-  });
+  const writeQueries = Promise.all(
+    result.queries.map(({ elmIntel }) => {
+      return writeFile(elmIntel.dest, generateElm(elmIntel)).then(() =>
+        result.options.log(`query written: ${elmIntel.dest}`)
+      );
+    })
+  );
 
-  elmFiles.forEach(filename => {
-    const src = resolve(__dirname, "../elm/GraphQL", filename);
-    const dest = resolve(result.options.dest, "GraphQL", filename);
-    result.options.log(`writing ${dest}`);
-    writeFile(dest, readFile(src));
-  });
+  const writeLib = Promise.all(
+    elmFiles.map(filename => {
+      const src = resolve(__dirname, "../elm/GraphQL", filename);
+      const dest = resolve(result.options.dest, "GraphQL", filename);
+      return readFile(src)
+        .then(data => writeFile(dest, data))
+        .then(() => result.options.log(`lib file written: ${dest}`));
+    })
+  );
 
-  result.options.log("done");
+  return Promise.all([writeEnums, writeQueries, writeLib])
+    .then(() => result.options.log("done"))
+    .then(() => result);
 };
 
 const elmFiles = [

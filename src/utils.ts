@@ -1,15 +1,32 @@
 import { EOL } from "os";
-import { readFileSync, writeFileSync } from "fs";
+import * as fs from "fs";
 import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
-export const readFile = (path: string): string => readFileSync(path, "utf8");
+export const readFile = (path: string): Promise<string> =>
+  new Promise((resolve, reject) =>
+    fs.readFile(
+      path,
+      "utf8",
+      (error, data) => (error ? reject(error) : resolve(data.toString()))
+    )
+  );
 
-export const writeFile = (dest: string, content: string): void => {
-  mkdirp.sync(dirname(dest));
-  content = content.replace(/\r?\n|\r/g, EOL);
-  writeFileSync(dest, content, "utf8");
-};
+export const writeFile = (dest: string, data: string): Promise<void> =>
+  new Promise((resolve, reject) =>
+    mkdirp(
+      dirname(dest),
+      error =>
+        error
+          ? reject(error)
+          : fs.writeFile(
+              dest,
+              data.replace(/\r?\n|\r/g, EOL),
+              "utf8",
+              error => (error ? reject(error) : resolve())
+            )
+    )
+  );
 
 export const firstToUpperCase = (string: string): string =>
   string ? `${string.charAt(0).toUpperCase()}${string.slice(1)}` : string;

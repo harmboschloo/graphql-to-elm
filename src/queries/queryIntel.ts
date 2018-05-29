@@ -78,17 +78,15 @@ export const readQueryIntel = (
   src: string,
   schema: GraphQLSchema,
   options: FinalOptions
-): QueryIntel => {
-  options.log(`reading query ${src}`);
-
-  const query = readFile(src)
-    .trim()
-    .replace(/\r\n/g, "\n");
-
-  return {
-    ...getQueryIntel(query, schema),
-    src
-  };
+): Promise<QueryIntel> => {
+  return readFile(src).then(query => {
+    options.log(`processing query ${src}`);
+    query = query.trim().replace(/\r\n/g, "\n");
+    return {
+      ...getQueryIntel(query, schema),
+      src
+    };
+  });
 };
 
 export const getQueryIntel = (

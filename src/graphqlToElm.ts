@@ -6,6 +6,7 @@ import {
   SchemaString,
   finalizeOptions
 } from "./options";
+import { getSchemaString } from "./schema";
 import * as enums from "./enums";
 import { EnumIntel } from "./enums";
 import { QueryIntel, readQueryIntel } from "./queries/queryIntel";
@@ -65,22 +66,6 @@ export const getGraphqlToElm = (userOptions: Options): Promise<Result> => {
       options
     }));
   });
-};
-
-export const getSchemaString = ({
-  schema,
-  log
-}: {
-  schema: string | SchemaString;
-  log?: (message: string) => void;
-}): Promise<string> => {
-  if (typeof schema === "string") {
-    log && log(`reading schema ${schema}`);
-    return readFile(schema);
-  } else {
-    log && log("schema from string");
-    return Promise.resolve(schema.string);
-  }
 };
 
 export const writeResult = (result: Result): Promise<Result> => {

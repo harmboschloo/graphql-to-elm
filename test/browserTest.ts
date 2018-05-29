@@ -9,10 +9,10 @@ import {
   Result,
   QueryResult,
   getGraphqlToElm,
-  getSchemaString,
   writeResult
 } from "../src/graphqlToElm";
 import { Options } from "../src/options";
+import { getSchemaString } from "../src/schema";
 import { ElmIntel } from "../src/queries/elmIntel";
 import { ElmEncoder, ElmOperationType } from "../src/queries/elmIntel";
 import { validModuleName } from "../src/elmUtils";

@@ -1,34 +1,40 @@
-import { resolve, relative } from "path";
-import { readFileSync, lstatSync } from "fs";
-import * as rimraf from "rimraf";
-import * as glob from "glob";
-import * as test from "tape";
+import * as p from "path";
+import {
+  Test,
+  test,
+  testNoThrow,
+  rimraf,
+  glob,
+  readFile,
+  Stats,
+  lstat
+} from "./utils";
 import { Fixture, getFixtures } from "./fixtures";
 import { graphqlToElm } from "../src/graphqlToElm";
 
 const fixtureId = "";
 
-test("graphqlToElm generate test", t => {
-  rimraf.sync(resolve(__dirname, "fixtures/**/generated*"));
+test("graphqlToElm generate test").then(t =>
+  rimraf(p.resolve(__dirname, "fixtures/**/generated*"))
+    .then(() => {
+      const cwd = process.cwd();
 
-  const cwd = process.cwd();
+      Promise.all(getFixtures(fixtureId).map(testFixture(t))).then(() => {
+        process.chdir(cwd);
+      });
+    })
+    .then(() => t.end(fixtureId ? "with fixture filter" : undefined))
+);
 
-  getFixtures(fixtureId).forEach(testFixture(t));
-
-  process.chdir(cwd);
-
-  t.end(fixtureId ? "with fixture filter" : undefined);
-});
-
-const testFixture = (t: test.Test) => ({
+const testFixture = (t: Test) => ({
   id,
   dir,
   options,
   expect,
   throws
-}: Fixture) =>
-  t.test(`== fixture ${id} ==`, t => {
-    process.chdir(resolve(__dirname, dir));
+}: Fixture): Promise<void> =>
+  test(`== fixture ${id} ==`, t).then((t: Test): Promise<void> => {
+    process.chdir(p.resolve(__dirname, dir));
 
     const runTest = (fn: () => Promise<void>, msg): Promise<void> => {
       if (throws) {
@@ -39,7 +45,7 @@ const testFixture = (t: test.Test) => ({
           );
       } else {
         return fn()
-          .then(() => t.pass())
+          .then(() => t.pass(msg))
           .catch(t.fail);
       }
     };
@@ -52,16 +58,15 @@ const testFixture = (t: test.Test) => ({
             log: t.comment
           }),
         "graphqlToElm"
-      ).then(() => {
-        t.doesNotThrow(
-          () => compareDirs(t, { actual: options.dest, expect }),
-          "compare generated and expected should not throw"
-        );
-        t.end();
-      });
+      )
+        .then(() =>
+          testNoThrow(t, "compare generated and expected should not throw")
+        )
+        .then((t: Test) => compareDirs(t, { actual: options.dest, expect }))
+        .then((t: Test) => t.end());
 
     if (process.argv.slice(2).includes("--update")) {
-      runTest(
+      return runTest(
         () =>
           graphqlToElm({
             ...options,
@@ -71,48 +76,55 @@ const testFixture = (t: test.Test) => ({
         "graphqlToElm UPDATE"
       ).then(runFixtureTest);
     } else {
-      runFixtureTest();
+      return runFixtureTest();
     }
   });
 
 const compareDirs = (
-  t: test.Test,
+  t: Test,
   { actual, expect }: { actual: string; expect: string }
-) => {
-  const actualFiles = glob
-    .sync(resolve(actual, "**/*"))
-    .map(path => relative(actual, path));
-
-  const expectedFiles = glob
-    .sync(resolve(expect, "**/*"))
-    .map(path => relative(expect, path));
-
-  t.deepEqual(actualFiles, expectedFiles, `${actual}/**/* === ${expect}/**/*`);
-
-  actualFiles.forEach(file => {
-    const actualFile = resolve(actual, file);
-    const expectedFile = resolve(expect, file);
-
-    if (lstatSync(actualFile).isDirectory()) {
-      t.equal(
-        true,
-        lstatSync(expectedFile).isDirectory(),
-        `${relative(process.cwd(), actualFile)} === ${relative(
-          process.cwd(),
-          expectedFile
-        )}`
+): Promise<Test> =>
+  Promise.all([
+    glob(p.resolve(actual, "**/*")).then(matches =>
+      matches.map(path => p.relative(actual, path))
+    ),
+    glob(p.resolve(expect, "**/*")).then(matches =>
+      matches.map(path => p.relative(expect, path))
+    )
+  ])
+    .then(([actualFiles, expectedFiles]): Promise<any> => {
+      t.deepEqual(
+        actualFiles,
+        expectedFiles,
+        `${actual}/**/* === ${expect}/**/*`
       );
-    } else {
-      const actualContent = readFileSync(actualFile, "utf8");
-      const expectedContent = readFileSync(expectedFile, "utf8");
-      t.equal(
-        actualContent,
-        expectedContent,
-        `${relative(process.cwd(), actualFile)} === ${relative(
-          process.cwd(),
-          expectedFile
-        )}`
+
+      return Promise.all(
+        actualFiles.map((file: string): Promise<any> => {
+          const actualFile: string = p.resolve(actual, file);
+          const expectedFile: string = p.resolve(expect, file);
+          const message: string = `${p.relative(
+            process.cwd(),
+            actualFile
+          )} === ${p.relative(process.cwd(), expectedFile)}`;
+
+          return Promise.all([lstat(actualFile), lstat(expectedFile)]).then(
+            ([actualStats, expectedStats]: Stats[]): Promise<void> => {
+              if (actualStats.isDirectory()) {
+                t.equal(true, expectedStats.isDirectory(), message);
+                return Promise.resolve();
+              } else {
+                return Promise.all([
+                  readFile(actualFile),
+                  readFile(expectedFile)
+                ]).then(([actualContent, expectedContent]: string[]) => {
+                  t.equal(actualContent, expectedContent, message);
+                  return Promise.resolve();
+                });
+              }
+            }
+          );
+        })
       );
-    }
-  });
-};
+    })
+    .then(() => t);

@@ -42,7 +42,7 @@ const appendUnderscores = (name: string, originalName: string) => {
   return matches ? name + matches[0] : name;
 };
 
-export const validWord = keyword =>
+export const validWord = (keyword: string) =>
   elmKeywords.includes(keyword) ? `${keyword}_` : keyword;
 
 export const elmKeywords = [

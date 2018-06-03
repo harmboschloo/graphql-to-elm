@@ -48,8 +48,8 @@ const generateExports = (intel: ElmIntel): string => {
   const types: string[] = [];
   const variables: string[] = [];
 
-  const addType = type => addOnce(type, types);
-  const addVariable = variable => addOnce(variable, variables);
+  const addType = (type: string) => addOnce(type, types);
+  const addVariable = (variable: string) => addOnce(variable, variables);
 
   intel.operations.forEach(operation => {
     addType(operation.responseTypeName);
@@ -90,9 +90,9 @@ const generateExports = (intel: ElmIntel): string => {
 const generateImports = (intel: ElmIntel): string => {
   const imports = ["Json.Decode"];
 
-  const addImport = module => addOnce(module, imports);
+  const addImport = (module: string) => addOnce(module, imports);
 
-  const addImportOf = x => {
+  const addImportOf = (x: string) => {
     const module = x && extractModule(x);
     if (module) {
       addImport(module);
@@ -282,7 +282,10 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
 // ENCODERS
 //
 
-const generateEncoders = (encoder: ElmEncoder, newType): void => {
+const generateEncoders = (
+  encoder: ElmEncoder,
+  newType: (type: string, createItems: () => string[]) => void
+): void => {
   visitEncoders(encoder, {
     record: (encoder: ElmRecordEncoder) => {
       newType(encoder.type, () => [
@@ -346,7 +349,10 @@ const wrapEncoder = (
 // DECODERS
 //
 
-const generateDecoders = (decoder: ElmDecoder, newType): void => {
+const generateDecoders = (
+  decoder: ElmDecoder,
+  newType: (type: string, createItems: () => string[]) => void
+): void => {
   visitDecoders(decoder, {
     value: (decoder: ElmValueDecoder) => {},
     constant: (decoder: ElmConstantDecoder) => {},
@@ -375,7 +381,7 @@ const generateRecordDecoder = (decoder: ElmRecordDecoder): string => {
 
   const map = fields.length > 1 ? Math.min(fields.length, 8) : "";
 
-  const prefix = index =>
+  const prefix = (index: number) =>
     index >= 8 ? "|> GraphQL.Helpers.Decode.andMap " : "";
 
   const fieldDecoders = fields.map(
@@ -507,7 +513,7 @@ const generateRecordTypeDeclaration = (
 
 const wrappedType = (field: ElmRecordField): string => {
   let signature = field.value.type;
-  let wrap = x => x;
+  let wrap = (x: string): string => x;
 
   switch (field.valueListItemWrapper) {
     case "nullable":

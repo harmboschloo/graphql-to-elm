@@ -146,7 +146,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
   const log =
     typeof options.log !== "undefined"
       ? options.log || (x => {})
-      : message => console.log(message);
+      : (message: string) => console.log(message);
 
   return {
     schema,

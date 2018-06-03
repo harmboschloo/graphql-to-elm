@@ -594,7 +594,7 @@ const getOutputs = (
 };
 
 const getOutput = (
-  name: String,
+  name: string,
   type: GraphQLType,
   fields: QueryOutputField[],
   fragments: QueryCompositeFragmentOutput[],
@@ -628,7 +628,7 @@ const getOutput = (
 };
 
 const getCompositeOutput = (
-  name: String,
+  name: string,
   type: GraphQLCompositeType,
   fields: QueryOutputField[],
   fragments: QueryCompositeFragmentOutput[],

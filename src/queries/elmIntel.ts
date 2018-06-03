@@ -60,9 +60,9 @@ export const queryToElmIntel = (
   queryIntel: QueryIntel,
   options: FinalOptions
 ): ElmIntel => {
-  let relativeSrc;
-  let dest;
-  let module;
+  let relativeSrc: string;
+  let dest: string;
+  let module: string;
 
   if (!queryIntel.src) {
     relativeSrc = "";
@@ -134,7 +134,7 @@ export interface ElmQueryOperation {
   variables: ElmRecordEncoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
-  responseTypeName: String;
+  responseTypeName: string;
 }
 
 export interface ElmNamedOperation {
@@ -145,7 +145,7 @@ export interface ElmNamedOperation {
   variables: ElmRecordEncoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
-  responseTypeName: String;
+  responseTypeName: string;
 }
 
 export interface ElmNamedPrefixedOperation {
@@ -157,7 +157,7 @@ export interface ElmNamedPrefixedOperation {
   variables: ElmRecordEncoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
-  responseTypeName: String;
+  responseTypeName: string;
 }
 
 export type ElmOperationType = "Query" | "Mutation" | "Subscription";
@@ -272,7 +272,7 @@ const fixFragmentNames = (
 //
 
 export interface ElmFragment {
-  name: String;
+  name: string;
   query: string;
 }
 
@@ -376,7 +376,7 @@ const getRecordEncoder = (
   scope: ElmScope,
   options: FinalOptions
 ): ElmRecordEncoder => {
-  const usedFieldNames = [];
+  const usedFieldNames: string[] = [];
   const fields: ElmEncoderField[] = input.fields.map(
     (field: QueryInputField): ElmEncoderField => ({
       jsonName: field.name,
@@ -543,7 +543,7 @@ const getRecordDecoder = (
   scope: ElmScope,
   options: FinalOptions
 ): ElmRecordDecoder => {
-  const usedFieldNames = [];
+  const usedFieldNames: string[] = [];
   const fields: ElmDecoderField[] = output.fields.map(
     (field: QueryOutputField): ElmDecoderField => ({
       jsonName: field.name,

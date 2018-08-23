@@ -1,8 +1,9 @@
-import { resolve, relative, normalize } from "path";
+import { resolve } from "path";
 import { execSync, spawn, ChildProcess } from "child_process";
 import * as rimraf from "rimraf";
-import * as glob from "glob";
-import phantom from "phantom";
+import { PhantomJS, WebPage } from "phantom";
+import * as phantom from "phantom";
+import { Test } from "tape";
 import * as test from "tape";
 import { Fixture, getFixtures } from "./fixtures";
 import {
@@ -40,7 +41,7 @@ test("graphqlToElm browser test", t => {
   });
 });
 
-const generateTestFiles = (t: test.Test): Promise<any> => {
+const generateTestFiles = (t: Test): Promise<any> => {
   rimraf.sync(generatePath);
 
   const fixtures: Fixture[] = getFixtures()
@@ -63,7 +64,9 @@ const generateTestFiles = (t: test.Test): Promise<any> => {
   );
 };
 
-const writeQueries = t => (fixture: Fixture): Promise<FixtureResult> => {
+const writeQueries = (t: Test) => (
+  fixture: Fixture
+): Promise<FixtureResult> => {
   const { id, dir, options } = fixture;
 
   const baseModule = `Tests.${validModuleName(id)}`;
@@ -74,17 +77,19 @@ const writeQueries = t => (fixture: Fixture): Promise<FixtureResult> => {
   };
 
   return getSchemaString(options)
-    .then((schemaString: string): Options => ({
-      ...options,
-      schema: { string: schemaString },
-      enums: {
-        ...enumOptions,
-        baseModule: `${baseModule}.${enumOptions.baseModule}`
-      },
-      queries: options.queries.map(query => resolve(__dirname, dir, query)),
-      src: resolve(__dirname, dir, options.src || ""),
-      log: t.comment
-    }))
+    .then(
+      (schemaString: string): Options => ({
+        ...options,
+        schema: { string: schemaString },
+        enums: {
+          ...enumOptions,
+          baseModule: `${baseModule}.${enumOptions.baseModule}`
+        },
+        queries: options.queries.map(query => resolve(__dirname, dir, query)),
+        src: resolve(__dirname, dir, options.src || ""),
+        log: t.comment
+      })
+    )
     .then(getGraphqlToElm)
     .then((result: Result) => {
       result.enums = result.enums.map(enumIntel => {
@@ -211,8 +216,13 @@ const generateVariables = (encoder: ElmEncoder): string => {
   }
 };
 
+type NamedQuery = {
+  id: string;
+  query: string;
+};
+
 const writeNamedQueries = (results: FixtureResult[]): Promise<void> => {
-  const namedQueries = [];
+  const namedQueries: NamedQuery[] = [];
 
   results.forEach(({ result, fixture }) => {
     result.queries.forEach(query =>
@@ -235,7 +245,9 @@ const writeNamedQueries = (results: FixtureResult[]): Promise<void> => {
   const entries = namedQueries.map(
     ({ id, query }) => `  "${id}": \`${query}\``
   );
-  const content = `export const namedQueries = {\n${entries.join(",\n")}\n};\n`;
+  const content = `export const namedQueries: { [id: string]: string } = {\n${entries.join(
+    ",\n"
+  )}\n};\n`;
 
   const path = resolve(generatePath, "namedQueries.ts");
 
@@ -249,14 +261,16 @@ const writeSchemas = (fixtures: Fixture[]): Promise<void> =>
     )
   ).then(schemas => {
     const entries = schemas.map(({ id, schema }) => `  "${id}": \`${schema}\``);
-    const content = `export const schemas = {\n${entries.join(",\n")}\n};\n`;
+    const content = `export const schemas: { [id: string]: string } = {\n${entries.join(
+      ",\n"
+    )}\n};\n`;
 
     const path = resolve(generatePath, "schemas.ts");
 
     return writeFile(path, content);
   });
 
-export const makeElm = t => {
+export const makeElm = (t: Test) => {
   t.comment("running elm-make");
   const log = execSync(
     `elm-make src/Main.elm --output generated/index.html --yes`,
@@ -265,7 +279,7 @@ export const makeElm = t => {
   t.comment(log.toString());
 };
 
-export const runServer = t => {
+export const runServer = (t: Test) => {
   let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
     cwd: basePath,
     shell: true
@@ -296,14 +310,15 @@ export const runServer = t => {
   return kill;
 };
 
-export const openTestPage = t => {
-  let browser;
+export const openTestPage = (t: Test) => {
+  let browser: PhantomJS | null = null;
   let killed = false;
 
   phantom
     .create()
-    .then(instance => {
+    .then((instance: PhantomJS) => {
       if (killed) {
+        // @ts-ignore
         instance.kill();
         return;
       }
@@ -312,7 +327,7 @@ export const openTestPage = t => {
 
       browser
         .createPage()
-        .then(page => {
+        .then((page: WebPage) => {
           page.on("onConsoleMessage", (message: string) => {
             if (message.startsWith("[Test Failed]")) {
               t.fail(message);
@@ -338,6 +353,7 @@ export const openTestPage = t => {
     t.comment(`kill browser ${!!browser}`);
     killed = true;
     if (browser) {
+      // @ts-ignore
       browser.kill();
       browser = null;
     }

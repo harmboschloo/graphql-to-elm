@@ -34,14 +34,14 @@ interface Mammal {
   subclass: String!
 }
 
-type Dog implements Animal, Mammal {
+type Dog implements Animal & Mammal {
   color: String!
   size: Float!
   hairy: Boolean!
   subclass: String!
 }
 
-type Dolphin implements Animal, Mammal {
+type Dolphin implements Animal & Mammal {
   color: String!
   size: Float!
   fins: Int!

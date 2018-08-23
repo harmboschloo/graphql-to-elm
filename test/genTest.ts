@@ -30,55 +30,58 @@ const testFixture = (t: Test) => ({
   id,
   dir,
   options,
+  actual,
   expect,
   throws
 }: Fixture): Promise<void> =>
-  test(`== fixture ${id} ==`, t).then((t: Test): Promise<void> => {
-    process.chdir(p.resolve(__dirname, dir));
+  test(`== fixture ${id} ==`, t).then(
+    (t: Test): Promise<void> => {
+      process.chdir(p.resolve(__dirname, dir));
 
-    const runTest = (fn: () => Promise<void>, msg): Promise<void> => {
-      if (throws) {
-        return fn()
-          .then(() => t.fail(`Expected error message: ${throws}`))
-          .catch(error =>
-            t.equal(error.message, throws, "Expected error message")
-          );
-      } else {
-        return fn()
-          .then(() => t.pass(msg))
-          .catch(t.fail);
-      }
-    };
+      const runTest = (fn: () => Promise<void>, msg: string): Promise<void> => {
+        if (throws) {
+          return fn()
+            .then(() => t.fail(`Expected error message: ${throws}`))
+            .catch(error =>
+              t.equal(error.message, throws, "Expected error message")
+            );
+        } else {
+          return fn()
+            .then(() => t.pass(msg))
+            .catch(t.fail);
+        }
+      };
 
-    const runFixtureTest = (): Promise<void> =>
-      runTest(
-        () =>
-          graphqlToElm({
-            ...options,
-            log: t.comment
-          }),
-        "graphqlToElm"
-      )
-        .then(() =>
-          testNoThrow(t, "compare generated and expected should not throw")
+      const runFixtureTest = (): Promise<void> =>
+        runTest(
+          () =>
+            graphqlToElm({
+              ...options,
+              log: t.comment
+            }),
+          "graphqlToElm"
         )
-        .then((t: Test) => compareDirs(t, { actual: options.dest, expect }))
-        .then((t: Test) => t.end());
+          .then(() =>
+            testNoThrow(t, "compare generated and expected should not throw")
+          )
+          .then((t: Test) => compareDirs(t, { actual, expect }))
+          .then((t: Test) => t.end());
 
-    if (process.argv.slice(2).includes("--update")) {
-      return runTest(
-        () =>
-          graphqlToElm({
-            ...options,
-            dest: expect,
-            log: t.comment
-          }),
-        "graphqlToElm UPDATE"
-      ).then(runFixtureTest);
-    } else {
-      return runFixtureTest();
+      if (process.argv.slice(2).includes("--update")) {
+        return runTest(
+          () =>
+            graphqlToElm({
+              ...options,
+              dest: expect,
+              log: t.comment
+            }),
+          "graphqlToElm UPDATE"
+        ).then(runFixtureTest);
+      } else {
+        return runFixtureTest();
+      }
     }
-  });
+  );
 
 const compareDirs = (
   t: Test,
@@ -92,39 +95,43 @@ const compareDirs = (
       matches.map(path => p.relative(expect, path))
     )
   ])
-    .then(([actualFiles, expectedFiles]): Promise<any> => {
-      t.deepEqual(
-        actualFiles,
-        expectedFiles,
-        `${actual}/**/* === ${expect}/**/*`
-      );
+    .then(
+      ([actualFiles, expectedFiles]): Promise<any> => {
+        t.deepEqual(
+          actualFiles,
+          expectedFiles,
+          `${actual}/**/* === ${expect}/**/*`
+        );
 
-      return Promise.all(
-        actualFiles.map((file: string): Promise<any> => {
-          const actualFile: string = p.resolve(actual, file);
-          const expectedFile: string = p.resolve(expect, file);
-          const message: string = `${p.relative(
-            process.cwd(),
-            actualFile
-          )} === ${p.relative(process.cwd(), expectedFile)}`;
+        return Promise.all(
+          actualFiles.map(
+            (file: string): Promise<any> => {
+              const actualFile: string = p.resolve(actual, file);
+              const expectedFile: string = p.resolve(expect, file);
+              const message: string = `${p.relative(
+                process.cwd(),
+                actualFile
+              )} === ${p.relative(process.cwd(), expectedFile)}`;
 
-          return Promise.all([lstat(actualFile), lstat(expectedFile)]).then(
-            ([actualStats, expectedStats]: Stats[]): Promise<void> => {
-              if (actualStats.isDirectory()) {
-                t.equal(true, expectedStats.isDirectory(), message);
-                return Promise.resolve();
-              } else {
-                return Promise.all([
-                  readFile(actualFile),
-                  readFile(expectedFile)
-                ]).then(([actualContent, expectedContent]: string[]) => {
-                  t.equal(actualContent, expectedContent, message);
-                  return Promise.resolve();
-                });
-              }
+              return Promise.all([lstat(actualFile), lstat(expectedFile)]).then(
+                ([actualStats, expectedStats]: Stats[]): Promise<void> => {
+                  if (actualStats.isDirectory()) {
+                    t.equal(true, expectedStats.isDirectory(), message);
+                    return Promise.resolve();
+                  } else {
+                    return Promise.all([
+                      readFile(actualFile),
+                      readFile(expectedFile)
+                    ]).then(([actualContent, expectedContent]: string[]) => {
+                      t.equal(actualContent, expectedContent, message);
+                      return Promise.resolve();
+                    });
+                  }
+                }
+              );
             }
-          );
-        })
-      );
-    })
+          )
+        );
+      }
+    )
     .then(() => t);

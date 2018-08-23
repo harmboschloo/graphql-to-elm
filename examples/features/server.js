@@ -1,22 +1,15 @@
+// @ts-check
+
 const { readFileSync } = require("fs");
 const express = require("express");
-const bodyParser = require("body-parser");
-const { graphqlExpress, graphiqlExpress } = require("apollo-server-express");
-const {
-  makeExecutableSchema,
-  addMockFunctionsToSchema
-} = require("graphql-tools");
+const { ApolloServer, gql } = require("apollo-server-express");
 
-const typeDefs = readFileSync("src/schema.gql", "utf8");
-const schema = makeExecutableSchema({ typeDefs });
-addMockFunctionsToSchema({ schema });
-
+const typeDefs = gql(readFileSync("src/schema.gql", "utf8"));
+const server = new ApolloServer({ typeDefs, mocks: true });
 const app = express();
-app.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
-app.use("/graphiql", graphiqlExpress({ endpointURL: "/graphql" }));
+server.applyMiddleware({ app });
 app.use(express.static(__dirname));
 app.listen(3000);
 
-console.log("example : http://localhost:3000");
-console.log("graphql : http://localhost:3000/graphql");
-console.log("graphiql: http://localhost:3000/graphiql");
+console.log("example    : http://localhost:3000");
+console.log("playground : http://localhost:3000/graphql");

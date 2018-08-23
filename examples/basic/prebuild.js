@@ -1,3 +1,5 @@
+// @ts-check
+
 const { graphqlToElm } = require("graphql-to-elm");
 
 graphqlToElm({

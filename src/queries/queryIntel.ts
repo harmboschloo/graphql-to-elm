@@ -25,6 +25,7 @@ import {
   isCompositeType,
   assertCompositeType,
   isAbstractType,
+  assertType,
   assertInputType,
   getNamedType,
   getNullableType,
@@ -298,7 +299,14 @@ const mapInputField = (
 const getInputType = (
   node: VariableDefinitionNode,
   schema: GraphQLSchema
-): GraphQLInputType => assertInputType(typeFromAST(schema, node.type));
+): GraphQLInputType =>
+  assertInputType(
+    typeFromAST(
+      schema,
+      // @ts-ignore
+      node.type
+    )
+  );
 
 //
 // OUTPUTS
@@ -547,7 +555,7 @@ const getOutputs = (
       Field(node: FieldNode) {
         const nodeInfo: NodeInfo = popNodeInfo();
         const name: string = node.alias ? node.alias.value : node.name.value;
-        const type: GraphQLType = typeInfo.getType();
+        const type: GraphQLType = assertType(typeInfo.getType());
         const output: QueryNonFragmentOutput = getOutput(
           name,
           type,
@@ -699,9 +707,9 @@ const getFieldsOrFragments = (
     });
   }
 
-  const possibleFragmentTypes: GraphQLObjectType[] = isAbstractType(type)
-    ? schema.getPossibleTypes(type)
-    : [];
+  const possibleFragmentTypes: ReadonlyArray<
+    GraphQLObjectType
+  > = isAbstractType(type) ? schema.getPossibleTypes(type) : [];
 
   const includedFragmentTypes: GraphQLNamedType[] = inFragments
     .map(fragment => fragment.type)

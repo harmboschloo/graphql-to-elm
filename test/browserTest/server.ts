@@ -1,8 +1,11 @@
-import express = require("express");
-import bodyParser = require("body-parser");
+import * as express from "express";
+import * as bodyParser from "body-parser";
 import { GraphQLScalarType } from "graphql";
-import { graphqlExpress, graphiqlExpress } from "graphql-server-express";
-import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
+import {
+  ApolloServer,
+  makeExecutableSchema,
+  addMockFunctionsToSchema
+} from "apollo-server-express";
 import { namedQueries } from "./generated/namedQueries";
 import { schemas } from "./generated/schemas";
 
@@ -16,7 +19,7 @@ const dateScalar = new GraphQLScalarType({
 });
 
 Object.keys(schemas).forEach(id => {
-  const setNamedQuery = payload => {
+  const setNamedQuery = (payload: any) => {
     if (payload.operationName && !payload.query) {
       payload.query = namedQueries[`${id}/${payload.operationName}`];
       const split = payload.operationName.split(":");
@@ -27,8 +30,8 @@ Object.keys(schemas).forEach(id => {
   };
 
   const typeDefs = schemas[id];
-  let resolvers = {};
-  let mocks = {};
+  let resolvers: { [type: string]: any } = {};
+  let mocks: { [type: string]: any } = {};
 
   if (typeDefs.includes("scalar Date")) {
     resolvers["Date"] = dateScalar;
@@ -43,24 +46,20 @@ Object.keys(schemas).forEach(id => {
 
   addMockFunctionsToSchema({ schema, mocks });
 
+  const server = new ApolloServer({ schema });
+
   const endpointURL = `/graphql/${id}`;
 
-  app.use(
-    endpointURL,
-    bodyParser.json(),
-    (req, resp, next) => {
-      if (Array.isArray(req.body)) {
-        req.body.forEach(setNamedQuery);
-      } else {
-        setNamedQuery(req.body);
-        setNamedQuery(req.query);
-      }
-      next();
-    },
-    graphqlExpress({ schema })
-  );
-
-  app.use(`/graphiql/${id}`, graphiqlExpress({ endpointURL }));
+  app.use(endpointURL, bodyParser.json(), (req, resp, next) => {
+    if (Array.isArray(req.body)) {
+      req.body.forEach(setNamedQuery);
+    } else {
+      setNamedQuery(req.body);
+      setNamedQuery(req.query);
+    }
+    next();
+  });
+  server.applyMiddleware({ app, path: endpointURL });
 });
 
 app.use(express.static(`${__dirname}/generated`));

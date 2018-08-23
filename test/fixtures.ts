@@ -5,6 +5,7 @@ export interface Fixture {
   id: string;
   dir: string;
   options: Options;
+  actual: string;
   expect: string;
   throws?: string;
 }
@@ -33,6 +34,7 @@ interface Config {
 interface FinalConfig {
   options: Options;
   expect: string;
+  actual: string;
   throws?: string;
 }
 
@@ -56,6 +58,7 @@ const create = ({
     dest,
     operationKind
   },
+  actual: dest,
   expect,
   throws
 });

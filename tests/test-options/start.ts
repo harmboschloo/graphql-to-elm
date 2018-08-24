@@ -1,0 +1,3 @@
+import { testOptions } from ".";
+
+testOptions();

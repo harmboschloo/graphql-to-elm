@@ -2,5 +2,5 @@ node_modules
 elm-stuff
 generated*
 index.html
-/lib
-/documentation.json
+lib
+documentation.json

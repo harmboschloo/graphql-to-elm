@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "summary": "Validates graphql queries and converts them to elm code.  ",
+  "summary": "Validates graphql queries and converts them to elm code.",
   "repository": "https://github.com/harmboschloo/graphql-to-elm.git",
   "license": "BSD-3-Clause",
   "source-directories": ["elm"],

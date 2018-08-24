@@ -1,0 +1,9 @@
+{
+  "name": "graphql-to-elm-test-options",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "graphql-to-elm": "0.6.1",
+    "tape": "^4.9.1"
+  }
+}

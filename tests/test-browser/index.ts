@@ -5,46 +5,55 @@ import { PhantomJS, WebPage } from "phantom";
 import * as phantom from "phantom";
 import { Test } from "tape";
 import * as test from "tape";
-import { Fixture, getFixtures } from "./fixtures";
+import { Fixture, getFixtures } from "graphql-to-elm-test-fixtures";
 import {
   Result,
   QueryResult,
   getGraphqlToElm,
   writeResult
-} from "../src/graphqlToElm";
-import { Options } from "../src/options";
-import { getSchemaString } from "../src/schema";
-import { ElmIntel } from "../src/queries/elmIntel";
-import { ElmEncoder, ElmOperationType } from "../src/queries/elmIntel";
-import { validModuleName } from "../src/elmUtils";
-import { writeFile } from "../src/utils";
+} from "graphql-to-elm/src/graphqlToElm";
+import { Options } from "graphql-to-elm/src/options";
+import { getSchemaString } from "graphql-to-elm/src/schema";
+import { ElmIntel } from "graphql-to-elm/src/queries/elmIntel";
+import {
+  ElmEncoder,
+  ElmOperationType
+} from "graphql-to-elm/src/queries/elmIntel";
+import { validModuleName } from "graphql-to-elm/src/elmUtils";
+import { writeFile } from "graphql-to-elm/src/utils";
 
 interface FixtureResult {
   fixture: Fixture;
   result: Result;
 }
 
-const basePath = resolve(__dirname, "browserTest");
+const basePath = __dirname;
 const generatePath = resolve(basePath, "generated");
 
-test("graphqlToElm browser test", t => {
-  generateTestFiles(t).then(() => {
-    makeElm(t);
+export type Config = {
+  graphqlVersion: "0.12" | "0.13";
+};
 
-    const killServer = runServer(t);
-    const killBrowser = openTestPage(t);
+export const testBrowser = (config: Config) => {
+  test("graphqlToElm browser test", t => {
+    generateTestFiles(config, t).then(() => {
+      makeElm(t);
 
-    test.onFinish(() => {
-      killServer();
-      killBrowser();
+      const killServer = runServer(t);
+      const killBrowser = openTestPage(t);
+
+      test.onFinish(() => {
+        killServer();
+        killBrowser();
+      });
     });
   });
-});
+};
 
-const generateTestFiles = (t: Test): Promise<any> => {
+const generateTestFiles = (config: Config, t: Test): Promise<any> => {
   rimraf.sync(generatePath);
 
-  const fixtures: Fixture[] = getFixtures()
+  const fixtures: Fixture[] = getFixtures(config)
     .filter(fixture => !fixture.throws)
     .map(fixture => {
       fixture.options.schema =

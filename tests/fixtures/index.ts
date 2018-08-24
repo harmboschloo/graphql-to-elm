@@ -1,5 +1,10 @@
 import { resolve } from "path";
-import { Options, SchemaString, TypeDecoders } from "../src/options";
+import { rimraf } from "graphql-to-elm-test-utils";
+import {
+  Options,
+  SchemaString,
+  TypeDecoders
+} from "graphql-to-elm/src/options";
 
 export interface Fixture {
   id: string;
@@ -10,14 +15,23 @@ export interface Fixture {
   throws?: string;
 }
 
-export const getFixtures = (fixtureId?: string): Fixture[] =>
-  Object.keys(data)
+export const clean = () => rimraf(resolve(__dirname, "fixtures/**/generated*"));
+
+export type FixturesConfig = {
+  graphqlVersion: "0.12" | "0.13";
+  fixtureId?: string;
+};
+
+export const getFixtures = (config: FixturesConfig): Fixture[] => {
+  const data = getData(config.graphqlVersion);
+  return Object.keys(data)
     .map(key => ({
       id: key,
-      dir: `fixtures/${key}`,
+      dir: resolve(__dirname, `fixtures/${key}`),
       ...data[key]
     }))
-    .filter(fixture => !fixtureId || fixture.id === fixtureId);
+    .filter(fixture => !config.fixtureId || fixture.id === config.fixtureId);
+};
 
 interface Config {
   schema?: string | SchemaString;
@@ -63,7 +77,9 @@ const create = ({
   throws
 });
 
-const data: { [key: string]: FinalConfig } = {
+const getData = (
+  graphqlVersion: "0.12" | "0.13"
+): { [key: string]: FinalConfig } => ({
   aliases: create({ queries: ["query.gql"] }),
 
   customScalars: create({
@@ -119,7 +135,8 @@ const data: { [key: string]: FinalConfig } = {
       "fragment-in-fragment.gql",
       "fragment-in-fragment-shared.gql",
       "fragment-in-fragment-partial.gql"
-    ]
+    ],
+    schema: graphqlVersion === "0.12" ? "schema-0.12.gql" : "schema-0.13.gql"
   }),
 
   "inline-fragments-throws": create({
@@ -212,4 +229,4 @@ const data: { [key: string]: FinalConfig } = {
       "lists.gql"
     ]
   })
-};
+});

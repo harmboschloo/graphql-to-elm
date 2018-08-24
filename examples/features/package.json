@@ -1,32 +1,27 @@
 {
-  "name": "graphql-to-elm-examples",
+  "name": "graphql-to-elm-example-features",
   "version": "0.0.0",
-  "description": "Feature examples for graphql-to-elm",
+  "private": true,
+  "peerDependencies": {
+    "elm": "0.18.x",
+    "graphql": "0.12.x || 0.13.x"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.0.4",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/glob": "^5.0.35",
+    "@types/node": "^10.0.4",
+    "glob": "^7.1.2",
+    "graphql-to-elm": "0.6.1",
+    "rimraf": "^2.6.2"
+  },
   "scripts": {
     "clean": "rimraf src-generated",
     "prebuild": "npm run clean && node prebuild",
     "build": "elm make src/Main.elm --yes",
     "serve": "node server",
     "start": "npm run build && npm run serve"
-  },
-  "author": "Harm Boschloo",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/harmboschloo/graphql-to-elm.git"
-  },
-  "homepage": "https://github.com/harmboschloo/graphql-to-elm",
-  "license": "BSD-3-Clause",
-  "dependencies": {
-    "apollo-server-express": "^2.0.4",
-    "express": "^4.16.3",
-    "graphql": "^0.13.2"
-  },
-  "devDependencies": {
-    "@types/glob": "^5.0.35",
-    "@types/node": "^10.0.4",
-    "elm": "^0.18.0",
-    "glob": "^7.1.2",
-    "graphql-to-elm": "file:../..",
-    "rimraf": "^2.6.2"
   }
 }

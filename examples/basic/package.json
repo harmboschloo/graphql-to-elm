@@ -1,27 +1,22 @@
 {
-  "name": "graphql-to-elm-examples",
+  "name": "graphql-to-elm-example-basic",
   "version": "0.0.0",
-  "description": "Basic example for graphql-to-elm",
+  "private": true,
+  "peerDependencies": {
+    "elm": "0.18.x",
+    "graphql": "0.12.x || 0.13.x"
+  },
+  "dependencies": {
+    "apollo-server-express": "^2.0.4",
+    "express": "^4.16.3"
+  },
+  "devDependencies": {
+    "graphql-to-elm": "0.6.1"
+  },
   "scripts": {
     "prebuild": "node prebuild",
     "build": "elm make src/Main.elm --yes",
     "serve": "node server",
     "start": "npm run build && npm run serve"
-  },
-  "author": "Harm Boschloo",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/harmboschloo/graphql-to-elm.git"
-  },
-  "homepage": "https://github.com/harmboschloo/graphql-to-elm",
-  "license": "BSD-3-Clause",
-  "dependencies": {
-    "apollo-server-express": "^2.0.4",
-    "express": "^4.16.3",
-    "graphql": "^0.13.2"
-  },
-  "devDependencies": {
-    "elm": "^0.18.0",
-    "graphql-to-elm": "file:../.."
   }
 }

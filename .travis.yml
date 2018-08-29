@@ -4,5 +4,5 @@ node_js:
   - "8"
 script:
   - npm run build
-  - npm run test:options
-  - npm run test:gen
+  - npm run test
+  - npm run examples:build

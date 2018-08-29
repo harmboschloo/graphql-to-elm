@@ -16,7 +16,8 @@
     "typescript": "^3.0.1"
   },
   "scripts": {
-    "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build",
-    "test": "tape -r ts-node/register test.ts | tap-diff"
+    "build": "cd main && npm run build",
+    "test": "tape -r ts-node/register test.ts | tap-diff",
+    "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build"
   }
 }

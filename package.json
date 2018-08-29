@@ -18,6 +18,7 @@
   "scripts": {
     "build": "cd main && npm run build",
     "test": "tape -r ts-node/register test.ts | tap-diff",
+    "test:gen-update": "tape -r ts-node/register test-gen-update.ts | tap-diff",
     "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build"
   }
 }

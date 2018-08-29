@@ -7,4 +7,6 @@ const config: Config = getConfig();
 
 testOptions();
 testGen(config);
-testBrowser(config);
+if (!process.env.TRAVIS) {
+  testBrowser(config);
+}

@@ -1,4 +1,0 @@
-# generated and expected files should always have LF line endings
-expected-output/**/*.elm text eol=lf
-generated-output/**/*.elm text eol=lf
-src-generated/**/*.elm text eol=lf

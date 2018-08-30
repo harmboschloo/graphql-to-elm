@@ -15,14 +15,17 @@ import {
 } from "graphql-to-elm-test-fixtures";
 import { graphqlToElm } from "graphql-to-elm/src/graphqlToElm";
 
-const fixtureId = "";
-
 export type Config = {
   graphqlVersion: "0.12" | "0.13";
   update?: boolean;
+  onlyFixtureWithId?: string;
 };
 
-export const testGen = (config: Config): void => {
+export const testGen = ({
+  graphqlVersion,
+  update,
+  onlyFixtureWithId
+}: Config): void => {
   test("graphqlToElm generate test").then(t =>
     cleanFixtures()
       .then(() => {
@@ -30,14 +33,14 @@ export const testGen = (config: Config): void => {
 
         Promise.all(
           getFixtures({
-            graphqlVersion: config.graphqlVersion,
-            fixtureId
+            graphqlVersion,
+            onlyFixtureWithId
           }).map(testFixture(t))
         ).then(() => {
           process.chdir(cwd);
         });
       })
-      .then(() => t.end(fixtureId ? "with fixture filter" : undefined))
+      .then(() => t.end(onlyFixtureWithId ? "with fixture filter" : undefined))
   );
 
   const testFixture = (t: Test) => ({
@@ -84,7 +87,7 @@ export const testGen = (config: Config): void => {
             .then((t: Test) => compareDirs(t, { actual, expect }))
             .then((t: Test) => t.end());
 
-        if (config.update) {
+        if (update) {
           return runTest(
             () =>
               graphqlToElm({

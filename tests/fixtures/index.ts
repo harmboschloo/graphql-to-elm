@@ -19,7 +19,7 @@ export const clean = () => rimraf(resolve(__dirname, "fixtures/**/generated*"));
 
 export type FixturesConfig = {
   graphqlVersion: "0.12" | "0.13";
-  fixtureId?: string;
+  onlyFixtureWithId?: string;
 };
 
 export const getFixtures = (config: FixturesConfig): Fixture[] => {
@@ -30,7 +30,10 @@ export const getFixtures = (config: FixturesConfig): Fixture[] => {
       dir: resolve(__dirname, `fixtures/${key}`),
       ...data[key]
     }))
-    .filter(fixture => !config.fixtureId || fixture.id === config.fixtureId);
+    .filter(
+      fixture =>
+        !config.onlyFixtureWithId || fixture.id === config.onlyFixtureWithId
+    );
 };
 
 interface Config {

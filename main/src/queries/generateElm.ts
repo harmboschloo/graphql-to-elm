@@ -23,10 +23,11 @@ import { withParentheses, addOnce } from "../utils";
 type TypeWrapper = false | "nullable" | "optional" | "non-null-optional";
 type ListItemWrapper = false | "non-null" | "nullable" | "optional";
 
-export const generateElm = (intel: ElmIntel): string => `module ${intel.module}
-    exposing
-        ( ${generateExports(intel)}
-        )
+export const generateElm = (intel: ElmIntel): string => `module ${
+  intel.module
+} exposing
+    ( ${generateExports(intel)}
+    )
 
 ${generateImports(intel)}
 
@@ -80,7 +81,10 @@ const generateExports = (intel: ElmIntel): string => {
     });
   });
 
-  return [...types, ...variables].join("\n        , ");
+  types.sort();
+  variables.sort();
+
+  return [...types, ...variables].join("\n    , ");
 };
 
 //
@@ -327,19 +331,38 @@ const wrapEncoder = (
   hasOptionalSiblings: boolean
 ): string => {
   let encoder = field.value.encoder;
+  let withParenthesesOptional = false;
+  let withParenthesesPresent = false;
+  let withParenthesesFinal = false;
 
   if (field.valueListItemWrapper === "optional") {
-    encoder = `(GraphQL.Optional.encodeList ${encoder})`;
+    encoder = `GraphQL.Optional.encodeList ${encoder}`;
+    withParenthesesOptional = true;
   } else if (field.valueListItemWrapper === "non-null") {
-    encoder = `(List.map ${encoder} >> Json.Encode.list)`;
+    encoder = `List.map ${encoder} >> Json.Encode.list`;
+    withParenthesesOptional = true;
+    withParenthesesPresent = true;
+    withParenthesesFinal = true;
   }
 
   if (hasOptionalSiblings) {
     if (field.valueWrapper === "optional") {
-      encoder = `(GraphQL.Optional.map ${encoder})`;
+      if (withParenthesesOptional) {
+        encoder = `(${encoder})`;
+      }
+      encoder = `GraphQL.Optional.map ${encoder}`;
+      withParenthesesFinal = false;
     } else {
-      encoder = `(${encoder} >> GraphQL.Optional.Present)`;
+      if (withParenthesesPresent) {
+        encoder = `(${encoder})`;
+      }
+      encoder = `${encoder} >> GraphQL.Optional.Present`;
+      withParenthesesFinal = true;
     }
+  }
+
+  if (withParenthesesFinal) {
+    encoder = `(${encoder})`;
   }
 
   return encoder;

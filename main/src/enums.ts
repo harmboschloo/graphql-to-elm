@@ -84,14 +84,13 @@ export const getDecoders = (enums: EnumIntel[]): TypeDecoders =>
   );
 
 export const generateElm = ({ module, typeName, values }: EnumIntel): string =>
-  `module ${module}
-    exposing
-        ( ${typeName}(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+  `module ${module} exposing
+    ( ${typeName}(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

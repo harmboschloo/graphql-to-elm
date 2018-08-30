@@ -87,7 +87,7 @@ export const writeResult = (result: Result): Promise<Result> => {
 
   const writeLib = Promise.all(
     elmFiles.map(filename => {
-      const src = resolve(__dirname, "../elm/GraphQL", filename);
+      const src = resolve(__dirname, "../elm/src/GraphQL", filename);
       const dest = resolve(result.options.dest, "GraphQL", filename);
       return readFile(src)
         .then(data => writeFile(dest, data))

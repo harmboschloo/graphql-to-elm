@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "peerDependencies": {
-    "elm": "0.18.x",
     "graphql": "0.12.x || 0.13.x"
   },
   "dependencies": {
@@ -11,6 +10,7 @@
     "express": "^4.16.3"
   },
   "devDependencies": {
+    "elm": "0.19.0-bugfix2",
     "graphql-to-elm": "0.6.1"
   },
   "scripts": {

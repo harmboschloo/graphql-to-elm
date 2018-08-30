@@ -3,22 +3,9 @@
   "workspaces": [
     "main",
     "tests/*",
-    "exampes/*"
+    "examples/*"
   ],
-  "dependencies": {
-    "elm": "0.18.x",
-    "graphql": "0.13.x"
-  },
   "devDependencies": {
-    "tap-diff": "^0.1.1",
-    "tape": "^4.9.1",
-    "ts-node": "^7.0.1",
-    "typescript": "^3.0.1"
-  },
-  "scripts": {
-    "build": "cd main && npm run build",
-    "test": "tape -r ts-node/register test.ts | tap-diff",
-    "test:gen-update": "tape -r ts-node/register test-gen-update.ts | tap-diff",
-    "examples:build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build"
+    "graphql": "0.13.x"
   }
 }

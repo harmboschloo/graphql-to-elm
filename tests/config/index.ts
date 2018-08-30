@@ -11,6 +11,6 @@ export const getConfig = (): Config => {
   );
 
   const graphqlVersion =
-    config.dependencies.graphql.indexOf("0.12") === 0 ? "0.12" : "0.13";
+    config.devDependencies.graphql.indexOf("0.12") === 0 ? "0.12" : "0.13";
   return { graphqlVersion };
 };

@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "peerDependencies": {
-    "elm": "0.18.x",
     "graphql": "0.12.x || 0.13.x"
   },
   "dependencies": {
@@ -22,6 +21,7 @@
     "@types/node": "^10.9.0",
     "@types/phantom": "^3.2.5",
     "@types/rimraf": "^2.0.2",
-    "@types/tape": "^4.2.32"
+    "@types/tape": "^4.2.32",
+    "elm": "0.19.0-bugfix2"
   }
 }

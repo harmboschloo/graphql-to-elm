@@ -84,7 +84,7 @@ You'll need to have [node/npm](https://nodejs.org) installed.
     ```
 
 5.  Now you can import the generated Elm files
-    (which include the `graphql-to-elm` [library files](elm/GraphQL) files)
+    (which include the `graphql-to-elm` [library files](elm/src/GraphQL) files)
     in your project and use them.
 
     For full usage examples see the [examples folder](examples)

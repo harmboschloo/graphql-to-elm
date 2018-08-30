@@ -1,25 +1,25 @@
 {
-    "type": "application",
-    "source-directories": [
-        "src"
+    "type": "package",
+    "name": "harmboschloo/graphql-to-elm",
+    "summary": "Validates graphql queries and converts them to elm code.",
+    "license": "BSD-3-Clause",
+    "version": "1.0.0",
+    "exposed-modules": [
+        "GraphQL.Helpers.Decode",
+        "GraphQL.Helpers.Url",
+        "GraphQL.Http.Basic",
+        "GraphQL.Batch",
+        "GraphQL.Errors",
+        "GraphQL.Operation",
+        "GraphQL.Optional",
+        "GraphQL.PlainBatch",
+        "GraphQL.Response"
     ],
-    "elm-version": "0.19.0",
+    "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
-        "direct": {
-            "elm/browser": "1.0.0",
-            "elm/core": "1.0.0",
-            "elm/html": "1.0.0"
-        },
-        "indirect": {
-            "elm/json": "1.0.0",
-            "elm/url": "1.0.0",
-            "elm/virtual-dom": "1.0.0"
-        }
+        "elm/core": "1.0.0 <= v < 2.0.0",
+        "elm/http": "1.0.0 <= v < 2.0.0",
+        "elm/json": "1.0.0 <= v < 2.0.0"
     },
-    "test-dependencies": {
-        "direct": {
-            "elm-explorations/test": "1.0.0"
-        },
-        "indirect": {}
-    }
+    "test-dependencies": {}
 }

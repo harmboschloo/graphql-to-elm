@@ -1,10 +1,9 @@
-module Mixed1
-    exposing
-        ( Mixed1Response
-        , Mixed1Variables
-        , Mixed1Query
-        , mixed1
-        )
+module Mixed1 exposing
+    ( Mixed1Query
+    , Mixed1Response
+    , Mixed1Variables
+    , mixed1
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,13 +1,12 @@
-module InterfaceList
-    exposing
-        ( InterfaceListResponse
-        , InterfaceListQuery
-        , Animal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , interfaceList
-        )
+module InterfaceList exposing
+    ( Animal(..)
+    , Bird
+    , Dog
+    , Dolphin
+    , InterfaceListQuery
+    , InterfaceListResponse
+    , interfaceList
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

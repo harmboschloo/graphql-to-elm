@@ -1,11 +1,12 @@
 module Main exposing (main)
 
-import Html exposing (Html, div, h1, ul, li, text)
-import Http
-import GraphQL.Http exposing (Response, send, getQuery)
+import GraphQL.Http exposing (Response, getQuery, send)
 import GraphQL.Optional as Optional exposing (Optional)
 import GraphQL.Response as Response
+import Html exposing (Html, div, h1, li, text, ul)
+import Http
 import Queries.Messages as Messages exposing (Message)
+
 
 
 -- Model
@@ -67,7 +68,7 @@ view model =
                 text "..."
 
             HttpError _ ->
-                text ("Http error")
+                text "Http error"
 
             GraphQLErrors errors data ->
                 div []

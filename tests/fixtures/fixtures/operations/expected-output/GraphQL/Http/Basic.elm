@@ -1,11 +1,4 @@
-module GraphQL.Http.Basic
-    exposing
-        ( getQuery
-        , postQuery
-        , postMutation
-        , postBatch
-        , postPlainBatch
-        )
+module GraphQL.Http.Basic exposing (getQuery, postQuery, postMutation, postBatch, postPlainBatch)
 
 {-| Some basic helper functions for creating GraphQL http requests.
 
@@ -13,12 +6,12 @@ module GraphQL.Http.Basic
 
 -}
 
-import Http
-import GraphQL.Operation as Operation exposing (Operation, Query, Mutation)
-import GraphQL.Response as Response exposing (Response)
 import GraphQL.Batch as Batch
-import GraphQL.PlainBatch as PlainBatch
 import GraphQL.Helpers.Url as Url
+import GraphQL.Operation as Operation exposing (Mutation, Operation, Query)
+import GraphQL.PlainBatch as PlainBatch
+import GraphQL.Response as Response exposing (Response)
+import Http
 
 
 {-|
@@ -29,6 +22,7 @@ import GraphQL.Helpers.Url as Url
             (Response.decoder operation)
 
     For `UrlHelper` see `GraphQL.Helpers.Url`.
+
 -}
 getQuery : String -> Operation Query e a -> Http.Request (Response e a)
 getQuery url operation =
@@ -44,6 +38,7 @@ getQuery url operation =
             url
             (Http.jsonBody <| Operation.encode query)
             (Response.decoder query)
+
 -}
 postQuery : String -> Operation Query e a -> Http.Request (Response e a)
 postQuery =
@@ -57,6 +52,7 @@ postQuery =
             url
             (Http.jsonBody <| Operation.encode mutation)
             (Response.decoder mutation)
+
 -}
 postMutation : String -> Operation Mutation e a -> Http.Request (Response e a)
 postMutation =
@@ -78,6 +74,7 @@ postOperation url operation =
             url
             (Http.jsonBody <| Batch.encode batch)
             (Batch.decoder batch)
+
 -}
 postBatch : String -> Batch.Batch e a -> Http.Request (Result e a)
 postBatch url batch =
@@ -94,6 +91,7 @@ postBatch url batch =
             url
             (Http.jsonBody <| PlainBatch.encode batch)
             (PlainBatch.decoder batch)
+
 -}
 postPlainBatch : String -> PlainBatch.Batch a -> Http.Request a
 postPlainBatch url batch =

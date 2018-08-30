@@ -1,11 +1,10 @@
-module Queries.Fragments
-    exposing
-        ( Response
-        , Query
-        , User
-        , Message
-        , query
-        )
+module Queries.Fragments exposing
+    ( Message
+    , Query
+    , Response
+    , User
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

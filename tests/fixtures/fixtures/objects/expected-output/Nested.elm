@@ -1,11 +1,10 @@
-module Nested
-    exposing
-        ( Response
-        , Query
-        , Person
-        , Person2
-        , query
-        )
+module Nested exposing
+    ( Person
+    , Person2
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

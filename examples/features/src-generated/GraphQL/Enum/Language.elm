@@ -1,11 +1,10 @@
-module GraphQL.Enum.Language
-    exposing
-        ( Language(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.Language exposing
+    ( Language(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

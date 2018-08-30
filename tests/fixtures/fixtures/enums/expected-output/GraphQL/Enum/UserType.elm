@@ -1,11 +1,10 @@
-module GraphQL.Enum.UserType
-    exposing
-        ( UserType(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.UserType exposing
+    ( UserType(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

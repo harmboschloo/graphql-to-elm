@@ -1,9 +1,8 @@
-module NullableEnum
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module NullableEnum exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import Data.Binary
 import GraphQL.Errors

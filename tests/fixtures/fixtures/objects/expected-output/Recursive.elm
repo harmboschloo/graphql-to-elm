@@ -1,13 +1,12 @@
-module Recursive
-    exposing
-        ( Response
-        , Query
-        , Comment4
-        , Comment3
-        , Comment2
-        , Comment
-        , query
-        )
+module Recursive exposing
+    ( Comment
+    , Comment2
+    , Comment3
+    , Comment4
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

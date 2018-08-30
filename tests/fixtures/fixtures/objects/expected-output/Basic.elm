@@ -1,10 +1,9 @@
-module Basic
-    exposing
-        ( Response
-        , Query
-        , Person
-        , query
-        )
+module Basic exposing
+    ( Person
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

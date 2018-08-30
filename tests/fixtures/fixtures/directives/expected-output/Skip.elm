@@ -1,10 +1,9 @@
-module Skip
-    exposing
-        ( SkipResponse
-        , SkipVariables
-        , SkipQuery
-        , skip
-        )
+module Skip exposing
+    ( SkipQuery
+    , SkipResponse
+    , SkipVariables
+    , skip
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

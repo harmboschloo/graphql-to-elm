@@ -1,12 +1,11 @@
-module InterfaceMultiple
-    exposing
-        ( InterfaceMultipleResponse
-        , InterfaceMultipleQuery
-        , Animal(..)
-        , Mammal
-        , Bird
-        , interfaceMultiple
-        )
+module InterfaceMultiple exposing
+    ( Animal(..)
+    , Bird
+    , InterfaceMultipleQuery
+    , InterfaceMultipleResponse
+    , Mammal
+    , interfaceMultiple
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

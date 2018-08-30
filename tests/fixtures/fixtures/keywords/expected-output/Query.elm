@@ -1,16 +1,15 @@
-module Query
-    exposing
-        ( Response
-        , Query
-        , ElmKeywords
-        , OtherElmKeywords
-        , ElmBasics
-        , Bool2
-        , List2
-        , GraphqlToElmReservedWords
-        , Misc
-        , query
-        )
+module Query exposing
+    ( Bool2
+    , ElmBasics
+    , ElmKeywords
+    , GraphqlToElmReservedWords
+    , List2
+    , Misc
+    , OtherElmKeywords
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

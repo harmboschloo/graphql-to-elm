@@ -1,10 +1,4 @@
-module GraphQL.Helpers.Decode
-    exposing
-        ( andMap
-        , fromResult
-        , emptyObject
-        , constant
-        )
+module GraphQL.Helpers.Decode exposing (andMap, fromResult, constant, emptyObject)
 
 {-| Some additional functions that help with decoding JSON.
 
@@ -43,6 +37,7 @@ constant constantValue =
         (\value ->
             if value == constantValue then
                 Decode.succeed value
+
             else
                 Decode.fail <|
                     "expected '"

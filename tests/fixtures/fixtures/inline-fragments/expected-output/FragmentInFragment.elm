@@ -1,15 +1,14 @@
-module FragmentInFragment
-    exposing
-        ( FragmentInFragmentResponse
-        , FragmentInFragmentQuery
-        , Animal
-        , OnAnimal(..)
-        , Mammal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , fragmentInFragment
-        )
+module FragmentInFragment exposing
+    ( Animal
+    , Bird
+    , Dog
+    , Dolphin
+    , FragmentInFragmentQuery
+    , FragmentInFragmentResponse
+    , Mammal(..)
+    , OnAnimal(..)
+    , fragmentInFragment
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

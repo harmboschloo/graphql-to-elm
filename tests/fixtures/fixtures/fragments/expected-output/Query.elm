@@ -1,14 +1,13 @@
-module Query
-    exposing
-        ( FragmentsResponse
-        , FragmentsVariables
-        , FragmentsQuery
-        , User
-        , Flip(..)
-        , Heads
-        , Tails
-        , fragments
-        )
+module Query exposing
+    ( Flip(..)
+    , FragmentsQuery
+    , FragmentsResponse
+    , FragmentsVariables
+    , Heads
+    , Tails
+    , User
+    , fragments
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,13 +1,12 @@
-module TypenameShared
-    exposing
-        ( TypenameSharedResponse
-        , TypenameSharedQuery
-        , Animal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , typenameShared
-        )
+module TypenameShared exposing
+    ( Animal(..)
+    , Bird
+    , Dog
+    , Dolphin
+    , TypenameSharedQuery
+    , TypenameSharedResponse
+    , typenameShared
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

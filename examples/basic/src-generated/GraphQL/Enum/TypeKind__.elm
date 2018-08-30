@@ -1,11 +1,10 @@
-module GraphQL.Enum.TypeKind__
-    exposing
-        ( TypeKind__(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.TypeKind__ exposing
+    ( TypeKind__(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

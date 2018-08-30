@@ -1,16 +1,15 @@
-module FragmentInFragmentShared
-    exposing
-        ( FragmentInFragmentSharedResponse
-        , FragmentInFragmentSharedQuery
-        , Animal
-        , OnAnimal(..)
-        , Mammal
-        , OnMammal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , fragmentInFragmentShared
-        )
+module FragmentInFragmentShared exposing
+    ( Animal
+    , Bird
+    , Dog
+    , Dolphin
+    , FragmentInFragmentSharedQuery
+    , FragmentInFragmentSharedResponse
+    , Mammal
+    , OnAnimal(..)
+    , OnMammal(..)
+    , fragmentInFragmentShared
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

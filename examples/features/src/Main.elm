@@ -1,24 +1,25 @@
 module Main exposing (main)
 
-import Html exposing (Html, div, h1, h2, dl, dt, dd, ul, li, button, text)
-import Html.Events exposing (onClick)
+import GraphQL.Batch as Batch
+import GraphQL.Enum.Language as Language
 import GraphQL.Http
     exposing
         ( Response
+        , postBatch
+        , postMutation
+        , postQuery
         , send
         , sendBatch
-        , postQuery
-        , postMutation
-        , postBatch
         )
-import GraphQL.Batch as Batch
-import GraphQL.Enum.Language as Language
 import GraphQL.Optional as Optional
+import Html exposing (Html, button, dd, div, dl, dt, h1, h2, li, text, ul)
+import Html.Events exposing (onClick)
 import Queries.Aliases as Aliases
 import Queries.Fields as Fields
 import Queries.Fragments as Fragments
 import Queries.Mutations as Mutations
 import Queries.Variables as Variables
+
 
 
 -- Helpers

@@ -1,14 +1,13 @@
-module Names
-    exposing
-        ( NamesResponse
-        , NamesQuery
-        , Flip(..)
-        , Heads
-        , Tails
-        , Flip2(..)
-        , Flip3(..)
-        , names
-        )
+module Names exposing
+    ( Flip(..)
+    , Flip2(..)
+    , Flip3(..)
+    , Heads
+    , NamesQuery
+    , NamesResponse
+    , Tails
+    , names
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

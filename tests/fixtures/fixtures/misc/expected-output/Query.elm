@@ -1,14 +1,13 @@
-module Query
-    exposing
-        ( TestQueryResponse
-        , TestQueryQuery
-        , User
-        , User2
-        , User4
-        , User3
-        , User5
-        , testQuery
-        )
+module Query exposing
+    ( TestQueryQuery
+    , TestQueryResponse
+    , User
+    , User2
+    , User3
+    , User4
+    , User5
+    , testQuery
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

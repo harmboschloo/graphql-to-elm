@@ -1,13 +1,12 @@
-module Typename
-    exposing
-        ( TypenameResponse
-        , TypenameQuery
-        , Animal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , typename
-        )
+module Typename exposing
+    ( Animal(..)
+    , Bird
+    , Dog
+    , Dolphin
+    , TypenameQuery
+    , TypenameResponse
+    , typename
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

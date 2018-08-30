@@ -1,11 +1,10 @@
-module InterfacePartial
-    exposing
-        ( InterfacePartialResponse
-        , InterfacePartialQuery
-        , Animal(..)
-        , Dog
-        , interfacePartial
-        )
+module InterfacePartial exposing
+    ( Animal(..)
+    , Dog
+    , InterfacePartialQuery
+    , InterfacePartialResponse
+    , interfacePartial
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

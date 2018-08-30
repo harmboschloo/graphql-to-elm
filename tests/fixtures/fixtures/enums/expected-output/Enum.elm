@@ -1,9 +1,8 @@
-module Enum
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module Enum exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import Data.Binary
 import GraphQL.Enum.UserType

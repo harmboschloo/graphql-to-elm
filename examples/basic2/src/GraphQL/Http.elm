@@ -1,20 +1,19 @@
-module GraphQL.Http
-    exposing
-        ( Errors
-        , Query
-        , Mutation
-        , Response
-        , Request
-        , getQuery
-        , postMutation
-        , send
-        )
+module GraphQL.Http exposing
+    ( Errors
+    , Mutation
+    , Query
+    , Request
+    , Response
+    , getQuery
+    , postMutation
+    , send
+    )
 
-import Http
 import GraphQL.Errors
 import GraphQL.Http.Basic
 import GraphQL.Operation
 import GraphQL.Response
+import Http
 
 
 type alias Errors =

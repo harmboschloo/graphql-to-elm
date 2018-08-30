@@ -1,9 +1,8 @@
-module Queries.Aliases
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module Queries.Aliases exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

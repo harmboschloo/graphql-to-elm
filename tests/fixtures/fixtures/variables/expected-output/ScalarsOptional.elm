@@ -1,10 +1,9 @@
-module ScalarsOptional
-    exposing
-        ( ScalarsOptionalResponse
-        , ScalarsOptionalVariables
-        , ScalarsOptionalQuery
-        , scalarsOptional
-        )
+module ScalarsOptional exposing
+    ( ScalarsOptionalQuery
+    , ScalarsOptionalResponse
+    , ScalarsOptionalVariables
+    , scalarsOptional
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -38,8 +37,8 @@ type alias ScalarsOptionalVariables =
 encodeScalarsOptionalVariables : ScalarsOptionalVariables -> Json.Encode.Value
 encodeScalarsOptionalVariables inputs =
     GraphQL.Optional.encodeObject
-        [ ( "string", (GraphQL.Optional.map Json.Encode.string) inputs.string )
-        , ( "int", (GraphQL.Optional.map Json.Encode.int) inputs.int )
+        [ ( "string", GraphQL.Optional.map Json.Encode.string inputs.string )
+        , ( "int", GraphQL.Optional.map Json.Encode.int inputs.int )
         ]
 
 

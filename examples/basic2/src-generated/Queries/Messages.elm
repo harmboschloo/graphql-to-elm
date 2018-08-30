@@ -1,16 +1,15 @@
-module Queries.Messages
-    exposing
-        ( MessagesResponse
-        , MessagesQuery
-        , Message
-        , PostMessageResponse2
-        , PostMessageVariables
-        , PostMessageMutation
-        , PostMessageResponse(..)
-        , MutationError
-        , messages
-        , postMessage
-        )
+module Queries.Messages exposing
+    ( Message
+    , MessagesQuery
+    , MessagesResponse
+    , MutationError
+    , PostMessageMutation
+    , PostMessageResponse(..)
+    , PostMessageResponse2
+    , PostMessageVariables
+    , messages
+    , postMessage
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

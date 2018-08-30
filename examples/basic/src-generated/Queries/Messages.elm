@@ -1,10 +1,9 @@
-module Queries.Messages
-    exposing
-        ( Response
-        , Query
-        , Message
-        , query
-        )
+module Queries.Messages exposing
+    ( Message
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

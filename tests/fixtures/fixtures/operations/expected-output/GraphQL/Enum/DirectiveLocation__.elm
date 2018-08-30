@@ -1,11 +1,10 @@
-module GraphQL.Enum.DirectiveLocation__
-    exposing
-        ( DirectiveLocation__(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.DirectiveLocation__ exposing
+    ( DirectiveLocation__(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

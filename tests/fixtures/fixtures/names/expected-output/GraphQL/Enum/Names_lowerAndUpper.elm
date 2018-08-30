@@ -1,11 +1,10 @@
-module GraphQL.Enum.Names_lowerAndUpper
-    exposing
-        ( Names_lowerAndUpper(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.Names_lowerAndUpper exposing
+    ( Names_lowerAndUpper(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

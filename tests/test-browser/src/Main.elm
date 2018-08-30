@@ -1,21 +1,21 @@
 module Main exposing (main)
 
-import Set
-import Http
-import Html exposing (Html)
-import GraphQL.Operation exposing (Query, Mutation)
-import GraphQL.Response as Response exposing (Response(Data, Errors))
+import GraphQL.Batch as Batch exposing (Batch)
 import GraphQL.Http.Basic
     exposing
         ( getQuery
-        , postQuery
-        , postMutation
         , postBatch
+        , postMutation
         , postPlainBatch
+        , postQuery
         )
-import GraphQL.Batch as Batch exposing (Batch)
+import GraphQL.Operation exposing (Mutation, Query)
 import GraphQL.PlainBatch as PlainBatch
-import Tests exposing (Test, queryTests, mutationTests)
+import GraphQL.Response as Response exposing (Response(..))
+import Html exposing (Html)
+import Http
+import Set
+import Tests exposing (Test, mutationTests, queryTests)
 
 
 numberOfRounds : Int
@@ -68,48 +68,48 @@ batchTests =
         batch3 a b c =
             [ toString a, toString b, toString c ]
     in
-        testsBySchema
-            |> List.map
-                (\( schemaId, queryTests, mutationTests ) ->
-                    List.concat
-                        [ List.map2
-                            (\a b ->
-                                ( schemaId
-                                , id2 a b
-                                , Batch.batch batch2
-                                    |> Batch.query a.operation
-                                    |> Batch.query b.operation
-                                )
+    testsBySchema
+        |> List.map
+            (\( schemaId, queryTests, mutationTests ) ->
+                List.concat
+                    [ List.map2
+                        (\a b ->
+                            ( schemaId
+                            , id2 a b
+                            , Batch.batch batch2
+                                |> Batch.query a.operation
+                                |> Batch.query b.operation
                             )
-                            (queryTests)
-                            (List.reverse queryTests)
-                        , List.map3
-                            (\a b c ->
-                                ( schemaId
-                                , id3 a b c
-                                , Batch.batch batch3
-                                    |> Batch.query a.operation
-                                    |> Batch.mutation b.operation
-                                    |> Batch.query c.operation
-                                )
+                        )
+                        queryTests
+                        (List.reverse queryTests)
+                    , List.map3
+                        (\a b c ->
+                            ( schemaId
+                            , id3 a b c
+                            , Batch.batch batch3
+                                |> Batch.query a.operation
+                                |> Batch.mutation b.operation
+                                |> Batch.query c.operation
                             )
-                            (queryTests)
-                            (mutationTests)
-                            (List.reverse queryTests)
-                        , List.map2
-                            (\a b ->
-                                ( schemaId
-                                , id2 a b
-                                , Batch.batch batch2
-                                    |> Batch.mutation a.operation
-                                    |> Batch.mutation b.operation
-                                )
+                        )
+                        queryTests
+                        mutationTests
+                        (List.reverse queryTests)
+                    , List.map2
+                        (\a b ->
+                            ( schemaId
+                            , id2 a b
+                            , Batch.batch batch2
+                                |> Batch.mutation a.operation
+                                |> Batch.mutation b.operation
                             )
-                            (List.reverse mutationTests)
-                            (mutationTests)
-                        ]
-                )
-            |> List.concat
+                        )
+                        (List.reverse mutationTests)
+                        mutationTests
+                    ]
+            )
+        |> List.concat
 
 
 type alias PlainBatchData =
@@ -128,48 +128,48 @@ plainBatchTests =
         batch3 a b c =
             [ map a, map b, map c ]
     in
-        testsBySchema
-            |> List.map
-                (\( schemaId, queryTests, mutationTests ) ->
-                    List.concat
-                        [ List.map2
-                            (\a b ->
-                                ( schemaId
-                                , id2 a b
-                                , PlainBatch.batch batch2
-                                    |> PlainBatch.query a.operation
-                                    |> PlainBatch.query b.operation
-                                )
+    testsBySchema
+        |> List.map
+            (\( schemaId, queryTests, mutationTests ) ->
+                List.concat
+                    [ List.map2
+                        (\a b ->
+                            ( schemaId
+                            , id2 a b
+                            , PlainBatch.batch batch2
+                                |> PlainBatch.query a.operation
+                                |> PlainBatch.query b.operation
                             )
-                            (queryTests)
-                            (List.reverse queryTests)
-                        , List.map3
-                            (\a b c ->
-                                ( schemaId
-                                , id3 a b c
-                                , PlainBatch.batch batch3
-                                    |> PlainBatch.query a.operation
-                                    |> PlainBatch.mutation b.operation
-                                    |> PlainBatch.query c.operation
-                                )
+                        )
+                        queryTests
+                        (List.reverse queryTests)
+                    , List.map3
+                        (\a b c ->
+                            ( schemaId
+                            , id3 a b c
+                            , PlainBatch.batch batch3
+                                |> PlainBatch.query a.operation
+                                |> PlainBatch.mutation b.operation
+                                |> PlainBatch.query c.operation
                             )
-                            (queryTests)
-                            (mutationTests)
-                            (List.reverse queryTests)
-                        , List.map2
-                            (\a b ->
-                                ( schemaId
-                                , id2 a b
-                                , PlainBatch.batch batch2
-                                    |> PlainBatch.mutation a.operation
-                                    |> PlainBatch.mutation b.operation
-                                )
+                        )
+                        queryTests
+                        mutationTests
+                        (List.reverse queryTests)
+                    , List.map2
+                        (\a b ->
+                            ( schemaId
+                            , id2 a b
+                            , PlainBatch.batch batch2
+                                |> PlainBatch.mutation a.operation
+                                |> PlainBatch.mutation b.operation
                             )
-                            (List.reverse mutationTests)
-                            (mutationTests)
-                        ]
-                )
-            |> List.concat
+                        )
+                        (List.reverse mutationTests)
+                        mutationTests
+                    ]
+            )
+        |> List.concat
 
 
 id2 : { a | id : String } -> { b | id : String } -> String
@@ -219,16 +219,16 @@ init =
         _ =
             Debug.log "[Start Test] number of tests" numberOfTests
     in
-        ( Model 0 0
-        , [ List.map sendPostQuery postQueryTests
-          , List.map sendPostMutation postMutationTests
-          , List.map sendBatch batchTests
-          , List.map sendPlainBatch plainBatchTests
-          , List.map sendGet getTests
-          ]
-            |> List.concat
-            |> Cmd.batch
-        )
+    ( Model 0 0
+    , [ List.map sendPostQuery postQueryTests
+      , List.map sendPostMutation postMutationTests
+      , List.map sendBatch batchTests
+      , List.map sendPlainBatch plainBatchTests
+      , List.map sendGet getTests
+      ]
+        |> List.concat
+        |> Cmd.batch
+    )
 
 
 sendPostQuery : Test Query -> Cmd Msg
@@ -323,12 +323,12 @@ passed id data model =
                 ("[Test Passed] "
                     ++ toString (testsDone model + 1)
                     ++ "/"
-                    ++ (toString numberOfTests)
+                    ++ toString numberOfTests
                 )
                 id
     in
-        { model | passed = model.passed + 1 }
-            |> end
+    { model | passed = model.passed + 1 }
+        |> end
 
 
 failed : String -> String -> Model -> ( Model, Cmd Msg )
@@ -337,8 +337,8 @@ failed id error model =
         _ =
             Debug.log "[Test Failed]" (id ++ ": " ++ error)
     in
-        { model | failed = model.failed + 1 }
-            |> end
+    { model | failed = model.failed + 1 }
+        |> end
 
 
 end : Model -> ( Model, Cmd Msg )
@@ -352,10 +352,11 @@ end model =
                         ++ ", failed: "
                         ++ toString model.failed
                     )
+
             else
                 ""
     in
-        ( model, Cmd.none )
+    ( model, Cmd.none )
 
 
 

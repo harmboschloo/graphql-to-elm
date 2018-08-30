@@ -1,10 +1,9 @@
-module AnonymousMutation
-    exposing
-        ( Response
-        , Mutation
-        , Fragment
-        , mutation
-        )
+module AnonymousMutation exposing
+    ( Fragment
+    , Mutation
+    , Response
+    , mutation
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

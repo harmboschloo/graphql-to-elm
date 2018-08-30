@@ -1,12 +1,11 @@
-module UnionList
-    exposing
-        ( UnionListResponse
-        , UnionListQuery
-        , Flip(..)
-        , Heads
-        , Tails
-        , unionList
-        )
+module UnionList exposing
+    ( Flip(..)
+    , Heads
+    , Tails
+    , UnionListQuery
+    , UnionListResponse
+    , unionList
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

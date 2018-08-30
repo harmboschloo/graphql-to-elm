@@ -1,13 +1,12 @@
-module FragmentInFragmentPartial
-    exposing
-        ( FragmentInFragmentPartialResponse
-        , FragmentInFragmentPartialQuery
-        , Animal
-        , OnAnimal(..)
-        , Mammal(..)
-        , Dog
-        , fragmentInFragmentPartial
-        )
+module FragmentInFragmentPartial exposing
+    ( Animal
+    , Dog
+    , FragmentInFragmentPartialQuery
+    , FragmentInFragmentPartialResponse
+    , Mammal(..)
+    , OnAnimal(..)
+    , fragmentInFragmentPartial
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

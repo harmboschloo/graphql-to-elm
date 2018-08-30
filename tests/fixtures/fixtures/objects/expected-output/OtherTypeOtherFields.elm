@@ -1,13 +1,12 @@
-module OtherTypeOtherFields
-    exposing
-        ( Response
-        , Query
-        , Person
-        , Dog
-        , Person2
-        , Person22
-        , query
-        )
+module OtherTypeOtherFields exposing
+    ( Dog
+    , Person
+    , Person2
+    , Person22
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,10 +1,9 @@
-module ListOfObjects
-    exposing
-        ( Response
-        , Query
-        , Friend
-        , query
-        )
+module ListOfObjects exposing
+    ( Friend
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

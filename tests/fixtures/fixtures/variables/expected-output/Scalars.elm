@@ -1,10 +1,9 @@
-module Scalars
-    exposing
-        ( ScalarsResponse
-        , ScalarsVariables
-        , ScalarsQuery
-        , scalars
-        )
+module Scalars exposing
+    ( ScalarsQuery
+    , ScalarsResponse
+    , ScalarsVariables
+    , scalars
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,12 +1,11 @@
-module InputsMixed
-    exposing
-        ( InputsMixedResponse
-        , InputsMixedVariables
-        , MixedInputs
-        , OtherInputs
-        , InputsMixedQuery
-        , inputsMixed
-        )
+module InputsMixed exposing
+    ( InputsMixedQuery
+    , InputsMixedResponse
+    , InputsMixedVariables
+    , MixedInputs
+    , OtherInputs
+    , inputsMixed
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -41,7 +40,7 @@ encodeInputsMixedVariables : InputsMixedVariables -> Json.Encode.Value
 encodeInputsMixedVariables inputs =
     GraphQL.Optional.encodeObject
         [ ( "inputs", (encodeMixedInputs >> GraphQL.Optional.Present) inputs.inputs )
-        , ( "inputs2", (GraphQL.Optional.map encodeMixedInputs) inputs.inputs2 )
+        , ( "inputs2", GraphQL.Optional.map encodeMixedInputs inputs.inputs2 )
         ]
 
 
@@ -56,7 +55,7 @@ encodeMixedInputs : MixedInputs -> Json.Encode.Value
 encodeMixedInputs inputs =
     GraphQL.Optional.encodeObject
         [ ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
-        , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
+        , ( "float", GraphQL.Optional.map Json.Encode.float inputs.float )
         , ( "other", (encodeOtherInputs >> GraphQL.Optional.Present) inputs.other )
         ]
 

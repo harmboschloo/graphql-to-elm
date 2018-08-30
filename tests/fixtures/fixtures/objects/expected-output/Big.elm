@@ -1,11 +1,10 @@
-module Big
-    exposing
-        ( Response
-        , Query
-        , Person
-        , Intel
-        , query
-        )
+module Big exposing
+    ( Intel
+    , Person
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

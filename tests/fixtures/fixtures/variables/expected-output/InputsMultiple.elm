@@ -1,12 +1,11 @@
-module InputsMultiple
-    exposing
-        ( InputsMultipleResponse
-        , InputsMultipleVariables
-        , Inputs
-        , OtherInputs
-        , InputsMultipleQuery
-        , inputsMultiple
-        )
+module InputsMultiple exposing
+    ( Inputs
+    , InputsMultipleQuery
+    , InputsMultipleResponse
+    , InputsMultipleVariables
+    , OtherInputs
+    , inputsMultiple
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -41,7 +40,7 @@ encodeInputsMultipleVariables : InputsMultipleVariables -> Json.Encode.Value
 encodeInputsMultipleVariables inputs =
     GraphQL.Optional.encodeObject
         [ ( "inputs", (encodeInputs >> GraphQL.Optional.Present) inputs.inputs )
-        , ( "inputs2", (GraphQL.Optional.map encodeInputs) inputs.inputs2 )
+        , ( "inputs2", GraphQL.Optional.map encodeInputs inputs.inputs2 )
         ]
 
 

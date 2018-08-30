@@ -1,12 +1,11 @@
-module Inputs
-    exposing
-        ( InputsResponse
-        , InputsVariables
-        , Inputs
-        , OtherInputs
-        , InputsQuery
-        , inputs
-        )
+module Inputs exposing
+    ( Inputs
+    , InputsQuery
+    , InputsResponse
+    , InputsVariables
+    , OtherInputs
+    , inputs
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

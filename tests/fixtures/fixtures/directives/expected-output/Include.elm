@@ -1,10 +1,9 @@
-module Include
-    exposing
-        ( IncludeResponse
-        , IncludeVariables
-        , IncludeQuery
-        , include
-        )
+module Include exposing
+    ( IncludeQuery
+    , IncludeResponse
+    , IncludeVariables
+    , include
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

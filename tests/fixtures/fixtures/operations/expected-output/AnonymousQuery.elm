@@ -1,10 +1,9 @@
-module AnonymousQuery
-    exposing
-        ( Response
-        , Query
-        , Operation
-        , query
-        )
+module AnonymousQuery exposing
+    ( Operation
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

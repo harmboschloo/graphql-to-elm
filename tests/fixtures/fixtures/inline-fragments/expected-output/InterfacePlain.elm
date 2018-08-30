@@ -1,10 +1,9 @@
-module InterfacePlain
-    exposing
-        ( InterfacePlainResponse
-        , InterfacePlainQuery
-        , Animal
-        , interfacePlain
-        )
+module InterfacePlain exposing
+    ( Animal
+    , InterfacePlainQuery
+    , InterfacePlainResponse
+    , interfacePlain
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

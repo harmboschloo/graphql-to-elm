@@ -1,22 +1,15 @@
-module GraphQL.Batch
-    exposing
-        ( Batch
-        , batch
-        , query
-        , mutation
-        , map
-        , mapError
-        , encode
-        , decoder
-        )
+module GraphQL.Batch exposing
+    ( Batch, batch, query, mutation
+    , map, mapError
+    , encode, decoder
+    )
 
 {-| Batch operations together.
 
-    (batch (,,)
+    batch (\a b c -> ( a, b, c ))
         |> query operation1
         |> query operation2
         |> mutation operation3
-    )
 
 
 # Batch
@@ -35,11 +28,11 @@ module GraphQL.Batch
 
 -}
 
+import GraphQL.Helpers.Decode as DecodeHelpers
+import GraphQL.Operation as Operation exposing (Mutation, Operation, Query)
+import GraphQL.Response as Response exposing (Response)
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
-import GraphQL.Helpers.Decode as DecodeHelpers
-import GraphQL.Operation as Operation exposing (Operation, Query, Mutation)
-import GraphQL.Response as Response exposing (Response)
 
 
 {-| -}
@@ -56,7 +49,7 @@ batch : (a -> b) -> Batch e (a -> b)
 batch a =
     Batch
         { operations = []
-        , decoder = (\values -> ( values, Decode.succeed (Ok a) ))
+        , decoder = \values -> ( values, Decode.succeed (Ok a) )
         }
 
 
@@ -78,7 +71,7 @@ any operation (Batch batch) =
         { operations =
             Operation.encode operation :: batch.operations
         , decoder =
-            (\values0 ->
+            \values0 ->
                 let
                     ( values1, decoder1 ) =
                         batch.decoder values0
@@ -86,10 +79,9 @@ any operation (Batch batch) =
                     ( values2, decoder2 ) =
                         responseDecoder operation values1
                 in
-                    ( values2
-                    , Decode.map2 andMapResult decoder2 decoder1
-                    )
-            )
+                ( values2
+                , Decode.map2 andMapResult decoder2 decoder1
+                )
         }
 
 
@@ -102,7 +94,7 @@ responseDecoder :
     Operation t e a
     -> (List Decode.Value -> ( List Decode.Value, Decoder (Result e a) ))
 responseDecoder operation =
-    (\values ->
+    \values ->
         case values of
             [] ->
                 ( values
@@ -118,7 +110,6 @@ responseDecoder operation =
                         )
                     |> DecodeHelpers.fromResult
                 )
-    )
 
 
 {-| Convert the batch data value.

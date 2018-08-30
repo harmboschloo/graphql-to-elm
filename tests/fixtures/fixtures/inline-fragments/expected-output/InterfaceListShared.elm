@@ -1,14 +1,13 @@
-module InterfaceListShared
-    exposing
-        ( InterfaceListSharedResponse
-        , InterfaceListSharedQuery
-        , Animal
-        , OnAnimal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , interfaceListShared
-        )
+module InterfaceListShared exposing
+    ( Animal
+    , Bird
+    , Dog
+    , Dolphin
+    , InterfaceListSharedQuery
+    , InterfaceListSharedResponse
+    , OnAnimal(..)
+    , interfaceListShared
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

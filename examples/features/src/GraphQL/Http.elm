@@ -1,23 +1,22 @@
-module GraphQL.Http
-    exposing
-        ( Errors
-        , Query
-        , Mutation
-        , Batch
-        , Response
-        , postQuery
-        , postMutation
-        , postBatch
-        , send
-        , sendBatch
-        )
+module GraphQL.Http exposing
+    ( Batch
+    , Errors
+    , Mutation
+    , Query
+    , Response
+    , postBatch
+    , postMutation
+    , postQuery
+    , send
+    , sendBatch
+    )
 
-import Http
 import GraphQL.Batch
 import GraphQL.Errors
 import GraphQL.Http.Basic
 import GraphQL.Operation
 import GraphQL.Response
+import Http
 
 
 type alias Errors =
@@ -72,7 +71,7 @@ sendBatch resultMsg =
 
 mapResult : Result Http.Error (Response a) -> Result String a
 mapResult =
-    Result.map (GraphQL.Response.toResult) >> mapBatchResult
+    Result.map GraphQL.Response.toResult >> mapBatchResult
 
 
 mapBatchResult : Result Http.Error (Result Errors a) -> Result String a

@@ -1,9 +1,8 @@
-module CustomNullableScalarTypes
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module CustomNullableScalarTypes exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import Data.Date
 import Data.Id

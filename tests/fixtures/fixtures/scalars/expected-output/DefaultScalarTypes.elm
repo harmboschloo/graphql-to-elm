@@ -1,9 +1,8 @@
-module DefaultScalarTypes
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module DefaultScalarTypes exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,14 +1,13 @@
-module InterfaceShared
-    exposing
-        ( InterfaceSharedResponse
-        , InterfaceSharedQuery
-        , Animal
-        , OnAnimal(..)
-        , Dog
-        , Dolphin
-        , Bird
-        , interfaceShared
-        )
+module InterfaceShared exposing
+    ( Animal
+    , Bird
+    , Dog
+    , Dolphin
+    , InterfaceSharedQuery
+    , InterfaceSharedResponse
+    , OnAnimal(..)
+    , interfaceShared
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

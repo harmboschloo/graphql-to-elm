@@ -1,11 +1,10 @@
-module Queries.Fields
-    exposing
-        ( Response
-        , Query
-        , User
-        , Message
-        , query
-        )
+module Queries.Fields exposing
+    ( Message
+    , Query
+    , Response
+    , User
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

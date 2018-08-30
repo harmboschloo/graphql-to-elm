@@ -1,11 +1,10 @@
-module Query
-    exposing
-        ( AliasesResponse
-        , AliasesQuery
-        , User
-        , User2
-        , aliases
-        )
+module Query exposing
+    ( AliasesQuery
+    , AliasesResponse
+    , User
+    , User2
+    , aliases
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

@@ -1,10 +1,9 @@
-module ScalarsMixed
-    exposing
-        ( ScalarsMixedResponse
-        , ScalarsMixedVariables
-        , ScalarsMixedQuery
-        , scalarsMixed
-        )
+module ScalarsMixed exposing
+    ( ScalarsMixedQuery
+    , ScalarsMixedResponse
+    , ScalarsMixedVariables
+    , scalarsMixed
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -38,7 +37,7 @@ type alias ScalarsMixedVariables =
 encodeScalarsMixedVariables : ScalarsMixedVariables -> Json.Encode.Value
 encodeScalarsMixedVariables inputs =
     GraphQL.Optional.encodeObject
-        [ ( "string", (GraphQL.Optional.map Json.Encode.string) inputs.string )
+        [ ( "string", GraphQL.Optional.map Json.Encode.string inputs.string )
         , ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
         ]
 

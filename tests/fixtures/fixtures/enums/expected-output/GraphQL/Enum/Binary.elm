@@ -1,11 +1,10 @@
-module GraphQL.Enum.Binary
-    exposing
-        ( Binary(..)
-        , encode
-        , decoder
-        , toString
-        , fromString
-        )
+module GraphQL.Enum.Binary exposing
+    ( Binary(..)
+    , decoder
+    , encode
+    , fromString
+    , toString
+    )
 
 import Json.Decode
 import Json.Encode

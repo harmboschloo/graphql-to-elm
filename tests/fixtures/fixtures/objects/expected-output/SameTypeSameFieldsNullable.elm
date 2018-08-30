@@ -1,10 +1,9 @@
-module SameTypeSameFieldsNullable
-    exposing
-        ( Response
-        , Query
-        , Person2
-        , query
-        )
+module SameTypeSameFieldsNullable exposing
+    ( Person2
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

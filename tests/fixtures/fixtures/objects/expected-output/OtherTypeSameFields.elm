@@ -1,11 +1,10 @@
-module OtherTypeSameFields
-    exposing
-        ( Response
-        , Query
-        , Person
-        , Person2
-        , query
-        )
+module OtherTypeSameFields exposing
+    ( Person
+    , Person2
+    , Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

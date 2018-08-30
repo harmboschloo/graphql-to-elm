@@ -1,10 +1,11 @@
 module Main exposing (main)
 
-import Html exposing (Html, div, h1, ul, li, hr, form, input, button, text)
+import GraphQL.Http exposing (Response, getQuery, postMutation, send)
+import Html exposing (Html, button, div, form, h1, hr, input, li, text, ul)
 import Html.Attributes exposing (type_, value)
-import Html.Events exposing (onSubmit, onInput)
-import GraphQL.Http exposing (Response, send, getQuery, postMutation)
+import Html.Events exposing (onInput, onSubmit)
 import Queries.Messages as Messages
+
 
 
 -- Model

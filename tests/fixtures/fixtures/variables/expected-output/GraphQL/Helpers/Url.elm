@@ -1,8 +1,4 @@
-module GraphQL.Helpers.Url
-    exposing
-        ( withParameters
-        , joinParameters
-        )
+module GraphQL.Helpers.Url exposing (withParameters, joinParameters)
 
 {-| Some functions that help dealing with urls.
 

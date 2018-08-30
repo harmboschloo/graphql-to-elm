@@ -1,18 +1,10 @@
-module GraphQL.Operation
-    exposing
-        ( Operation
-        , Query
-        , Mutation
-        , Subscription
-        , withName
-        , withQuery
-        , dataDecoder
-        , mapData
-        , errorsDecoder
-        , mapErrors
-        , encode
-        , encodeParameters
-        )
+module GraphQL.Operation exposing
+    ( Operation, Query, Mutation, Subscription
+    , withName, withQuery
+    , encode, encodeParameters
+    , dataDecoder, errorsDecoder
+    , mapData, mapErrors
+    )
 
 {-| A GraphQL operation.
 
@@ -28,9 +20,9 @@ module GraphQL.Operation
 
 -}
 
+import Http exposing (encodeUri)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Http exposing (encodeUri)
 
 
 {-| -}

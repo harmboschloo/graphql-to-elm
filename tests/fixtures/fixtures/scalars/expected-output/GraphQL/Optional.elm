@@ -1,16 +1,8 @@
-module GraphQL.Optional
-    exposing
-        ( Optional(Present, Null, Absent)
-        , map
-        , withDefault
-        , toMaybe
-        , fromMaybe
-        , encode
-        , encodeList
-        , encodeObject
-        , fieldDecoder
-        , nonNullFieldDecoder
-        )
+module GraphQL.Optional exposing
+    ( Optional(..), map, withDefault, toMaybe, fromMaybe
+    , encode, encodeList, encodeObject
+    , fieldDecoder, nonNullFieldDecoder
+    )
 
 {-| An `Optional` can be `Present`, `Null` or `Absent`.
 

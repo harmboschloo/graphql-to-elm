@@ -1,13 +1,12 @@
-module UnionPartial
-    exposing
-        ( UnionPartialResponse
-        , UnionPartialQuery
-        , Flip(..)
-        , Heads
-        , Flip2(..)
-        , Tails
-        , unionPartial
-        )
+module UnionPartial exposing
+    ( Flip(..)
+    , Flip2(..)
+    , Heads
+    , Tails
+    , UnionPartialQuery
+    , UnionPartialResponse
+    , unionPartial
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

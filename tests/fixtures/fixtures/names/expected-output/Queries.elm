@@ -1,27 +1,26 @@
-module Queries
-    exposing
-        ( UserNameResponse
-        , UserNameQuery
-        , User
-        , UserEmailResponse
-        , UserEmailQuery
-        , User2
-        , NodeResponse
-        , NodeVariables
-        , NodeQuery
-        , Node(..)
-        , Node2(..)
-        , Group
-        , Node3(..)
-        , User3
-        , Group2
-        , UnderscoresResponse
-        , UnderscoresQuery
-        , userName
-        , userEmail
-        , node
-        , underscores
-        )
+module Queries exposing
+    ( Group
+    , Group2
+    , Node(..)
+    , Node2(..)
+    , Node3(..)
+    , NodeQuery
+    , NodeResponse
+    , NodeVariables
+    , UnderscoresQuery
+    , UnderscoresResponse
+    , User
+    , User2
+    , User3
+    , UserEmailQuery
+    , UserEmailResponse
+    , UserNameQuery
+    , UserNameResponse
+    , node
+    , underscores
+    , userEmail
+    , userName
+    )
 
 import GraphQL.Errors
 import GraphQL.Helpers.Decode

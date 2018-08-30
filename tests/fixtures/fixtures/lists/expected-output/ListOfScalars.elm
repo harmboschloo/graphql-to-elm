@@ -1,9 +1,8 @@
-module ListOfScalars
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module ListOfScalars exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

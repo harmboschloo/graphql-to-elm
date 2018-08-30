@@ -1,10 +1,9 @@
-module Single
-    exposing
-        ( SingleResponse
-        , SingleQuery
-        , Animal
-        , single
-        )
+module Single exposing
+    ( Animal
+    , SingleQuery
+    , SingleResponse
+    , single
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

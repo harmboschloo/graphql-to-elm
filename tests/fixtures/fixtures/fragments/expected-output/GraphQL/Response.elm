@@ -1,11 +1,4 @@
-module GraphQL.Response
-    exposing
-        ( Response(Data, Errors)
-        , mapData
-        , mapErrors
-        , toResult
-        , decoder
-        )
+module GraphQL.Response exposing (Response(..), mapData, mapErrors, toResult, decoder)
 
 {-| The GraphQL response type.
 See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
@@ -14,9 +7,9 @@ See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
 
 -}
 
-import Json.Decode as Decode exposing (Decoder)
 import GraphQL.Operation as Operation exposing (Operation)
 import GraphQL.Optional as Optional exposing (Optional(..))
+import Json.Decode as Decode exposing (Decoder)
 
 
 {-| -}

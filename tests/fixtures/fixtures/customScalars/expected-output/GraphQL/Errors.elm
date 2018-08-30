@@ -1,12 +1,7 @@
-module GraphQL.Errors
-    exposing
-        ( Errors
-        , Error
-        , Location
-        , decoder
-        , errorDecoder
-        , locationDecoder
-        )
+module GraphQL.Errors exposing
+    ( Errors, Error, Location, decoder
+    , errorDecoder, locationDecoder
+    )
 
 {-| Types and decoder for the errors field in the GraphQL response.
 See <http://facebook.github.io/graphql/October2016/#sec-Errors>.
@@ -15,8 +10,8 @@ See <http://facebook.github.io/graphql/October2016/#sec-Errors>.
 
 -}
 
-import Json.Decode as Decode exposing (Decoder)
 import GraphQL.Optional as Optional
+import Json.Decode as Decode exposing (Decoder)
 
 
 {-| -}

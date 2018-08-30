@@ -1,12 +1,11 @@
-module InterfacePartialShared
-    exposing
-        ( InterfacePartialSharedResponse
-        , InterfacePartialSharedQuery
-        , Animal
-        , OnAnimal(..)
-        , Dog
-        , interfacePartialShared
-        )
+module InterfacePartialShared exposing
+    ( Animal
+    , Dog
+    , InterfacePartialSharedQuery
+    , InterfacePartialSharedResponse
+    , OnAnimal(..)
+    , interfacePartialShared
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

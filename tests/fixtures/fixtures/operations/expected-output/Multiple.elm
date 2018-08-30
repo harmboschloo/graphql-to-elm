@@ -1,19 +1,18 @@
-module Multiple
-    exposing
-        ( Query1Response
-        , Query1Variables
-        , Query1Query
-        , Operation
-        , Query2Response
-        , Query2Query
-        , Operation2
-        , MutationResponse
-        , MutationMutation
-        , Fragment
-        , query1
-        , query2
-        , mutation
-        )
+module Multiple exposing
+    ( Fragment
+    , MutationMutation
+    , MutationResponse
+    , Operation
+    , Operation2
+    , Query1Query
+    , Query1Response
+    , Query1Variables
+    , Query2Query
+    , Query2Response
+    , mutation
+    , query1
+    , query2
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -82,7 +81,7 @@ type alias Query1Variables =
 encodeQuery1Variables : Query1Variables -> Json.Encode.Value
 encodeQuery1Variables inputs =
     GraphQL.Optional.encodeObject
-        [ ( "name", (GraphQL.Optional.map Json.Encode.string) inputs.name )
+        [ ( "name", GraphQL.Optional.map Json.Encode.string inputs.name )
         ]
 
 

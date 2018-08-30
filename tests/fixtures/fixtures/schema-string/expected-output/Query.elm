@@ -1,9 +1,8 @@
-module Query
-    exposing
-        ( Response
-        , Query
-        , query
-        )
+module Query exposing
+    ( Query
+    , Response
+    , query
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation

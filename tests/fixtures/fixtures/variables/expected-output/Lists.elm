@@ -1,13 +1,12 @@
-module Lists
-    exposing
-        ( ListsResponse
-        , ListsVariables
-        , Inputs
-        , OtherInputs
-        , OptionalInputs
-        , ListsQuery
-        , lists
-        )
+module Lists exposing
+    ( Inputs
+    , ListsQuery
+    , ListsResponse
+    , ListsVariables
+    , OptionalInputs
+    , OtherInputs
+    , lists
+    )
 
 import GraphQL.Errors
 import GraphQL.Operation
@@ -48,10 +47,10 @@ type alias ListsVariables =
 encodeListsVariables : ListsVariables -> Json.Encode.Value
 encodeListsVariables inputs =
     GraphQL.Optional.encodeObject
-        [ ( "ints", (GraphQL.Optional.map (List.map Json.Encode.int >> Json.Encode.list)) inputs.ints )
-        , ( "floats", (GraphQL.Optional.map (GraphQL.Optional.encodeList Json.Encode.float)) inputs.floats )
+        [ ( "ints", GraphQL.Optional.map (List.map Json.Encode.int >> Json.Encode.list) inputs.ints )
+        , ( "floats", GraphQL.Optional.map (GraphQL.Optional.encodeList Json.Encode.float) inputs.floats )
         , ( "inputs", ((List.map encodeInputs >> Json.Encode.list) >> GraphQL.Optional.Present) inputs.inputs )
-        , ( "inputs2", ((GraphQL.Optional.encodeList encodeOptionalInputs) >> GraphQL.Optional.Present) inputs.inputs2 )
+        , ( "inputs2", (GraphQL.Optional.encodeList encodeOptionalInputs >> GraphQL.Optional.Present) inputs.inputs2 )
         ]
 
 
@@ -93,9 +92,9 @@ type alias OptionalInputs =
 encodeOptionalInputs : OptionalInputs -> Json.Encode.Value
 encodeOptionalInputs inputs =
     GraphQL.Optional.encodeObject
-        [ ( "int", (GraphQL.Optional.map Json.Encode.int) inputs.int )
-        , ( "float", (GraphQL.Optional.map Json.Encode.float) inputs.float )
-        , ( "other", (GraphQL.Optional.map encodeOtherInputs) inputs.other )
+        [ ( "int", GraphQL.Optional.map Json.Encode.int inputs.int )
+        , ( "float", GraphQL.Optional.map Json.Encode.float inputs.float )
+        , ( "other", GraphQL.Optional.map encodeOtherInputs inputs.other )
         ]
 
 

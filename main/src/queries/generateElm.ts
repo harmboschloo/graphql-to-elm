@@ -8,7 +8,7 @@ import {
   ElmValueEncoder,
   ElmDecoder,
   ElmValueDecoder,
-  ElmConstantDecoder,
+  ElmConstantStringDecoder,
   ElmRecordDecoder,
   ElmUnionDecoder,
   ElmUnionOnDecoder,
@@ -67,7 +67,7 @@ const generateExports = (intel: ElmIntel): string => {
 
     visitDecoders(operation.data, {
       value: (decoder: ElmValueDecoder) => {},
-      constant: (decoder: ElmConstantDecoder) => {},
+      constantString: (decoder: ElmConstantStringDecoder) => {},
       record: (decoder: ElmRecordDecoder) => {
         addType(decoder.type);
       },
@@ -147,8 +147,7 @@ const generateImports = (intel: ElmIntel): string => {
         addImportOf(decoder.type);
         addImportOf(decoder.decoder);
       },
-      constant: (decoder: ElmConstantDecoder) => {
-        addImportOf(decoder.decoder);
+      constantString: (decoder: ElmConstantStringDecoder) => {
         addImport("GraphQL.Helpers.Decode");
       },
       record: (decoder: ElmRecordDecoder) => {
@@ -378,7 +377,7 @@ const generateDecoders = (
 ): void => {
   visitDecoders(decoder, {
     value: (decoder: ElmValueDecoder) => {},
-    constant: (decoder: ElmConstantDecoder) => {},
+    constantString: (decoder: ElmConstantStringDecoder) => {},
     record: (decoder: ElmRecordDecoder) => {
       newType(decoder.type, () => [
         generateRecordTypeDeclaration(decoder),
@@ -435,10 +434,8 @@ const fieldDecoder = (field: ElmDecoderField): string => {
 const wrapFieldDecoder = (field: ElmDecoderField): string => {
   let decoder = field.value.decoder;
 
-  if (field.value.kind === "constant-decoder") {
-    decoder = `(GraphQL.Helpers.Decode.constant ${
-      field.value.value
-    } ${decoder})`;
+  if (field.value.kind === "constant-string-decoder") {
+    decoder = `(GraphQL.Helpers.Decode.constantString ${field.value.value})`;
   }
 
   if (field.valueListItemWrapper === "nullable") {
@@ -590,7 +587,7 @@ const visitEncoders = (encoder: ElmEncoder, visitor: EncoderVisitor) => {
 
 type DecoderVisitor = {
   value: (decoder: ElmValueDecoder) => void;
-  constant: (decoder: ElmConstantDecoder) => void;
+  constantString: (decoder: ElmConstantStringDecoder) => void;
   record: (decoder: ElmRecordDecoder) => void;
   union: (decoder: ElmUnionDecoder) => void;
   unionOn: (decoder: ElmUnionOnDecoder) => void;
@@ -602,8 +599,8 @@ const visitDecoders = (decoder: ElmDecoder, visitor: DecoderVisitor) => {
     case "value-decoder":
       visitor.value(decoder);
       break;
-    case "constant-decoder":
-      visitor.constant(decoder);
+    case "constant-string-decoder":
+      visitor.constantString(decoder);
       break;
     case "record-decoder":
       visitor.record(decoder);

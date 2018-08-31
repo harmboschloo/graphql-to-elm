@@ -407,7 +407,7 @@ const getEncoderName = (type: string, scope: ElmScope): string =>
 
 export type ElmDecoder =
   | ElmValueDecoder
-  | ElmConstantDecoder
+  | ElmConstantStringDecoder
   | ElmRecordDecoder
   | ElmUnionDecoder
   | ElmUnionOnDecoder
@@ -419,11 +419,11 @@ export interface ElmValueDecoder {
   decoder: string;
 }
 
-export interface ElmConstantDecoder {
-  kind: "constant-decoder";
+export interface ElmConstantStringDecoder {
+  kind: "constant-string-decoder";
   type: string;
   value: string;
-  decoder: string;
+  decoder: "Json.Decode.string";
 }
 
 export interface ElmRecordDecoder {
@@ -502,7 +502,7 @@ const getDecoder = (
 
     case "typename":
       return {
-        kind: "constant-decoder",
+        kind: "constant-string-decoder",
         type: output.typeName,
         value: `"${parentOutput.typeName}"`,
         decoder: "Json.Decode.string"
@@ -658,7 +658,7 @@ const checkUnionConstructorDecodeSignatures = (
 
 const getDecodeSignature = (decoder: ElmDecoder): string => {
   switch (decoder.kind) {
-    case "constant-decoder":
+    case "constant-string-decoder":
       return `${decoder.type} ${decoder.value}`;
 
     case "value-decoder":

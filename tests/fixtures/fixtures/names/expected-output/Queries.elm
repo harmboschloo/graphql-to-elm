@@ -229,7 +229,7 @@ groupDecoder : Json.Decode.Decoder Group
 groupDecoder =
     Json.Decode.map2 Group
         (Json.Decode.field "name" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Group" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Group"))
 
 
 type Node3

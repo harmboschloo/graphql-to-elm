@@ -77,7 +77,7 @@ dogDecoder : Json.Decode.Decoder Dog
 dogDecoder =
     Json.Decode.map2 Dog
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Dog" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Dog"))
 
 
 type alias Dolphin =
@@ -90,7 +90,7 @@ dolphinDecoder : Json.Decode.Decoder Dolphin
 dolphinDecoder =
     Json.Decode.map2 Dolphin
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Dolphin" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Dolphin"))
 
 
 type alias Bird =
@@ -103,4 +103,4 @@ birdDecoder : Json.Decode.Decoder Bird
 birdDecoder =
     Json.Decode.map2 Bird
         (Json.Decode.field "color" Json.Decode.string)
-        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constant "Bird" Json.Decode.string))
+        (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Bird"))

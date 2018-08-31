@@ -63,15 +63,15 @@ mutation =
 
 
 any : Operation t e a -> Batch (Response e a -> b) -> Batch b
-any operation (Batch batch) =
+any operation (Batch state) =
     Batch
         { operations =
-            Operation.encode operation :: batch.operations
+            Operation.encode operation :: state.operations
         , decoder =
             \values0 ->
                 let
                     ( values1, decoder1 ) =
-                        batch.decoder values0
+                        state.decoder values0
 
                     ( values2, decoder2 ) =
                         responseDecoder operation values1
@@ -104,23 +104,23 @@ responseDecoder operation =
 {-| Convert the batch value.
 -}
 map : (a -> b) -> Batch a -> Batch b
-map mapper (Batch batch) =
+map mapper (Batch state) =
     Batch
-        { operations = batch.operations
-        , decoder = batch.decoder >> Tuple.mapSecond (Decode.map mapper)
+        { operations = state.operations
+        , decoder = state.decoder >> Tuple.mapSecond (Decode.map mapper)
         }
 
 
 {-| Encode the batch operations for a request.
 -}
 encode : Batch a -> Encode.Value
-encode (Batch batch) =
-    Encode.list (List.reverse batch.operations)
+encode (Batch state) =
+    Encode.list identity (List.reverse state.operations)
 
 
 {-| Decoder for the response of a batch request.
 -}
 decoder : Batch a -> Decoder a
-decoder (Batch batch) =
+decoder (Batch state) =
     Decode.list Decode.value
-        |> Decode.andThen (batch.decoder >> Tuple.second)
+        |> Decode.andThen (state.decoder >> Tuple.second)

@@ -1,12 +1,12 @@
-module GraphQL.Helpers.Decode exposing (andMap, fromResult, constant, emptyObject)
+module GraphQL.Helpers.Decode exposing (andMap, fromResult, constantString, emptyObject)
 
 {-| Some additional functions that help with decoding JSON.
 
-@docs andMap, fromResult, constant, emptyObject
+@docs andMap, fromResult, constantString, emptyObject
 
 -}
 
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode exposing (Decoder, Error)
 
 
 {-| Provide a pipeline for mapping decoders.
@@ -17,35 +17,36 @@ andMap =
     Decode.map2 (|>)
 
 
-{-| Turn a result into a decoder.
+{-| Turn a decode result into a decoder.
 -}
-fromResult : Result String a -> Decoder a
+fromResult : Result Error a -> Decoder a
 fromResult result =
     case result of
         Err error ->
-            Decode.fail error
+            Decode.fail (Decode.errorToString error)
 
         Ok value ->
             Decode.succeed value
 
 
-{-| Decode a constant value.
+{-| Decode a constant string.
 -}
-constant : a -> Decoder a -> Decoder a
-constant constantValue =
-    Decode.andThen
-        (\value ->
-            if value == constantValue then
-                Decode.succeed value
+constantString : String -> Decoder String
+constantString constantValue =
+    Decode.string
+        |> Decode.andThen
+            (\value ->
+                if value == constantValue then
+                    Decode.succeed value
 
-            else
-                Decode.fail <|
-                    "expected '"
-                        ++ toString constantValue
-                        ++ "' but got '"
-                        ++ toString value
-                        ++ "`"
-        )
+                else
+                    Decode.fail <|
+                        "expected '"
+                            ++ constantValue
+                            ++ "' but got '"
+                            ++ value
+                            ++ "`"
+            )
 
 
 {-| Decode an empty object `{}`.

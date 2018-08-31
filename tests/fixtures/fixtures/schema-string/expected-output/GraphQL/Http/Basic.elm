@@ -7,11 +7,11 @@ module GraphQL.Http.Basic exposing (getQuery, postQuery, postMutation, postBatch
 -}
 
 import GraphQL.Batch as Batch
-import GraphQL.Helpers.Url as Url
 import GraphQL.Operation as Operation exposing (Mutation, Operation, Query)
 import GraphQL.PlainBatch as PlainBatch
 import GraphQL.Response as Response exposing (Response)
 import Http
+import Url.Builder exposing (toQuery)
 
 
 {-|
@@ -27,7 +27,7 @@ import Http
 getQuery : String -> Operation Query e a -> Http.Request (Response e a)
 getQuery url operation =
     Http.get
-        (Url.withParameters url <| Operation.encodeParameters operation)
+        (url ++ toQuery (Operation.queryParameters operation))
         (Response.decoder operation)
 
 

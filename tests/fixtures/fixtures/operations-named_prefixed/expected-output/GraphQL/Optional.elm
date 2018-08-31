@@ -103,7 +103,7 @@ encodeList : (a -> Encode.Value) -> List (Optional a) -> Encode.Value
 encodeList encoder optionals =
     optionals
         |> List.filterMap (encode encoder)
-        |> Encode.list
+        |> Encode.list identity
 
 
 {-| Encode a object of `Optional` fields. Absent fields are omitted.
@@ -130,22 +130,28 @@ fieldDecoder : String -> Decoder a -> Decoder (Optional a)
 fieldDecoder name decoder =
     Decode.maybe (Decode.field name Decode.value)
         |> Decode.andThen
-            (Maybe.map (valueToOptionalDecoder decoder)
-                >> Maybe.withDefault (Decode.succeed Absent)
+            (\maybeValue ->
+                case maybeValue of
+                    Just _ ->
+                        nullableFieldDecoder name decoder
+
+                    Nothing ->
+                        Decode.succeed Absent
             )
 
 
-valueToOptionalDecoder : Decoder a -> Decode.Value -> Decoder (Optional a)
-valueToOptionalDecoder decoder value =
-    case Decode.decodeValue (Decode.nullable decoder) value of
-        Err error ->
-            Decode.fail error
+nullableFieldDecoder : String -> Decoder a -> Decoder (Optional a)
+nullableFieldDecoder name decoder =
+    Decode.field name (Decode.nullable decoder)
+        |> Decode.map
+            (\maybeValue ->
+                case maybeValue of
+                    Just value ->
+                        Present value
 
-        Ok Nothing ->
-            Decode.succeed Null
-
-        Ok (Just a) ->
-            Decode.succeed (Present a)
+                    Nothing ->
+                        Null
+            )
 
 
 {-| Decode a JSON object with a `Optional` field that can be present or absent
@@ -155,16 +161,12 @@ nonNullFieldDecoder : String -> Decoder a -> Decoder (Maybe a)
 nonNullFieldDecoder name decoder =
     Decode.maybe (Decode.field name Decode.value)
         |> Decode.andThen
-            (Maybe.map (valueToMaybeDecoder decoder)
-                >> Maybe.withDefault (Decode.succeed Nothing)
+            (\maybeValue ->
+                case maybeValue of
+                    Just _ ->
+                        Decode.field name decoder
+                            |> Decode.map Just
+
+                    Nothing ->
+                        Decode.succeed Nothing
             )
-
-
-valueToMaybeDecoder : Decoder a -> Decode.Value -> Decoder (Maybe a)
-valueToMaybeDecoder decoder value =
-    case Decode.decodeValue decoder value of
-        Err error ->
-            Decode.fail error
-
-        Ok a ->
-            Decode.succeed (Just a)

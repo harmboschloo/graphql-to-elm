@@ -1,7 +1,8 @@
 module GraphQL.Operation exposing
     ( Operation, Query, Mutation, Subscription
     , withName, withQuery
-    , encode, encodeParameters
+    , encode
+    , queryParameters
     , dataDecoder, errorsDecoder
     , mapData, mapErrors
     )
@@ -12,7 +13,9 @@ module GraphQL.Operation exposing
 
 @docs withName, withQuery
 
-@docs encode, encodeParameters
+@docs encode
+
+@docs queryParameters
 
 @docs dataDecoder, errorsDecoder
 
@@ -20,16 +23,16 @@ module GraphQL.Operation exposing
 
 -}
 
-import Http exposing (encodeUri)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+import Url.Builder as UrlBuilder exposing (QueryParameter)
 
 
 {-| -}
 type Operation t e a
     = Operation
         { kind : Kind
-        , variables : Maybe Encode.Value
+        , maybeVariables : Maybe Encode.Value
         , dataDecoder : Decoder a
         , errorsDecoder : Decoder e
         }
@@ -63,7 +66,7 @@ withName :
     -> Decoder e
     -> Operation t e a
 withName name =
-    operation (WithName name)
+    initOperation (WithName name)
 
 
 {-| -}
@@ -74,21 +77,21 @@ withQuery :
     -> Decoder e
     -> Operation t e a
 withQuery query =
-    operation (WithQuery query)
+    initOperation (WithQuery query)
 
 
-operation :
+initOperation :
     Kind
     -> Maybe Encode.Value
     -> Decoder a
     -> Decoder e
     -> Operation t e a
-operation kind variables dataDecoder errorsDecoder =
+initOperation kind maybeVariables operationDataDecoder operationErrorsDecoder =
     Operation
         { kind = kind
-        , variables = variables
-        , dataDecoder = dataDecoder
-        , errorsDecoder = errorsDecoder
+        , maybeVariables = maybeVariables
+        , dataDecoder = operationDataDecoder
+        , errorsDecoder = operationErrorsDecoder
         }
 
 
@@ -102,7 +105,11 @@ dataDecoder (Operation operation) =
 mapData : (a -> b) -> Operation t e a -> Operation t e b
 mapData mapper (Operation operation) =
     Operation
-        { operation | dataDecoder = Decode.map mapper operation.dataDecoder }
+        { kind = operation.kind
+        , maybeVariables = operation.maybeVariables
+        , dataDecoder = Decode.map mapper operation.dataDecoder
+        , errorsDecoder = operation.errorsDecoder
+        }
 
 
 {-| -}
@@ -115,56 +122,54 @@ errorsDecoder (Operation operation) =
 mapErrors : (e1 -> e2) -> Operation t e1 a -> Operation t e2 a
 mapErrors mapper (Operation operation) =
     Operation
-        { operation
-            | errorsDecoder = Decode.map mapper operation.errorsDecoder
+        { kind = operation.kind
+        , maybeVariables = operation.maybeVariables
+        , dataDecoder = operation.dataDecoder
+        , errorsDecoder = Decode.map mapper operation.errorsDecoder
         }
 
 
 {-| -}
 encode : Operation t e a -> Encode.Value
 encode (Operation operation) =
-    case operation.kind of
-        WithName name ->
-            Encode.object
-                (( "operationName", Encode.string name )
-                    :: variablesField operation.variables
-                )
+    let
+        queryField =
+            case operation.kind of
+                WithName name ->
+                    ( "operationName", Encode.string name )
 
-        WithQuery query ->
-            Encode.object
-                (( "query", Encode.string query )
-                    :: variablesField operation.variables
-                )
+                WithQuery query ->
+                    ( "query", Encode.string query )
 
+        otherFields =
+            case operation.maybeVariables of
+                Nothing ->
+                    []
 
-variablesField : Maybe Encode.Value -> List ( String, Encode.Value )
-variablesField variables =
-    case variables of
-        Nothing ->
-            []
-
-        Just variables ->
-            [ ( "variables", variables ) ]
+                Just variables ->
+                    [ ( "variables", variables ) ]
+    in
+    Encode.object (queryField :: otherFields)
 
 
 {-| -}
-encodeParameters : Operation t e a -> List ( String, String )
-encodeParameters (Operation operation) =
-    case operation.kind of
-        WithName name ->
-            ( "operationName", encodeUri name )
-                :: encodeVariablesParameter operation.variables
+queryParameters : Operation t e a -> List QueryParameter
+queryParameters (Operation { kind, maybeVariables }) =
+    let
+        operationParameter =
+            case kind of
+                WithName name ->
+                    UrlBuilder.string "operationName" name
 
-        WithQuery query ->
-            ( "query", encodeUri query )
-                :: encodeVariablesParameter operation.variables
+                WithQuery query ->
+                    UrlBuilder.string "query" query
 
+        otherParameters =
+            case maybeVariables of
+                Nothing ->
+                    []
 
-encodeVariablesParameter : Maybe Encode.Value -> List ( String, String )
-encodeVariablesParameter variables =
-    case variables of
-        Nothing ->
-            []
-
-        Just variables ->
-            [ ( "variables", encodeUri (Encode.encode 0 variables) ) ]
+                Just variables ->
+                    [ UrlBuilder.string "variables" (Encode.encode 0 variables) ]
+    in
+    operationParameter :: otherParameters

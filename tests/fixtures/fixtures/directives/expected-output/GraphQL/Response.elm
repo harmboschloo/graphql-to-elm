@@ -26,9 +26,9 @@ mapData mapper response =
         Data data ->
             Data (mapper data)
 
-        Errors errors data ->
+        Errors errors optionalData ->
             Errors errors <|
-                case data of
+                case optionalData of
                     Absent ->
                         Absent
 

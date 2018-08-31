@@ -1,11 +1,6 @@
 import { resolve } from "path";
 import { GraphQLSchema, buildSchema } from "graphql";
-import {
-  Options,
-  FinalOptions,
-  SchemaString,
-  finalizeOptions
-} from "./options";
+import { Options, FinalOptions, finalizeOptions } from "./options";
 import { getSchemaString } from "./schema";
 import * as enums from "./enums";
 import { EnumIntel } from "./enums";
@@ -108,6 +103,5 @@ const elmFiles = [
   "PlainBatch.elm",
   "Response.elm",
   "Helpers/Decode.elm",
-  "Helpers/Url.elm",
   "Http/Basic.elm"
 ];

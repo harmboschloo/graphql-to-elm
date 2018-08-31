@@ -1,5 +1,6 @@
 import {
   ElmIntel,
+  ElmScope,
   ElmOperation,
   ElmQueryOperation,
   ElmFragment,
@@ -18,6 +19,7 @@ import {
   ElmDecoderField,
   ElmRecordField
 } from "./elmIntel";
+import { findUnusedName } from "../elmUtils";
 import { withParentheses, addOnce } from "../utils";
 
 type TypeWrapper = false | "nullable" | "optional" | "non-null-optional";
@@ -273,7 +275,7 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
 
   intel.operations.map(operation => {
     if (operation.variables) {
-      generateEncoders(operation.variables, newType);
+      generateEncoders(operation.variables, newType, intel.scope);
     }
     generateDecoders(operation.data, newType);
   });
@@ -287,20 +289,24 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
 
 const generateEncoders = (
   encoder: ElmEncoder,
-  newType: (type: string, createItems: () => string[]) => void
+  newType: (type: string, createItems: () => string[]) => void,
+  scope: ElmScope
 ): void => {
   visitEncoders(encoder, {
     record: (encoder: ElmRecordEncoder) => {
       newType(encoder.type, () => [
         generateRecordTypeDeclaration(encoder),
-        generateRecordEncoder(encoder)
+        generateRecordEncoder(encoder, scope)
       ]);
     },
     value: (encoder: ElmValueEncoder) => {}
   });
 };
 
-const generateRecordEncoder = (encoder: ElmRecordEncoder): string => {
+const generateRecordEncoder = (
+  encoder: ElmRecordEncoder,
+  scope: ElmScope
+): string => {
   const hasOptionals = encoder.fields.some(
     field => field.valueWrapper === "optional"
   );
@@ -309,17 +315,20 @@ const generateRecordEncoder = (encoder: ElmRecordEncoder): string => {
     ? "GraphQL.Optional.encodeObject"
     : "Json.Encode.object";
 
+  const argumentName = findUnusedName("inputs", scope.names);
+
   const fieldEncoders = encoder.fields
     .map(
       field =>
-        `( "${field.jsonName}", ${wrapEncoder(field, hasOptionals)} inputs.${
-          field.name
-        } )`
+        `( "${field.jsonName}", ${wrapEncoder(
+          field,
+          hasOptionals
+        )} ${argumentName}.${field.name} )`
     )
     .join("\n        , ");
 
   return `${encoder.encoder} : ${encoder.type} -> Json.Encode.Value
-${encoder.encoder} inputs =
+${encoder.encoder} ${argumentName} =
     ${objectEncoder}
         [ ${fieldEncoders}
         ]`;
@@ -338,9 +347,8 @@ const wrapEncoder = (
     encoder = `GraphQL.Optional.encodeList ${encoder}`;
     withParenthesesOptional = true;
   } else if (field.valueListItemWrapper === "non-null") {
-    encoder = `List.map ${encoder} >> Json.Encode.list`;
+    encoder = `Json.Encode.list ${encoder}`;
     withParenthesesOptional = true;
-    withParenthesesPresent = true;
     withParenthesesFinal = true;
   }
 

@@ -1,6 +1,6 @@
 # Scalars
 
-scalar Date
+scalar Time
 
 # Schema
 
@@ -13,6 +13,6 @@ schema {
 type Query {
   idOrNull: ID
   id: ID!
-  dateOrNull: Date
-  date: Date!
+  timeOrNull: Time
+  time: Time!
 }

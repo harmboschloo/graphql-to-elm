@@ -4,8 +4,8 @@ module CustomNullableScalarTypes exposing
     , query
     )
 
-import Data.Date
 import Data.Id
+import Data.Time
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Response
@@ -17,7 +17,7 @@ query =
     GraphQL.Operation.withQuery
         """{
 idOrNull
-dateOrNull
+timeOrNull
 }"""
         Maybe.Nothing
         queryDecoder
@@ -30,7 +30,7 @@ type alias Response =
 
 type alias Query =
     { idOrNull : Maybe.Maybe Data.Id.Id
-    , dateOrNull : Maybe.Maybe Data.Date.Date
+    , timeOrNull : Maybe.Maybe Data.Time.Posix
     }
 
 
@@ -38,4 +38,4 @@ queryDecoder : Json.Decode.Decoder Query
 queryDecoder =
     Json.Decode.map2 Query
         (Json.Decode.field "idOrNull" (Json.Decode.nullable Data.Id.decoder))
-        (Json.Decode.field "dateOrNull" (Json.Decode.nullable Data.Date.decoder))
+        (Json.Decode.field "timeOrNull" (Json.Decode.nullable Data.Time.decoder))

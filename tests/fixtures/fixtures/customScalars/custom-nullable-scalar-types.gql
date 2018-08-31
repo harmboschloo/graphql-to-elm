@@ -1,4 +1,4 @@
 {
   idOrNull
-  dateOrNull
+  timeOrNull
 }

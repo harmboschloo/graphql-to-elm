@@ -4,8 +4,8 @@ module CustomScalarTypes exposing
     , query
     )
 
-import Data.Date
 import Data.Id
+import Data.Time
 import GraphQL.Errors
 import GraphQL.Operation
 import GraphQL.Response
@@ -17,7 +17,7 @@ query =
     GraphQL.Operation.withQuery
         """{
 id
-date
+time
 }"""
         Maybe.Nothing
         queryDecoder
@@ -30,7 +30,7 @@ type alias Response =
 
 type alias Query =
     { id : Data.Id.Id
-    , date : Data.Date.Date
+    , time : Data.Time.Posix
     }
 
 
@@ -38,4 +38,4 @@ queryDecoder : Json.Decode.Decoder Query
 queryDecoder =
     Json.Decode.map2 Query
         (Json.Decode.field "id" Data.Id.decoder)
-        (Json.Decode.field "date" Data.Date.decoder)
+        (Json.Decode.field "time" Data.Time.decoder)

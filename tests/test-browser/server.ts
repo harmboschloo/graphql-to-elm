@@ -11,11 +11,12 @@ import { schemas } from "./generated/schemas";
 
 const app = express();
 
-const dateScalar = new GraphQLScalarType({
-  name: "Date",
-  serialize: value => value,
-  parseValue: value => value,
-  parseLiteral: ast => (ast.kind == "StringValue" ? ast.value : "")
+const timeScalar = new GraphQLScalarType({
+  name: "Time",
+  serialize: value => `${value}`,
+  parseValue: value => parseInt(value, 10),
+  parseLiteral: ast =>
+    ast.kind == "StringValue" ? parseInt(ast.value, 10) : null
 });
 
 Object.keys(schemas).forEach(id => {
@@ -33,9 +34,9 @@ Object.keys(schemas).forEach(id => {
   let resolvers: { [type: string]: any } = {};
   let mocks: { [type: string]: any } = {};
 
-  if (typeDefs.includes("scalar Date")) {
-    resolvers["Date"] = dateScalar;
-    mocks["Date"] = () => "Wed, 14 Feb 2018 21:27:07 GMT";
+  if (typeDefs.includes("scalar Time")) {
+    resolvers["Time"] = timeScalar;
+    mocks["Time"] = () => Date.now();
   }
 
   const schema = makeExecutableSchema({
@@ -46,7 +47,11 @@ Object.keys(schemas).forEach(id => {
 
   addMockFunctionsToSchema({ schema, mocks });
 
-  const server = new ApolloServer({ schema });
+  const server = new ApolloServer({
+    schema,
+    introspection: false,
+    playground: false
+  });
 
   const endpointURL = `/graphql/${id}`;
 

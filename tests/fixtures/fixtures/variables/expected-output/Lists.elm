@@ -47,9 +47,9 @@ type alias ListsVariables =
 encodeListsVariables : ListsVariables -> Json.Encode.Value
 encodeListsVariables inputs =
     GraphQL.Optional.encodeObject
-        [ ( "ints", GraphQL.Optional.map (List.map Json.Encode.int >> Json.Encode.list) inputs.ints )
+        [ ( "ints", GraphQL.Optional.map (Json.Encode.list Json.Encode.int) inputs.ints )
         , ( "floats", GraphQL.Optional.map (GraphQL.Optional.encodeList Json.Encode.float) inputs.floats )
-        , ( "inputs", ((List.map encodeInputs >> Json.Encode.list) >> GraphQL.Optional.Present) inputs.inputs )
+        , ( "inputs", (Json.Encode.list encodeInputs >> GraphQL.Optional.Present) inputs.inputs )
         , ( "inputs2", (GraphQL.Optional.encodeList encodeOptionalInputs >> GraphQL.Optional.Present) inputs.inputs2 )
         ]
 

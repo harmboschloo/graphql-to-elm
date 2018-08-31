@@ -35,17 +35,17 @@ export type Config = {
 };
 
 export const testBrowser = (config: Config) => {
-  test("graphqlToElm browser test", t => {
-    generateTestFiles(config, t).then(() => {
-      makeElm(t);
+  test("graphqlToElm browser test", async t => {
+    await generateTestFiles(config, t);
 
-      const killServer = runServer(t);
-      const killBrowser = openTestPage(t);
+    makeElm(t);
 
-      test.onFinish(() => {
-        killServer();
-        killBrowser();
-      });
+    const killServer = runServer(t);
+    const killBrowser = openTestPage(t);
+
+    test.onFinish(() => {
+      killServer();
+      killBrowser();
     });
   });
 };
@@ -73,56 +73,56 @@ const generateTestFiles = (config: Config, t: Test): Promise<any> => {
   );
 };
 
-const writeQueries = (t: Test) => (
+const writeQueries = (t: Test) => async (
   fixture: Fixture
 ): Promise<FixtureResult> => {
-  const { id, dir, options } = fixture;
-
-  const baseModule = `Tests.${validModuleName(id)}`;
+  const baseModule = `Tests.${validModuleName(fixture.id)}`;
 
   const enumOptions = {
     baseModule: "GraphQL.Enum",
-    ...(options.enums || {})
+    ...(fixture.options.enums || {})
   };
 
-  return getSchemaString(options)
-    .then(
-      (schemaString: string): Options => ({
-        ...options,
-        schema: { string: schemaString },
-        enums: {
-          ...enumOptions,
-          baseModule: `${baseModule}.${enumOptions.baseModule}`
-        },
-        queries: options.queries.map(query => resolve(__dirname, dir, query)),
-        src: resolve(__dirname, dir, options.src || ""),
-        log: t.comment
-      })
-    )
-    .then(getGraphqlToElm)
-    .then((result: Result) => {
-      result.enums = result.enums.map(enumIntel => {
-        enumIntel.dest = resolve(
-          generatePath,
-          `${enumIntel.module.replace(/\./g, "/")}.elm`
-        );
-        return enumIntel;
-      });
+  const schemaString = await getSchemaString(fixture.options);
 
-      result.queries = result.queries.map(query => {
-        query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
-        query.elmIntel.dest = resolve(
-          generatePath,
-          `${query.elmIntel.module.replace(/\./g, "/")}.elm`
-        );
-        return query;
-      });
+  const options: Options = {
+    ...fixture.options,
+    schema: { string: schemaString },
+    enums: {
+      ...enumOptions,
+      baseModule: `${baseModule}.${enumOptions.baseModule}`
+    },
+    queries: fixture.options.queries.map(query =>
+      resolve(__dirname, fixture.dir, query)
+    ),
+    src: resolve(__dirname, fixture.dir, fixture.options.src || ""),
+    log: t.comment
+  };
 
-      result.options.dest = generatePath;
-      return result;
-    })
-    .then(writeResult)
-    .then(result => ({ fixture, result }));
+  const result: Result = await getGraphqlToElm(options);
+
+  result.enums = result.enums.map(enumIntel => {
+    enumIntel.dest = resolve(
+      generatePath,
+      `${enumIntel.module.replace(/\./g, "/")}.elm`
+    );
+    return enumIntel;
+  });
+
+  result.queries = result.queries.map(query => {
+    query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
+    query.elmIntel.dest = resolve(
+      generatePath,
+      `${query.elmIntel.module.replace(/\./g, "/")}.elm`
+    );
+    return query;
+  });
+
+  result.options.dest = generatePath;
+
+  await writeResult(result);
+
+  return { fixture, result };
 };
 
 interface FixtureElmIntel {
@@ -157,7 +157,7 @@ const writeTests = (results: FixtureResult[]): Promise<void> => {
                 operation.variables
                   ? ` ${generateVariables(operation.variables)}`
                   : ""
-              } |> Operation.mapData toString |> Operation.mapErrors toString
+              } |> Operation.mapData Debug.toString |> Operation.mapErrors Debug.toString
       }
 `
           )
@@ -280,15 +280,18 @@ const writeSchemas = (fixtures: Fixture[]): Promise<void> =>
   });
 
 export const makeElm = (t: Test) => {
-  t.comment("running elm-make");
-  const log = execSync(
-    `elm-make src/Main.elm --output generated/index.html --yes`,
-    { cwd: basePath }
-  );
-  t.comment(log.toString());
+  t.comment("running elm make");
+  const log = execSync(`elm make src/Main.elm --output=generated/index.html`, {
+    cwd: basePath,
+    stdio: "ignore" // elm make messes with the console
+  });
+  t.comment(log ? log.toString() : "no log");
+  t.comment("done");
 };
 
 export const runServer = (t: Test) => {
+  t.comment("starting server");
+
   let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
     cwd: basePath,
     shell: true
@@ -320,51 +323,49 @@ export const runServer = (t: Test) => {
 };
 
 export const openTestPage = (t: Test) => {
-  let browser: PhantomJS | null = null;
-  let killed = false;
+  t.comment("opening browser");
 
-  phantom
-    .create()
-    .then((instance: PhantomJS) => {
-      if (killed) {
-        // @ts-ignore
-        instance.kill();
-        return;
+  let killed: boolean = false;
+  let instance: PhantomJS | null = null;
+
+  (async () => {
+    instance = await phantom.create();
+
+    if (killed) {
+      // @ts-ignore
+      instance.kill();
+      instance = null;
+      return;
+    }
+
+    const page: WebPage = await instance.createPage();
+
+    await page.on("onConsoleMessage", (message: string) => {
+      if (message.startsWith("[Test Failed]")) {
+        t.fail(message);
+      } else if (message.startsWith("[Test Passed]")) {
+        t.pass(message);
+      } else {
+        t.comment(message);
+        if (message.startsWith("[End Test]")) {
+          t.end();
+        }
       }
+    });
 
-      browser = instance;
+    await page.on("onError", t.end);
 
-      browser
-        .createPage()
-        .then((page: WebPage) => {
-          page.on("onConsoleMessage", (message: string) => {
-            if (message.startsWith("[Test Failed]")) {
-              t.fail(message);
-            } else if (message.startsWith("[Test Passed]")) {
-              t.pass(message);
-            } else {
-              t.comment(message);
-              if (message.startsWith("[End Test]")) {
-                t.end();
-              }
-            }
-          });
-
-          page.on("onError", t.end);
-
-          page.open("http://localhost:3000");
-        })
-        .catch(t.end);
-    })
-    .catch(t.end);
+    t.comment("opening test page");
+    await page.open("http://localhost:3000");
+  })();
 
   const kill = () => {
-    t.comment(`kill browser ${!!browser}`);
+    t.comment(`kill browser ${!!instance}`);
     killed = true;
-    if (browser) {
+    if (instance) {
       // @ts-ignore
-      browser.kill();
-      browser = null;
+      instance.kill();
+      instance = null;
     }
   };
 

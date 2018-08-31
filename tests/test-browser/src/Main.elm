@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser exposing (Document)
 import GraphQL.Batch as Batch exposing (Batch)
 import GraphQL.Http.Basic
     exposing
@@ -63,10 +64,10 @@ batchTests : List ( String, String, Batch String (List String) )
 batchTests =
     let
         batch2 a b =
-            [ toString a, toString b ]
+            [ Debug.toString a, Debug.toString b ]
 
         batch3 a b c =
-            [ toString a, toString b, toString c ]
+            [ Debug.toString a, Debug.toString b, Debug.toString c ]
     in
     testsBySchema
         |> List.map
@@ -120,7 +121,7 @@ plainBatchTests : List ( String, String, PlainBatch.Batch PlainBatchData )
 plainBatchTests =
     let
         map =
-            Response.mapData toString >> Response.mapErrors toString
+            Response.mapData Debug.toString >> Response.mapErrors Debug.toString
 
         batch2 a b =
             [ map a, map b ]
@@ -209,12 +210,12 @@ type alias Model =
 
 
 testsDone : Model -> Int
-testsDone { passed, failed } =
-    passed + failed
+testsDone model =
+    model.passed + model.failed
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     let
         _ =
             Debug.log "[Start Test] number of tests" numberOfTests
@@ -279,22 +280,22 @@ update msg model =
 
         TestResponseReceived id (Ok (Errors errors data)) ->
             failed id
-                ("Errors: " ++ toString { errors = errors, data = data })
+                ("Errors: " ++ Debug.toString { errors = errors, data = data })
                 model
 
         TestResponseReceived id (Err error) ->
-            failed id ("HttpError: " ++ toString error) model
+            failed id ("HttpError: " ++ Debug.toString error) model
 
-        TestBatchResponseReceived id (Ok data) ->
-            case data of
+        TestBatchResponseReceived id (Ok dataResult) ->
+            case dataResult of
                 Err errors ->
                     failed id ("Errors: " ++ errors) model
 
                 Ok data ->
-                    passed id (toString data) model
+                    passed id (Debug.toString data) model
 
         TestBatchResponseReceived id (Err error) ->
-            failed id ("HttpError: " ++ toString error) model
+            failed id ("HttpError: " ++ Debug.toString error) model
 
         TestPlainBatchResponseReceived id (Ok data) ->
             data
@@ -309,10 +310,10 @@ update msg model =
                     )
                 |> List.head
                 |> Maybe.map (\errors -> failed id ("Errors: " ++ errors) model)
-                |> Maybe.withDefault (passed id (toString data) model)
+                |> Maybe.withDefault (passed id (Debug.toString data) model)
 
         TestPlainBatchResponseReceived id (Err error) ->
-            failed id ("HttpError: " ++ toString error) model
+            failed id ("HttpError: " ++ Debug.toString error) model
 
 
 passed : String -> String -> Model -> ( Model, Cmd Msg )
@@ -321,9 +322,9 @@ passed id data model =
         _ =
             Debug.log
                 ("[Test Passed] "
-                    ++ toString (testsDone model + 1)
+                    ++ Debug.toString (testsDone model + 1)
                     ++ "/"
-                    ++ toString numberOfTests
+                    ++ Debug.toString numberOfTests
                 )
                 id
     in
@@ -348,9 +349,9 @@ end model =
             if testsDone model == numberOfTests then
                 Debug.log "[End Test]"
                     ("passed: "
-                        ++ toString model.passed
+                        ++ Debug.toString model.passed
                         ++ ", failed: "
-                        ++ toString model.failed
+                        ++ Debug.toString model.failed
                     )
 
             else
@@ -363,18 +364,20 @@ end model =
 -- View
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    Html.text "GraphQL Integration Tests (see console)"
+    { title = "Browser Test - graphql-to-elm"
+    , body = [ Html.text "GraphQL Integration Tests (see console)" ]
+    }
 
 
 
 -- Main
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.document
         { init = init
         , update = update
         , subscriptions = always Sub.none

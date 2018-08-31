@@ -92,9 +92,9 @@ const getData = (
         type: "Data.Id.Id",
         decoder: "Data.Id.decoder"
       },
-      Date: {
-        type: "Data.Date.Date",
-        decoder: "Data.Date.decoder"
+      Time: {
+        type: "Data.Time.Posix",
+        decoder: "Data.Time.decoder"
       }
     }
   }),

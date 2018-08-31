@@ -1,17 +1,6 @@
 import * as path from "path";
-import {
-  FinalOptions,
-  TypeEncoders,
-  TypeEncoder,
-  TypeDecoders,
-  TypeDecoder
-} from "../options";
-import {
-  cachedValue,
-  firstToUpperCase,
-  firstToLowerCase,
-  assertOk
-} from "../utils";
+import { FinalOptions, TypeEncoder, TypeDecoder } from "../options";
+import { cachedValue, assertOk } from "../utils";
 import {
   QueryIntel,
   QueryOperation,
@@ -36,8 +25,8 @@ import {
   validTypeName,
   validFieldName,
   validTypeConstructorName,
-  validWord,
-  validNameUpper
+  validNameUpper,
+  newUnusedName
 } from "../elmUtils";
 
 export interface ElmIntel {
@@ -46,6 +35,7 @@ export interface ElmIntel {
   module: string;
   operations: ElmOperation[];
   fragments: ElmFragment[];
+  scope: ElmScope;
 }
 
 export interface ElmScope {
@@ -103,7 +93,8 @@ export const queryToElmIntel = (
     dest,
     module,
     operations,
-    fragments
+    fragments,
+    scope
   };
 
   // console.log("elm scope", JSON.stringify(scope, null, "  "));
@@ -249,10 +240,10 @@ const assertOperationName = (queryOperation: QueryOperation) =>
   );
 
 const newOperationName = (name: string, scope: ElmScope): string =>
-  getUnusedName(`${validVariableName(name)}`, scope.names);
+  newUnusedName(`${validVariableName(name)}`, scope.names);
 
 const newOperationResponseTypeName = (name: string, scope: ElmScope): string =>
-  getUnusedName(`${validTypeName(`${name}Response`)}`, scope.names);
+  newUnusedName(`${validTypeName(`${name}Response`)}`, scope.names);
 
 const fixFragmentNames = (
   operations: ElmOperation[],
@@ -294,7 +285,7 @@ const getFragment = (
   queryFragment: QueryFragment,
   scope: ElmScope
 ): ElmFragment => {
-  const name = getUnusedName(
+  const name = newUnusedName(
     validVariableName(queryFragment.name),
     scope.names
   );
@@ -380,7 +371,7 @@ const getRecordEncoder = (
   const fields: ElmEncoderField[] = input.fields.map(
     (field: QueryInputField): ElmEncoderField => ({
       jsonName: field.name,
-      name: getUnusedName(validFieldName(field.name), usedFieldNames),
+      name: newUnusedName(validFieldName(field.name), usedFieldNames),
       value: getEncoder(field.value, scope, options),
       valueWrapper: field.valueWrapper,
       valueListItemWrapper: field.valueListItemWrapper
@@ -398,7 +389,7 @@ const getRecordEncoder = (
 
 const getEncoderName = (type: string, scope: ElmScope): string =>
   cachedValue(type, scope.encodersByType, () =>
-    getUnusedName(`encode${validNameUpper(type)}`, scope.names)
+    newUnusedName(`encode${validNameUpper(type)}`, scope.names)
   );
 
 //
@@ -547,7 +538,7 @@ const getRecordDecoder = (
   const fields: ElmDecoderField[] = output.fields.map(
     (field: QueryOutputField): ElmDecoderField => ({
       jsonName: field.name,
-      name: getUnusedName(validFieldName(field.name), usedFieldNames),
+      name: newUnusedName(validFieldName(field.name), usedFieldNames),
       value: getDecoder(output, field.value, scope, options),
       valueWrapper: field.valueWrapper,
       valueListItemWrapper: field.valueListItemWrapper
@@ -699,7 +690,7 @@ const getUnionType = (
   cachedValue(
     getUnionSignature(queryItem, decoders),
     scope.typesBySignature,
-    () => getUnusedName(validTypeName(queryItem.typeName), scope.names)
+    () => newUnusedName(validTypeName(queryItem.typeName), scope.names)
   );
 
 const getUnionSignature = (
@@ -724,7 +715,7 @@ const getUnionConstructorName = (
   scope: ElmScope
 ): string =>
   cachedValue(`${unionType} On${constructorType}`, scope.typesBySignature, () =>
-    getUnusedName(
+    newUnusedName(
       validTypeConstructorName(`On${validNameUpper(constructorType)}`),
       scope.names
     )
@@ -732,7 +723,7 @@ const getUnionConstructorName = (
 
 const getDecoderName = (type: string, scope: ElmScope): string =>
   cachedValue(type, scope.decodersByType, () =>
-    getUnusedName(`${validVariableName(type)}Decoder`, scope.names)
+    newUnusedName(`${validVariableName(type)}Decoder`, scope.names)
   );
 
 //
@@ -749,7 +740,7 @@ const getRecordType = (
   cachedValue(
     getRecordSignature(queryItem, fields),
     scope.typesBySignature,
-    () => getUnusedName(validTypeName(queryItem.typeName), scope.names)
+    () => newUnusedName(validTypeName(queryItem.typeName), scope.names)
   );
 
 const getRecordSignature = (
@@ -775,25 +766,4 @@ const wrappedTypeSignature = (field: ElmRecordField): string => {
   }
 
   return signature;
-};
-
-//
-//
-//
-
-const getUnusedName = (name: string, usedNames: string[]): string => {
-  name = validWord(name);
-
-  if (!usedNames.includes(name)) {
-    usedNames.push(name);
-    return name;
-  } else {
-    let count = 2;
-    while (usedNames.includes(name + count)) {
-      count++;
-    }
-    const name2 = name + count;
-    usedNames.push(name2);
-    return name2;
-  }
 };

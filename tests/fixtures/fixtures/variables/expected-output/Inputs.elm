@@ -35,9 +35,9 @@ type alias InputsVariables =
 
 
 encodeInputsVariables : InputsVariables -> Json.Encode.Value
-encodeInputsVariables inputs =
+encodeInputsVariables inputs2 =
     Json.Encode.object
-        [ ( "inputs", encodeInputs inputs.inputs )
+        [ ( "inputs", encodeInputs inputs2.inputs )
         ]
 
 
@@ -49,11 +49,11 @@ type alias Inputs =
 
 
 encodeInputs : Inputs -> Json.Encode.Value
-encodeInputs inputs =
+encodeInputs inputs2 =
     Json.Encode.object
-        [ ( "int", Json.Encode.int inputs.int )
-        , ( "float", Json.Encode.float inputs.float )
-        , ( "other", encodeOtherInputs inputs.other )
+        [ ( "int", Json.Encode.int inputs2.int )
+        , ( "float", Json.Encode.float inputs2.float )
+        , ( "other", encodeOtherInputs inputs2.other )
         ]
 
 
@@ -63,9 +63,9 @@ type alias OtherInputs =
 
 
 encodeOtherInputs : OtherInputs -> Json.Encode.Value
-encodeOtherInputs inputs =
+encodeOtherInputs inputs2 =
     Json.Encode.object
-        [ ( "string", Json.Encode.string inputs.string )
+        [ ( "string", Json.Encode.string inputs2.string )
         ]
 
 

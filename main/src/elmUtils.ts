@@ -37,10 +37,10 @@ export const validNameUpper = (name: string): string => {
 
 const isEmpty = (string: string): boolean => !!string;
 
-const appendUnderscores = (name: string, originalName: string) => {
-  const matches = originalName.match(/^_+/g);
-  return matches ? name + matches[0] : name;
-};
+// const appendUnderscores = (name: string, originalName: string) => {
+//   const matches = originalName.match(/^_+/g);
+//   return matches ? name + matches[0] : name;
+// };
 
 export const validWord = (keyword: string) =>
   elmKeywords.includes(keyword) ? `${keyword}_` : keyword;
@@ -72,3 +72,24 @@ export const elmKeywords = [
   // "subscription",
   // "true",
 ];
+
+export const findUnusedName = (name: string, usedNames: string[]): string => {
+  name = validWord(name);
+
+  if (!usedNames.includes(name)) {
+    return name;
+  } else {
+    let count = 2;
+    while (usedNames.includes(name + count)) {
+      count++;
+    }
+    const name2 = name + count;
+    return name2;
+  }
+};
+
+export const newUnusedName = (name: string, usedNames: string[]): string => {
+  const newName = findUnusedName(name, usedNames);
+  usedNames.push(newName);
+  return newName;
+};

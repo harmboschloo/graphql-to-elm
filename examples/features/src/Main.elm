@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser exposing (Document)
 import GraphQL.Batch as Batch
 import GraphQL.Enum.Language as Language
 import GraphQL.Http
@@ -62,8 +63,8 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( Model None None None None None None
     , Cmd.none
     )
@@ -235,9 +236,10 @@ update msg model =
 -- View
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    div []
+    { title = "features example - graphql-to-elm"
+    , body =
         [ h1 [] [ text "graphql-to-elm features example" ]
         , viewFeature "Fields"
             FieldsRequested
@@ -264,6 +266,7 @@ view model =
             model.batch
             viewBatch
         ]
+    }
 
 
 viewFeature : String -> Msg -> Data a -> (a -> Html Msg) -> Html Msg
@@ -280,8 +283,8 @@ viewFeature label loadMsg data viewData =
             LoadError error ->
                 text ("Error: " ++ error)
 
-            Loaded data ->
-                viewData data
+            Loaded loadedData ->
+                viewData loadedData
         ]
 
 
@@ -471,9 +474,9 @@ viewBatch data =
 -- Main
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.document
         { init = init
         , view = view
         , update = update

@@ -75,13 +75,13 @@ mapResult =
 
 
 mapBatchResult : Result Http.Error (Result Errors a) -> Result String a
-mapBatchResult result =
-    case result of
+mapBatchResult httpResult =
+    case httpResult of
         Err error ->
             Err (httpErrorToString error)
 
-        Ok result ->
-            case result of
+        Ok graphqlResult ->
+            case graphqlResult of
                 Err [] ->
                     Err "GraphQL something went wrong"
 

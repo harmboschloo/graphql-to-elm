@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser exposing (Document)
 import GraphQL.Http exposing (Response, getQuery, send)
 import GraphQL.Optional as Optional exposing (Optional)
 import GraphQL.Response as Response
@@ -19,8 +20,8 @@ type Model
     | Loaded (List Message)
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( Loading
     , send MessagesResponded (getQuery Messages.query)
     )
@@ -59,9 +60,10 @@ update msg model =
 -- View
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    div []
+    { title = "basic example - graphql-to-elm"
+    , body =
         [ h1 [] [ text "graphql-to-elm basic example" ]
         , case model of
             Loading ->
@@ -87,6 +89,7 @@ view model =
             Loaded messages ->
                 div [] [ text "messages:", viewMessages messages ]
         ]
+    }
 
 
 viewError : String -> Html msg
@@ -113,9 +116,9 @@ viewMessage { message } =
 -- Main
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.document
         { init = init
         , view = view
         , update = update

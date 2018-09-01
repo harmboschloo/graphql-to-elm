@@ -15,7 +15,9 @@
   },
   "scripts": {
     "prebuild": "node prebuild",
-    "build": "elm make src/Main.elm --yes",
+    "build": "elm make src/Main.elm --output=index.html",
+    "build:debug": "elm make src/Main.elm --output=index.html --debug",
+    "build:optimize": "elm make src/Main.elm --output=index.html --optimize",
     "serve": "node server",
     "start": "npm run build && npm run serve"
   }

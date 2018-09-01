@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser exposing (Document)
 import GraphQL.Http exposing (Response, getQuery, postMutation, send)
 import Html exposing (Html, button, div, form, h1, hr, input, li, text, ul)
 import Html.Attributes exposing (type_, value)
@@ -25,8 +26,8 @@ type Model
         }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init _ =
     ( Loading
     , send MessagesResponded (getQuery Messages.messages)
     )
@@ -125,9 +126,10 @@ update msg model =
 -- View
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    div []
+    { title = "basic example 2 - graphql-to-elm"
+    , body =
         [ h1 [] [ text "graphql-to-elm basic example 2" ]
         , case model of
             Loading ->
@@ -151,6 +153,7 @@ view model =
                     , viewPostInput data.messageInput
                     ]
         ]
+    }
 
 
 viewMessages : List Messages.Message -> Html Msg
@@ -165,12 +168,12 @@ viewMessages messages =
 
 viewMessage : Messages.Message -> Html Msg
 viewMessage { id, message } =
-    li [] [ text ("(" ++ toString id ++ ") "), text message ]
+    li [] [ text ("(" ++ String.fromInt id ++ ") "), text message ]
 
 
 viewPostError : Maybe String -> Html Msg
-viewPostError error =
-    case error of
+viewPostError maybeError =
+    case maybeError of
         Nothing ->
             text ""
 
@@ -190,9 +193,9 @@ viewPostInput message =
 -- Main
 
 
-main : Program Never Model Msg
+main : Program () Model Msg
 main =
-    Html.program
+    Browser.document
         { init = init
         , view = view
         , update = update

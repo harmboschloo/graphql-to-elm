@@ -1,11 +1,65 @@
 {
-  "private": true,
-  "workspaces": [
-    "main",
-    "tests/*",
-    "examples/*"
+  "name": "graphql-to-elm",
+  "version": "0.6.1",
+  "description": "Validates graphql queries and converts them to elm code",
+  "author": "Harm Boschloo",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/harmboschloo/graphql-to-elm.git"
+  },
+  "homepage": "https://github.com/harmboschloo/graphql-to-elm",
+  "keywords": [
+    "graphql",
+    "elm"
   ],
+  "license": "BSD-3-Clause",
+  "files": [
+    "elm",
+    "lib",
+    "src",
+    "index.js",
+    "index.d.ts"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "peerDependencies": {
+    "graphql": "0.12.x || 0.13.x"
+  },
+  "scripts": {
+    "install:examples": "cd examples/basic && yarn && cd ../basic2 && yarn && cd ../features && yarn",
+    "build": "rimraf lib && tsc",
+    "build:examples": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build",
+    "test": "tape -r ts-node/register test/test-*/start.ts | tap-diff",
+    "test:options": "tape -r ts-node/register test/test-options/start.ts | tap-diff",
+    "test:gen": "tape -r ts-node/register test/test-gen/start.ts | tap-diff",
+    "test:gen-update": "tape -r ts-node/register test/test-gen/update.ts | tap-diff",
+    "test:browser": "tape -r ts-node/register test/test-browser/start.ts | tap-diff",
+    "prepublishOnly": "npm run build && npm run build:examples && npm run test"
+  },
+  "dependencies": {
+    "graphql-to-elm-package" : "^0.1.0",
+    "mkdirp": "^0.5.1"
+  },
   "devDependencies": {
-    "graphql": "0.13.x"
+    "@types/body-parser": "^1.17.0",
+    "@types/express": "^4.16.0",
+    "@types/graphql": "^0.13.4",
+    "@types/mkdirp": "^0.5.2",
+    "@types/node": "^10.9.0",
+    "@types/phantom": "^3.2.5",
+    "@types/rimraf": "^2.0.2",
+    "@types/tape": "^4.2.32",
+    "apollo-server-express": "^2.0.4",
+    "body-parser": "^1.18.3",
+    "elm": "0.19.0-bugfix2",
+    "elm-test": "0.19.0-beta5",
+    "express": "^4.16.3",
+    "graphql": "0.13.x",
+    "phantom": "^6.0.3",
+    "rimraf": "^2.6.2",
+    "tap-diff": "^0.1.1",
+    "tape": "^4.9.1",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.0.1"
   }
 }

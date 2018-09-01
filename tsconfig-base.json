@@ -1,7 +1,0 @@
-{
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "lib": ["es2017", "esnext.asynciterable"]
-  }
-}

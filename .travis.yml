@@ -5,4 +5,5 @@ node_js:
 script:
   - npm run build
   - npm run test
-  - npm run examples:build
+  - npm run install:examples
+  - npm run build:examples

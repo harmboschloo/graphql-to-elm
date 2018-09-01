@@ -2,22 +2,15 @@
   "name": "graphql-to-elm-example-basic",
   "version": "0.0.0",
   "private": true,
-  "peerDependencies": {
-    "graphql": "0.12.x || 0.13.x"
-  },
-  "dependencies": {
-    "apollo-server-express": "^2.0.4",
-    "express": "^4.16.3"
-  },
   "devDependencies": {
-    "elm": "0.19.0-bugfix2",
-    "graphql-to-elm": "0.6.1"
+    "graphql": "0.13.x",
+    "graphql-to-elm": "file:../..",
+    "rimraf": "^2.6.2"
   },
   "scripts": {
-    "prebuild": "node prebuild",
+    "clean": "rimraf src-generated",
+    "prebuild": "npm run clean && node prebuild",
     "build": "elm make src/Main.elm --output=index.html",
-    "build:debug": "elm make src/Main.elm --output=index.html --debug",
-    "build:optimize": "elm make src/Main.elm --output=index.html --optimize",
     "serve": "node server",
     "start": "npm run build && npm run serve"
   }

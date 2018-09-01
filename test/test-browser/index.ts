@@ -345,11 +345,13 @@ export const openTestPage = (t: Test): Promise<{ kill: () => void }> =>
       if (message.startsWith("[Test Failed]")) {
         t.fail(message);
       } else if (message.startsWith("[Test Passed]")) {
-        t.pass(message);
+        // t.pass(message);
       } else {
-        t.comment(message);
         if (message.startsWith("[End Test]")) {
+          t.pass(message);
           t.end();
+        } else {
+          t.comment(message);
         }
       }
     });

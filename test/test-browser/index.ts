@@ -38,12 +38,11 @@ export const testBrowser = (config: Config) => {
     makeElm(t);
 
     const server = await runServer(t);
-    const browser = await openTestPage(t);
+    const browser = await openBrowser(t);
+    await openTestPage(t, browser.instance);
 
-    test.onFinish(() => {
-      server.kill();
-      browser.kill();
-    });
+    server.kill();
+    browser.kill();
   });
 };
 
@@ -320,24 +319,24 @@ export const runServer = (t: Test): Promise<{ kill: () => void }> =>
     };
   });
 
-export const openTestPage = (t: Test): Promise<{ kill: () => void }> =>
-  new Promise(async resolve => {
-    t.comment("opening browser");
+export const openBrowser = async (
+  t: Test
+): Promise<{ instance: PhantomJS; kill: () => void }> => {
+  t.comment("opening browser");
+  const instance = await phantom.create();
+  return {
+    instance,
+    kill: () => {
+      t.comment("kill browser");
+      // @ts-ignore
+      instance.kill();
+    }
+  };
+};
 
-    let instance: PhantomJS | null = null;
-
-    instance = await phantom.create();
-
-    const kill = () => {
-      t.comment(`kill browser ${!!instance}`);
-      if (instance) {
-        // @ts-ignore
-        instance.kill();
-        instance = null;
-      }
-    };
-
-    resolve({ kill });
+export const openTestPage = (t: Test, instance: PhantomJS): Promise<void> =>
+  new Promise(async (resolve, reject) => {
+    t.comment("opening test page");
 
     const page: WebPage = await instance.createPage();
 
@@ -350,12 +349,16 @@ export const openTestPage = (t: Test): Promise<{ kill: () => void }> =>
         t.comment(message);
         if (message.startsWith("[End Test]")) {
           t.end();
+          resolve();
         }
       }
     });
 
-    await page.on("onError", t.end);
+    await page.on("onError", error => {
+      t.end(error);
+      reject(error);
+    });
 
-    t.comment("opening test page");
+    t.comment("loading page");
     await page.open("http://localhost:3000");
   });

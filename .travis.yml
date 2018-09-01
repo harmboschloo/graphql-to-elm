@@ -6,6 +6,6 @@ script:
   - npm run build
   - npm run test:options
   - npm run test:gen
-  - npm run test:browser
+  # - npm run test:browser
   - npm run install:examples
   - npm run build:examples

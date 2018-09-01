@@ -37,12 +37,12 @@ export const testBrowser = (config: Config) => {
 
     makeElm(t);
 
-    const killServer = runServer(t);
-    const killBrowser = openTestPage(t);
+    const server = await runServer(t);
+    const browser = await openTestPage(t);
 
     test.onFinish(() => {
-      killServer();
-      killBrowser();
+      server.kill();
+      browser.kill();
     });
   });
 };
@@ -286,54 +286,58 @@ export const makeElm = (t: Test) => {
   t.comment("done");
 };
 
-export const runServer = (t: Test) => {
-  t.comment("starting server");
+export const runServer = (t: Test): Promise<{ kill: () => void }> =>
+  new Promise((resolve, reject) => {
+    t.comment("starting server");
 
-  let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
-    cwd: basePath,
-    shell: true
-  });
+    let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
+      cwd: basePath,
+      shell: true
+    });
 
-  server.stdout.on("data", data => {
-    t.comment(`[SERVER] ${data.toString()}`);
-  });
+    server.stdout.on("data", data => {
+      t.comment(`[SERVER] ${data.toString()}`);
+      resolve({ kill });
+    });
 
-  server.stderr.on("data", data => {
-    t.end(`[SERVER] ${data.toString()}`);
-  });
+    server.stderr.on("data", data => {
+      t.end(`[SERVER] ${data.toString()}`);
+      reject(data.toString());
+    });
 
-  const kill = () => {
-    t.comment(`kill server ${server && server.pid}`);
-    if (server && server.pid) {
-      const pid = server.pid;
-      server = null;
+    const kill = () => {
+      t.comment(`kill server ${server && server.pid}`);
+      if (server && server.pid) {
+        const pid = server.pid;
+        server = null;
 
-      if (process.platform === "win32") {
-        execSync(`taskkill /pid ${pid} /f /t`);
-      } else {
-        process.kill(pid);
+        if (process.platform === "win32") {
+          execSync(`taskkill /pid ${pid} /f /t`);
+        } else {
+          process.kill(pid);
+        }
       }
-    }
-  };
+    };
+  });
 
-  return kill;
-};
+export const openTestPage = (t: Test): Promise<{ kill: () => void }> =>
+  new Promise(async resolve => {
+    t.comment("opening browser");
 
-export const openTestPage = (t: Test) => {
-  t.comment("opening browser");
+    let instance: PhantomJS | null = null;
 
-  let killed: boolean = false;
-  let instance: PhantomJS | null = null;
-
-  (async () => {
     instance = await phantom.create();
 
-    if (killed) {
-      // @ts-ignore
-      instance.kill();
-      instance = null;
-      return;
-    }
+    const kill = () => {
+      t.comment(`kill browser ${!!instance}`);
+      if (instance) {
+        // @ts-ignore
+        instance.kill();
+        instance = null;
+      }
+    };
+
+    resolve({ kill });
 
     const page: WebPage = await instance.createPage();
 
@@ -354,17 +358,4 @@ export const openTestPage = (t: Test) => {
 
     t.comment("opening test page");
     await page.open("http://localhost:3000");
-  })();
-
-  const kill = () => {
-    t.comment(`kill browser ${!!instance}`);
-    killed = true;
-    if (instance) {
-      // @ts-ignore
-      instance.kill();
-      instance = null;
-    }
-  };
-
-  return kill;
-};
+  });

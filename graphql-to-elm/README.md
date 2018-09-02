@@ -2,9 +2,7 @@
 
 [![Build Status](https://travis-ci.org/harmboschloo/graphql-to-elm.svg?branch=master)](https://travis-ci.org/harmboschloo/graphql-to-elm)
 
-## == Work In Progress ==
-
-`graphql-to-elm` validates graphql queries and converts them to elm code.
+`graphql-to-elm` validates graphql queries and converts them to elm code. Can be used with [elm 0.19](https://www.npmjs.com/package/elm) and [graphql 0.12 or 0.13](https://www.npmjs.com/package/graphql).
 
 This package assumes that you use GraphQL [query documents](http://graphql.org/learn/queries/)
 and a [schema document](http://graphql.org/learn/schema/) to write your queries and schema in.
@@ -33,10 +31,6 @@ It includes support for:
 - custom enum encoders and decoders
 - custom error decoder
 - batched queries
-
-### To do
-
-- improve documentation
 
 ## Usage
 

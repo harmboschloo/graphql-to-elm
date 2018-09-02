@@ -68,8 +68,8 @@ toMaybe optional =
 
 
 {-| -}
-fromMaybe : Maybe a -> Optional a -> Optional a
-fromMaybe maybe default =
+fromMaybe : Optional a -> Maybe a -> Optional a
+fromMaybe default maybe =
     case maybe of
         Just a ->
             Present a

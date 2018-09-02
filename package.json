@@ -37,7 +37,7 @@
     "prepublishOnly": "npm run build && npm run build:examples && npm run test"
   },
   "dependencies": {
-    "graphql-to-elm-package": "^0.1.0",
+    "graphql-to-elm-package": "^0.2.0",
     "mkdirp": "^0.5.1"
   },
   "devDependencies": {

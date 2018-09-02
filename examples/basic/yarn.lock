@@ -32,14 +32,14 @@ glob@^7.0.5:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-graphql-to-elm-package@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/graphql-to-elm-package/-/graphql-to-elm-package-0.1.0.tgz#1d32e783601d6be7e64e33a23d8c06b05c06b558"
+graphql-to-elm-package@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/graphql-to-elm-package/-/graphql-to-elm-package-0.2.0.tgz#6ad9e68a1d6fb103a958b6e506cea4e274ddc08d"
 
 "graphql-to-elm@file:../..":
   version "0.6.1"
   dependencies:
-    graphql-to-elm-package "^0.1.0"
+    graphql-to-elm-package "^0.2.0"
     mkdirp "^0.5.1"
 
 graphql@0.13.x:

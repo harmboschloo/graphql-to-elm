@@ -9,7 +9,7 @@ export const config: Config = getConfig();
 
 function getConfig(): Config {
   const config = JSON.parse(
-    readFileSync(resolve(__dirname, "package.json"), "utf8")
+    readFileSync(resolve(__dirname, "../package.json"), "utf8")
   );
 
   const graphqlVersion =

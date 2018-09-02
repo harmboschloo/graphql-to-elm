@@ -14,7 +14,6 @@
   ],
   "license": "BSD-3-Clause",
   "files": [
-    "elm",
     "lib",
     "src",
     "index.js",

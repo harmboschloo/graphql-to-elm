@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "elm": "0.19.0-bugfix2",
-    "graphql-to-elm": "0.6.1",
+    "graphql-to-elm": "x",
     "rimraf": "^2.6.2"
   },
   "scripts": {

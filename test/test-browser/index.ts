@@ -1,5 +1,6 @@
 import { resolve } from "path";
 import { execSync, spawn, ChildProcess } from "child_process";
+import * as kill from "tree-kill";
 import * as rimraf from "rimraf";
 import { PhantomJS, WebPage } from "phantom";
 import * as phantom from "phantom";
@@ -33,16 +34,16 @@ export type Config = {
 
 export const testBrowser = (config: Config) => {
   test("graphqlToElm browser test", async t => {
-    await generateTestFiles(config, t);
-
-    makeElm(t);
-
-    const server = await runServer(t);
-    const browser = await openBrowser(t);
-    await openTestPage(t, browser.instance);
-
-    server.kill();
-    browser.kill();
+    try {
+      await generateTestFiles(config, t);
+      await makeElm(t);
+      const server: ChildProcess = await runServer(t);
+      await openTestPage(t);
+      kill(server.pid);
+      t.end();
+    } catch (error) {
+      t.end(error.toString());
+    }
   });
 };
 
@@ -285,77 +286,49 @@ export const makeElm = (t: Test) => {
   t.comment("done");
 };
 
-export const runServer = (t: Test): Promise<{ kill: () => void }> =>
+export const runServer = (t: Test): Promise<ChildProcess> =>
   new Promise((resolve, reject) => {
     t.comment("starting server");
 
-    let server: ChildProcess | null = spawn("ts-node", ["server.ts"], {
+    const server: ChildProcess = spawn("ts-node", ["server.ts"], {
       cwd: basePath,
       shell: true
     });
 
     server.stdout.on("data", data => {
       t.comment(`[SERVER] ${data.toString()}`);
-      resolve({ kill });
+      resolve(server);
     });
 
     server.stderr.on("data", data => {
-      t.end(`[SERVER] ${data.toString()}`);
-      reject(data.toString());
+      reject(`[SERVER] ${data.toString()}`);
     });
-
-    const kill = () => {
-      t.comment(`kill server ${server && server.pid}`);
-      if (server && server.pid) {
-        const pid = server.pid;
-        server = null;
-
-        if (process.platform === "win32") {
-          execSync(`taskkill /pid ${pid} /f /t`);
-        } else {
-          process.kill(pid);
-        }
-      }
-    };
   });
 
-export const openBrowser = async (
-  t: Test
-): Promise<{ instance: PhantomJS; kill: () => void }> => {
-  t.comment("opening browser");
-  const instance = await phantom.create();
-  return {
-    instance,
-    kill: () => {
-      t.comment("kill browser");
-      // @ts-ignore
-      instance.kill();
-    }
-  };
-};
-
-export const openTestPage = (t: Test, instance: PhantomJS): Promise<void> =>
+export const openTestPage = (t: Test): Promise<void> =>
   new Promise(async (resolve, reject) => {
     t.comment("opening test page");
 
+    const instance: PhantomJS = await phantom.create();
     const page: WebPage = await instance.createPage();
 
     await page.on("onConsoleMessage", (message: string) => {
       if (message.startsWith("[Test Failed]")) {
-        t.fail(message);
+        t.fail(`[Browser] ${message}`);
       } else if (message.startsWith("[Test Passed]")) {
-        t.pass(message);
+        t.pass(`[Browser] ${message}`);
       } else {
-        t.comment(message);
+        t.comment(`[Browser] ${message}`);
         if (message.startsWith("[End Test]")) {
-          t.end();
+          instance.exit();
           resolve();
         }
       }
     });
 
     await page.on("onError", error => {
-      t.end(error);
+      t.comment(`[Browser] ${error.toString()}`);
+      instance.exit();
       reject(error);
     });
 

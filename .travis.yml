@@ -1,8 +1,15 @@
 language: node_js
+
 node_js:
-  - "10"
   - "8"
+  - "10"
+
+env:
+  - GRAPHQL_VERSION=0.12.x
+  - GRAPHQL_VERSION=0.13.x
+
 script:
+  - yarn add --dev graphql@$GRAPHQL_VERSION
   - npm run build
   - npm run test:options
   - npm run test:gen

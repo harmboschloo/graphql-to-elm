@@ -4,13 +4,19 @@ node_js:
   - "8"
   - "10"
 
+os:
+  - linux
+  - osx
+
 env:
   - GRAPHQL_VERSION=0.12.x
   - GRAPHQL_VERSION=0.13.x
 
-script:
+before_script:
   - yarn add --dev -W graphql@$GRAPHQL_VERSION
   - cd graphql-to-elm
+
+script:
   - npm run build
   - npm run build:examples
   - npm run test

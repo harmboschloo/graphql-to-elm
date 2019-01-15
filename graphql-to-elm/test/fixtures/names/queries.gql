@@ -50,6 +50,8 @@ query Node($ID_UPPER: ID!, $id_lower: ID!, $id_lowerAndUpper: ID!) {
 
 query Underscores {
   _UNDERSCORE_UPPER
+  _DOUBLE__UNDERSCORE__UPPER
+  _TRIPPLE___UNDERSCORE___UPPER
   _underscore_lower
   _underscore_lowerAndUpper
 }

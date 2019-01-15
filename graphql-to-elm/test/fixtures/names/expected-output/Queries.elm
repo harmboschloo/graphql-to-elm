@@ -94,6 +94,8 @@ underscores =
     GraphQL.Operation.withQuery
         """query Underscores {
 _UNDERSCORE_UPPER
+_DOUBLE__UNDERSCORE__UPPER
+_TRIPPLE___UNDERSCORE___UPPER
 _underscore_lower
 _underscore_lowerAndUpper
 }"""
@@ -271,6 +273,8 @@ group2Decoder =
 
 type alias UnderscoresQuery =
     { underscoreUpper_ : String
+    , double_Underscore_Upper_ : String
+    , tripple__Underscore__Upper_ : String
     , underscore_lower_ : String
     , underscore_lowerAndUpper_ : String
     }
@@ -278,7 +282,9 @@ type alias UnderscoresQuery =
 
 underscoresQueryDecoder : Json.Decode.Decoder UnderscoresQuery
 underscoresQueryDecoder =
-    Json.Decode.map3 UnderscoresQuery
+    Json.Decode.map5 UnderscoresQuery
         (Json.Decode.field "_UNDERSCORE_UPPER" Json.Decode.string)
+        (Json.Decode.field "_DOUBLE__UNDERSCORE__UPPER" Json.Decode.string)
+        (Json.Decode.field "_TRIPPLE___UNDERSCORE___UPPER" Json.Decode.string)
         (Json.Decode.field "_underscore_lower" Json.Decode.string)
         (Json.Decode.field "_underscore_lowerAndUpper" Json.Decode.string)

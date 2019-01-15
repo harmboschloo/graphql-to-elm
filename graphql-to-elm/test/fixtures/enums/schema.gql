@@ -20,4 +20,5 @@ enum Binary {
 enum USER_TYPE {
   REGULAR_USER
   ADMIN_USER
+  TEMP__ADMIN_USER
 }

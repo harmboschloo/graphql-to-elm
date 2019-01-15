@@ -19,7 +19,8 @@ export const validNameUpper = (name: string): string => {
 
   const validName = isAllUpperCase
     ? name
-        .split(/[^A-Z0-9]/g)
+        .replace(/_(_*)/g, "-$1-")
+        .split(/[^A-Z0-9_]/g)
         .filter(isEmpty)
         .map(x => x.toLowerCase())
         .map(firstToUpperCase)

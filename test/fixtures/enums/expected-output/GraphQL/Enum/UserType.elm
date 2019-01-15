@@ -14,6 +14,7 @@ import Json.Encode
 type UserType
     = RegularUser
     | AdminUser
+    | Temp_AdminUser
 
 
 encode : UserType -> Json.Encode.Value
@@ -43,6 +44,9 @@ toString value =
         AdminUser ->
             "ADMIN_USER"
 
+        Temp_AdminUser ->
+            "TEMP__ADMIN_USER"
+
 
 fromString : String -> Maybe UserType
 fromString value =
@@ -52,6 +56,9 @@ fromString value =
 
         "ADMIN_USER" ->
             Just AdminUser
+
+        "TEMP__ADMIN_USER" ->
+            Just Temp_AdminUser
 
         _ ->
             Nothing

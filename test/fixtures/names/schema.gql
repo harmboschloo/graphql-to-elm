@@ -35,6 +35,8 @@ type Query {
   node_lower(id_lower: ID!): Node
   node_lowerAndUpper(id_lowerAndUpper: ID!): Node
   _UNDERSCORE_UPPER: String!
+  _DOUBLE__UNDERSCORE__UPPER: String!
+  _TRIPPLE___UNDERSCORE___UPPER: String!
   _underscore_lower: String!
   _underscore_lowerAndUpper: String!
 }

@@ -1,6 +1,6 @@
 {
   "name": "graphql-to-elm",
-  "version": "0.7.0-elm18",
+  "version": "0.7.1-elm18",
   "description": "Validates graphql queries and converts them to elm code",
   "files": [
     "elm",

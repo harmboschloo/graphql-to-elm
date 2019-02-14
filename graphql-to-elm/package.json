@@ -22,7 +22,7 @@
   "main": "index.js",
   "types": "index.d.ts",
   "peerDependencies": {
-    "graphql": "0.12.x || 0.13.x"
+    "graphql": "0.12.x || 0.13.x || ^14.0.0"
   },
   "scripts": {
     "build": "rimraf lib && tsc",

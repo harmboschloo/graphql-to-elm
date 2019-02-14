@@ -8,15 +8,10 @@ os:
   - linux
   - osx
 
-env:
-  # - GRAPHQL_VERSION=0.12.x
-  # - GRAPHQL_VERSION=0.13.x
-  - GRAPHQL_VERSION=14.x
-
 before_script:
-  - yarn add --dev -W graphql@$GRAPHQL_VERSION
+  - yarn install:examples
 
 script:
-  - npm run build
-  - npm run build:examples
-  - npm run test
+  - yarn build
+  - yarn build:examples
+  - yarn test

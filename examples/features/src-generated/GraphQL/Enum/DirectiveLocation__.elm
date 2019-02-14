@@ -18,6 +18,7 @@ type DirectiveLocation__
     | FragmentDefinition
     | FragmentSpread
     | InlineFragment
+    | VariableDefinition
     | Schema
     | Scalar
     | Object
@@ -72,6 +73,9 @@ toString value =
 
         InlineFragment ->
             "INLINE_FRAGMENT"
+
+        VariableDefinition ->
+            "VARIABLE_DEFINITION"
 
         Schema ->
             "SCHEMA"
@@ -130,6 +134,9 @@ fromString value =
 
         "INLINE_FRAGMENT" ->
             Just InlineFragment
+
+        "VARIABLE_DEFINITION" ->
+            Just VariableDefinition
 
         "SCHEMA" ->
             Just Schema

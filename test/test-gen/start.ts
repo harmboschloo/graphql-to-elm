@@ -1,0 +1,3 @@
+import { testGen } from ".";
+
+testGen();

@@ -8,10 +8,8 @@ os:
   - linux
   - osx
 
-before_script:
-  - yarn install:examples
-
 script:
   - yarn build
+  - yarn install:examples
   - yarn build:examples
   - yarn test

@@ -7,9 +7,9 @@
   },
   "scripts": {
     "clean": "rimraf src-generated",
-    "prebuild": "npm run clean && node prebuild",
+    "prebuild": "yarn clean && node prebuild",
     "build": "elm make src/Main.elm --output=index.html",
     "serve": "node server",
-    "start": "npm run build && npm run serve"
+    "start": "yarn build && yarn serve"
   }
 }

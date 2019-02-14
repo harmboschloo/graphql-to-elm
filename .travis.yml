@@ -15,7 +15,6 @@ env:
 
 before_script:
   - yarn add --dev -W graphql@$GRAPHQL_VERSION
-  - cd graphql-to-elm
 
 script:
   - npm run build

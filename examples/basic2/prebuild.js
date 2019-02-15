@@ -1,6 +1,6 @@
 // @ts-check
 
-const { graphqlToElm } = require("graphql-to-elm");
+const { graphqlToElm } = require("../..");
 
 graphqlToElm({
   schema: "./src/schema.gql",

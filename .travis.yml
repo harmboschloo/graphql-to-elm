@@ -10,6 +10,5 @@ os:
 
 script:
   - yarn build
-  - yarn install:examples
   - yarn build:examples
   - yarn test

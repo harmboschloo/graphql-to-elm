@@ -1,10 +1,5 @@
 {
-  "name": "graphql-to-elm-example-features",
-  "version": "0.0.0",
   "private": true,
-  "devDependencies": {
-    "graphql-to-elm": "file:../.."
-  },
   "scripts": {
     "clean": "rimraf src-generated",
     "prebuild": "yarn clean && node prebuild",

@@ -25,7 +25,6 @@
     "graphql": "0.12.x || 0.13.x || ^14.0.0"
   },
   "scripts": {
-    "install:examples": "cd examples/basic && yarn && cd ../basic2 && yarn && cd ../features && yarn",
     "build": "rimraf lib && tsc",
     "build:examples": "cd examples/basic && yarn build && cd ../basic2 && yarn build && cd ../features && yarn build",
     "test": "tape -r ts-node/register test/test-*/start.ts | tap-diff",

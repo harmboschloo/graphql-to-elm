@@ -1,12 +1,13 @@
 module GraphQL.Errors exposing
-    ( Errors, Error, Location, decoder
-    , errorDecoder, locationDecoder
+    ( Errors, Error, Location, PathSegment(..)
+    , decoder, errorDecoder, locationDecoder, pathSegmentDecoder
     )
 
 {-| Types and decoder for the errors field in the GraphQL response.
-See <http://facebook.github.io/graphql/October2016/#sec-Errors>.
+See <http://facebook.github.io/graphql/draft/#sec-Errors>.
 
-@docs Errors, Error, Location, decoder
+@docs Errors, Error, Location, PathSegment
+@docs decoder, errorDecoder, locationDecoder, pathSegmentDecoder
 
 -}
 
@@ -23,6 +24,7 @@ type alias Errors =
 type alias Error =
     { message : String
     , locations : Maybe (List Location)
+    , path : Maybe (List PathSegment)
     }
 
 
@@ -34,6 +36,12 @@ type alias Location =
 
 
 {-| -}
+type PathSegment
+    = FieldName String
+    | ListIndex Int
+
+
+{-| -}
 decoder : Decoder Errors
 decoder =
     Decode.list errorDecoder
@@ -42,9 +50,10 @@ decoder =
 {-| -}
 errorDecoder : Decoder Error
 errorDecoder =
-    Decode.map2 Error
+    Decode.map3 Error
         (Decode.field "message" Decode.string)
         (Optional.nonNullFieldDecoder "locations" <| Decode.list locationDecoder)
+        (Optional.nonNullFieldDecoder "path" <| Decode.list pathSegmentDecoder)
 
 
 {-| -}
@@ -53,3 +62,12 @@ locationDecoder =
     Decode.map2 Location
         (Decode.field "line" Decode.int)
         (Decode.field "column" Decode.int)
+
+
+{-| -}
+pathSegmentDecoder : Decoder PathSegment
+pathSegmentDecoder =
+    Decode.oneOf
+        [ Decode.map ListIndex Decode.int
+        , Decode.map FieldName Decode.string
+        ]

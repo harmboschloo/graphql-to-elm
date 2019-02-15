@@ -1,7 +1,7 @@
 module GraphQL.Response exposing (Response(..), mapData, mapErrors, toResult, decoder)
 
 {-| The GraphQL response type.
-See <http://facebook.github.io/graphql/October2016/#sec-Response-Format>.
+See <https://facebook.github.io/graphql/draft/#sec-Response-Format>.
 
 @docs Response, mapData, mapErrors, toResult, decoder
 

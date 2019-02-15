@@ -1,7 +1,7 @@
 {
   "name": "graphql-to-elm",
   "version": "0.8.0",
-  "description": "Generates Elm types, encoders and decoders from graphql queries",
+  "description": "Generates Elm types, encoders and decoders from GraphQL queries",
   "author": "Harm Boschloo",
   "repository": {
     "type": "git",

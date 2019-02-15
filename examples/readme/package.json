@@ -1,0 +1,10 @@
+{
+  "private": true,
+  "scripts": {
+    "clean": "rimraf src-generated",
+    "prebuild": "yarn clean && node prebuild",
+    "build": "elm make src/Main.elm --output=index.html",
+    "serve": "node server",
+    "start": "yarn build && yarn serve"
+  }
+}

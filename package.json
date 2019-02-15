@@ -27,7 +27,7 @@
   },
   "scripts": {
     "build": "rimraf lib && tsc",
-    "build:examples": "cd examples/basic && yarn build && cd ../basic2 && yarn build && cd ../features && yarn build",
+    "build:examples": "cd examples/basic && yarn build && cd ../basic2 && yarn build && cd ../features && yarn build && cd ../readme && yarn build",
     "test": "tape -r ts-node/register test/test-*/start.ts | tap-diff",
     "test:options": "tape -r ts-node/register test/test-options/start.ts | tap-diff",
     "test:gen": "tape -r ts-node/register test/test-gen/start.ts | tap-diff",

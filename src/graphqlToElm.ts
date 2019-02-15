@@ -8,7 +8,7 @@ import { EnumIntel } from "./enums";
 import { QueryIntel, readQueryIntel } from "./queries/queryIntel";
 import { ElmIntel, queryToElmIntel } from "./queries/elmIntel";
 import { generateElm } from "./queries/generateElm";
-import { readFile, writeFile } from "./utils";
+import { readFile, writeFileIfChanged } from "./utils";
 
 export interface Result {
   enums: EnumIntel[];
@@ -67,16 +67,17 @@ export const getGraphqlToElm = (userOptions: Options): Promise<Result> => {
 export const writeResult = (result: Result): Promise<Result> => {
   const writeEnums = Promise.all(
     result.enums.map(enumIntel => {
-      return writeFile(enumIntel.dest, enums.generateElm(enumIntel)).then(() =>
-        result.options.log(`enum written: ${enumIntel.dest}`)
-      );
+      return writeFileIfChanged(
+        enumIntel.dest,
+        enums.generateElm(enumIntel)
+      ).then(logWrite(result.options, "enum", enumIntel.dest));
     })
   );
 
   const writeQueries = Promise.all(
     result.queries.map(({ elmIntel }) => {
-      return writeFile(elmIntel.dest, generateElm(elmIntel)).then(() =>
-        result.options.log(`query written: ${elmIntel.dest}`)
+      return writeFileIfChanged(elmIntel.dest, generateElm(elmIntel)).then(
+        logWrite(result.options, "query", elmIntel.dest)
       );
     })
   );
@@ -86,12 +87,20 @@ export const writeResult = (result: Result): Promise<Result> => {
       const src = resolve(elmSrc, file);
       const dest = resolve(result.options.dest, file);
       return readFile(src)
-        .then(data => writeFile(dest, data))
-        .then(() => result.options.log(`lib file written: ${dest}`));
+        .then(data => writeFileIfChanged(dest, data))
+        .then(logWrite(result.options, "lib", dest));
     })
   );
 
   return Promise.all([writeEnums, writeQueries, writeLib])
     .then(() => result.options.log("done"))
     .then(() => result);
+};
+
+const logWrite = (options: FinalOptions, label: string, dest: string) => (
+  changed: boolean
+): void => {
+  if (changed) {
+    options.log(`${label} file written: ${dest}`);
+  }
 };

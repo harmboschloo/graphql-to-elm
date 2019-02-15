@@ -5,27 +5,48 @@ import * as mkdirp from "mkdirp";
 
 export const readFile = (path: string): Promise<string> =>
   new Promise((resolve, reject) =>
-    fs.readFile(
-      path,
-      "utf8",
-      (error, data) => (error ? reject(error) : resolve(data.toString()))
+    fs.readFile(path, "utf8", (error, data) =>
+      error ? reject(error) : resolve(data.toString())
     )
   );
 
 export const writeFile = (dest: string, data: string): Promise<void> =>
+  writeFileWithDir(dest, fixLineEndings(data));
+
+const writeFileWithDir = (dest: string, data: string): Promise<void> =>
   new Promise((resolve, reject) =>
-    mkdirp(
-      dirname(dest),
-      error =>
-        error
-          ? reject(error)
-          : fs.writeFile(
-              dest,
-              data.replace(/\r?\n|\r/g, EOL),
-              "utf8",
-              error => (error ? reject(error) : resolve())
-            )
+    mkdirp(dirname(dest), error =>
+      error
+        ? reject(error)
+        : fs.writeFile(dest, data, "utf8", error =>
+            error ? reject(error) : resolve()
+          )
     )
+  );
+
+const fixLineEndings = (data: string): string => data.replace(/\r?\n|\r/g, EOL);
+
+export const writeFileIfChanged = (
+  dest: string,
+  data: string
+): Promise<boolean> =>
+  new Promise((resolve, reject) => {
+    const fileData = fixLineEndings(data);
+
+    isFileChanged(dest, fileData)
+      .then(changed =>
+        changed
+          ? writeFileWithDir(dest, fileData).then(() => resolve(true))
+          : resolve(false)
+      )
+      .catch(reject);
+  });
+
+const isFileChanged = (dest: string, newData: string): Promise<boolean> =>
+  new Promise(resolve =>
+    readFile(dest)
+      .then(currentData => resolve(currentData !== newData))
+      .catch(() => resolve(true))
   );
 
 export const firstToUpperCase = (string: string): string =>

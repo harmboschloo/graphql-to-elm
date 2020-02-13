@@ -249,7 +249,8 @@ const nodeToInputField = (
   mapInputField(
     {
       name: node.variable.name.value,
-      type: getInputType(node, schema)
+      type: getInputType(node, schema),
+      extensions: null
     },
     schema
   );

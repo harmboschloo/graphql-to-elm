@@ -1,6 +1,5 @@
 import { resolve } from "path";
 import { GraphQLSchema, buildSchema } from "graphql";
-import { elmSrc, elmFiles } from "graphql-to-elm-package";
 import { Options, FinalOptions, finalizeOptions } from "./options";
 import { getSchemaString } from "./schema";
 import * as enums from "./enums";
@@ -82,17 +81,7 @@ export const writeResult = (result: Result): Promise<Result> => {
     })
   );
 
-  const writeLib = Promise.all(
-    elmFiles.map(file => {
-      const src = resolve(elmSrc, file);
-      const dest = resolve(result.options.dest, file);
-      return readFile(src)
-        .then(data => writeFileIfChanged(dest, data))
-        .then(logWrite(result.options, "lib", dest));
-    })
-  );
-
-  return Promise.all([writeEnums, writeQueries, writeLib])
+  return Promise.all([writeEnums, writeQueries])
     .then(() => result.options.log("done"))
     .then(() => result);
 };

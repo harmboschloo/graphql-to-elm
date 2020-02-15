@@ -36,7 +36,6 @@
     "graphql": "^14.0.0"
   },
   "dependencies": {
-    "graphql-to-elm-package": "^1.0.0",
     "mkdirp": "^1.0.3"
   },
   "devDependencies": {

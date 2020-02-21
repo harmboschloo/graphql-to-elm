@@ -1,4 +1,4 @@
-module Optional exposing (suite)
+module GraphQL.OptionalTest exposing (suite)
 
 import Expect exposing (Expectation, equal, fail)
 import GraphQL.Optional exposing (Optional(..), fieldDecoder, nonNullFieldDecoder)

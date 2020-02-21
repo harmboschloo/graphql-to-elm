@@ -1,4 +1,3 @@
-import { resolve } from "path";
 import { GraphQLSchema, buildSchema } from "graphql";
 import { Options, FinalOptions, finalizeOptions } from "./options";
 import { getSchemaString } from "./schema";
@@ -7,7 +6,7 @@ import { EnumIntel } from "./enums";
 import { QueryIntel, readQueryIntel } from "./queries/queryIntel";
 import { ElmIntel, queryToElmIntel } from "./queries/elmIntel";
 import { generateElm } from "./queries/generateElm";
-import { readFile, writeFileIfChanged } from "./utils";
+import { writeFileIfChanged } from "./utils";
 
 export interface Result {
   enums: EnumIntel[];

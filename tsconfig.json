@@ -4,5 +4,5 @@
     "lib": ["es2017", "esnext.asynciterable"],
     "outDir": "lib"
   },
-  "files": ["src/graphqlToElm.ts"]
+  "files": ["src/gen/graphqlToElm.ts"]
 }

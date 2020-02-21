@@ -236,7 +236,7 @@ const getInputs = (
     ? {
         typeName: `${node.name ? node.name.value : ""}Variables`,
         kind: "object",
-        fields: node.variableDefinitions.map(node =>
+        fields: node.variableDefinitions.map((node: VariableDefinitionNode) =>
           nodeToInputField(node, schema)
         )
       }

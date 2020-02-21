@@ -4,25 +4,13 @@ import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
 export const readFile = (path: string): Promise<string> =>
-  new Promise((resolve, reject) =>
-    fs.readFile(path, "utf8", (error, data) =>
-      error ? reject(error) : resolve(data.toString())
-    )
-  );
+  fs.promises.readFile(path, "utf8").then(data => data.toString());
 
 export const writeFile = (dest: string, data: string): Promise<void> =>
   writeFileWithDir(dest, fixLineEndings(data));
 
 const writeFileWithDir = (dest: string, data: string): Promise<void> =>
-  new Promise((resolve, reject) =>
-    mkdirp(dirname(dest), error =>
-      error
-        ? reject(error)
-        : fs.writeFile(dest, data, "utf8", error =>
-            error ? reject(error) : resolve()
-          )
-    )
-  );
+  mkdirp(dirname(dest)).then(() => fs.promises.writeFile(dest, data, "utf8"));
 
 const fixLineEndings = (data: string): string => data.replace(/\r?\n|\r/g, EOL);
 

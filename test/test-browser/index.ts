@@ -56,13 +56,14 @@ const generateTestFiles = (t: Test): Promise<any> => {
       return fixture;
     });
 
-  return Promise.all(fixtures.map(writeQueries(t))).then(
-    (results: FixtureResult[]) =>
-      Promise.all([
-        writeTests(results),
-        writeNamedQueries(results),
-        writeSchemas(fixtures)
-      ])
+  return Promise.all(
+    fixtures.map(writeQueries(t))
+  ).then((results: FixtureResult[]) =>
+    Promise.all([
+      writeTests(results),
+      writeNamedQueries(results),
+      writeSchemas(fixtures)
+    ])
   );
 };
 
@@ -290,6 +291,16 @@ export const runServer = (t: Test): Promise<ChildProcess> =>
       cwd: basePath,
       shell: true
     });
+
+    if (server.stdout === null) {
+      reject("[SERVER] server.stdout === null");
+      return;
+    }
+
+    if (server.stderr === null) {
+      reject("[SERVER] server.stderr === null");
+      return;
+    }
 
     server.stdout.on("data", data => {
       t.comment(`[SERVER] ${data.toString()}`);

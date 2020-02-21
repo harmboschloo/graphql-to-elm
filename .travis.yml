@@ -1,8 +1,8 @@
 language: node_js
 
 node_js:
-  - "8"
   - "10"
+  - "12"
 
 os:
   - linux
@@ -10,5 +10,5 @@ os:
 
 script:
   - yarn build
-  - yarn build:examples
+  - yarn build-examples
   - yarn test

@@ -198,11 +198,7 @@ const generateOperation = (operation: ElmOperation): string => {
         value: "Maybe.Nothing"
       };
 
-  const declaration = `${operation.name} :${
-    variables.declaration
-  } GraphQL.Operation.Operation GraphQL.Operation.${operation.type} ${
-    operation.errors.type
-  } ${operation.data.type}`;
+  const declaration = `${operation.name} :${variables.declaration} GraphQL.Operation.Operation GraphQL.Operation.${operation.type} ${operation.errors.type} ${operation.data.type}`;
 
   switch (operation.kind) {
     case "query":
@@ -247,9 +243,7 @@ const generateFragments = (intel: ElmIntel): string =>
   intel.fragments.map(generateFragment).join("");
 
 const generateFragment = (fragment: ElmFragment): string =>
-  `\n\n\n${fragment.name} : String\n${fragment.name} =\n    """${
-    fragment.query
-  }"""`;
+  `\n\n\n${fragment.name} : String\n${fragment.name} =\n    """${fragment.query}"""`;
 
 const generateOperationResponses = (intel: ElmIntel): string =>
   intel.operations.map(generateOperationResponse).join("\n\n\n");
@@ -403,9 +397,7 @@ const generateDecoders = (
 };
 
 const generateRecordDecoder = (decoder: ElmRecordDecoder): string => {
-  const declaration = `${decoder.decoder} : Json.Decode.Decoder ${
-    decoder.type
-  }`;
+  const declaration = `${decoder.decoder} : Json.Decode.Decoder ${decoder.type}`;
 
   const { fields } = decoder;
 
@@ -414,13 +406,12 @@ const generateRecordDecoder = (decoder: ElmRecordDecoder): string => {
   const prefix = (index: number) =>
     index >= 8 ? "|> GraphQL.Helpers.Decode.andMap " : "";
 
-  const fieldDecoders = fields.map(
-    (field, index) =>
-      field.value.kind === "union-on-decoder"
-        ? `        ${field.value.decoder}`
-        : `        ${prefix(index)}(${fieldDecoder(field)} "${
-            field.jsonName
-          }" ${wrapFieldDecoder(field)})`
+  const fieldDecoders = fields.map((field, index) =>
+    field.value.kind === "union-on-decoder"
+      ? `        ${field.value.decoder}`
+      : `        ${prefix(index)}(${fieldDecoder(field)} "${
+          field.jsonName
+        }" ${wrapFieldDecoder(field)})`
   );
 
   return `${declaration}\n${decoder.decoder} =\n    Json.Decode.map${map} ${
@@ -484,18 +475,14 @@ const generateUnionDecoder = (
     decoder.type
   }\n    = ${constructorDeclarations.join("\n    | ")}`;
 
-  const decoderDeclaration = `${decoder.decoder} : Json.Decode.Decoder ${
-    decoder.type
-  }`;
+  const decoderDeclaration = `${decoder.decoder} : Json.Decode.Decoder ${decoder.type}`;
 
   const constructorDecoders = constructors.map(
     (constructor: ElmUnionConstructor): string => {
       switch (constructor.decoder.kind) {
         case "record-decoder":
         case "union-decoder":
-          return `Json.Decode.map ${constructor.name} ${
-            constructor.decoder.decoder
-          }`;
+          return `Json.Decode.map ${constructor.name} ${constructor.decoder.decoder}`;
         case "empty-decoder":
           return `${constructor.decoder.decoder} ${constructor.name}`;
       }

@@ -335,9 +335,7 @@ const getEncoder = (
     case "scalar": {
       const scalarEncoder: TypeEncoder = assertOk(
         options.scalarEncoders[input.typeName],
-        `No encoder defined for scalar type: ${
-          input.typeName
-        }. Please add one to options.scalarEncoders`
+        `No encoder defined for scalar type: ${input.typeName}. Please add one to options.scalarEncoders`
       );
 
       return {
@@ -349,9 +347,7 @@ const getEncoder = (
     case "enum": {
       const enumEncoder: TypeEncoder = assertOk(
         options.enumEncoders[input.typeName],
-        `No encoder defined for enum type: ${
-          input.typeName
-        }. Please add one to options.enumEncoders`
+        `No encoder defined for enum type: ${input.typeName}. Please add one to options.enumEncoders`
       );
 
       return {
@@ -502,9 +498,7 @@ const getDecoder = (
     case "scalar": {
       const scalarDecoder: TypeDecoder = assertOk(
         options.scalarDecoders[output.typeName],
-        `No decoder defined for scalar type: ${
-          output.typeName
-        }. Please add one to options.scalarDecoders`
+        `No decoder defined for scalar type: ${output.typeName}. Please add one to options.scalarDecoders`
       );
 
       return {
@@ -516,9 +510,7 @@ const getDecoder = (
     case "enum": {
       const enumDecoder: TypeDecoder = assertOk(
         options.enumDecoders[output.typeName],
-        `No decoder defined for enum type: ${
-          output.typeName
-        }. Please add one to options.enumDecoders`
+        `No decoder defined for enum type: ${output.typeName}. Please add one to options.enumDecoders`
       );
 
       return {

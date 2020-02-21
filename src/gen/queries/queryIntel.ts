@@ -708,9 +708,11 @@ const getFieldsOrFragments = (
     });
   }
 
-  const possibleFragmentTypes: ReadonlyArray<
-    GraphQLObjectType
-  > = isAbstractType(type) ? schema.getPossibleTypes(type) : [];
+  const possibleFragmentTypes: ReadonlyArray<GraphQLObjectType> = isAbstractType(
+    type
+  )
+    ? schema.getPossibleTypes(type)
+    : [];
 
   const includedFragmentTypes: GraphQLNamedType[] = inFragments
     .map(fragment => fragment.type)

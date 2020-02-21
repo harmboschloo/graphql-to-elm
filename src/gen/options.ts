@@ -214,9 +214,7 @@ const validateEnums = (enums?: EnumOptions) => {
     assert.strictEqual(
       typeof enums.baseModule,
       "string",
-      `options.enums.baseModule must be a string, but found: ${
-        enums.baseModule
-      }`
+      `options.enums.baseModule must be a string, but found: ${enums.baseModule}`
     );
   }
 };

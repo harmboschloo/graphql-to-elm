@@ -9,6 +9,7 @@ os:
   - osx
 
 script:
+  - npm run validate
   - npm run build
   - npm run build-examples
   - npm run test

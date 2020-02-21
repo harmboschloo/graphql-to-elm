@@ -9,6 +9,6 @@ os:
   - osx
 
 script:
-  - yarn build
-  - yarn build-examples
-  - yarn test
+  - npm run build
+  - npm run build-examples
+  - npm run test

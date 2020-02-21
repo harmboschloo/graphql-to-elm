@@ -24,13 +24,13 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "rimraf lib && tsc",
-    "build-examples": "cd examples/basic && yarn build && cd ../basic2 && yarn build && cd ../features && yarn build && cd ../readme && yarn build",
+    "build-examples": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build && cd ../readme && npm run build",
     "test": "tape -r ts-node/register test/test-*/start.ts | tap-diff",
     "test-options": "tape -r ts-node/register test/test-options/start.ts | tap-diff",
     "test-gen": "tape -r ts-node/register test/test-gen/start.ts | tap-diff",
     "test-gen-update": "tape -r ts-node/register test/test-gen/update.ts | tap-diff",
     "test-browser": "tape -r ts-node/register test/test-browser/start.ts | tap-diff",
-    "prepublishOnly": "yarn build && yarn build:examples && yarn test"
+    "prepublishOnly": "npm run build && npm run build:examples && npm run test"
   },
   "peerDependencies": {
     "graphql": "^14.0.0"

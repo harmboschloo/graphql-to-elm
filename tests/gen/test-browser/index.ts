@@ -16,7 +16,10 @@ import {
 import { Options } from "../../../src/gen/options";
 import { getSchemaString } from "../../../src/gen/schema";
 import { ElmIntel } from "../../../src/gen/queries/elmIntel";
-import { ElmEncoder, ElmOperationType } from "../../../src/gen/queries/elmIntel";
+import {
+  ElmEncoder,
+  ElmOperationType
+} from "../../../src/gen/queries/elmIntel";
 import { validModuleName } from "../../../src/gen/elmUtils";
 import { writeFile } from "../../../src/gen/utils";
 

@@ -4,14 +4,6 @@ import Browser exposing (Document)
 import GraphQL.Batch as Batch
 import GraphQL.Enum.Language as Language
 import GraphQL.Http
-    exposing
-        ( Response
-        , postBatch
-        , postMutation
-        , postQuery
-        , send
-        , sendBatch
-        )
 import GraphQL.Optional as Optional
 import Html exposing (Html, button, dd, div, dl, dt, h1, h2, li, text, ul)
 import Html.Events exposing (onClick)
@@ -96,7 +88,7 @@ update msg model =
             case model.fields of
                 None ->
                     ( { model | fields = Loading }
-                    , send FieldsResponded (postQuery Fields.query)
+                    , GraphQL.Http.send FieldsResponded (GraphQL.Http.postOperation Fields.query)
                     )
 
                 _ ->
@@ -116,7 +108,7 @@ update msg model =
             case model.aliases of
                 None ->
                     ( { model | aliases = Loading }
-                    , send AliasesResponded (postQuery Aliases.query)
+                    , GraphQL.Http.send AliasesResponded (GraphQL.Http.postOperation Aliases.query)
                     )
 
                 _ ->
@@ -136,7 +128,7 @@ update msg model =
             case model.fragments of
                 None ->
                     ( { model | fragments = Loading }
-                    , send FragmentsResponded (postQuery Fragments.query)
+                    , GraphQL.Http.send FragmentsResponded (GraphQL.Http.postOperation Fragments.query)
                     )
 
                 _ ->
@@ -156,8 +148,8 @@ update msg model =
             case model.variables of
                 None ->
                     ( { model | variables = Loading }
-                    , send VariablesResponded
-                        (postQuery
+                    , GraphQL.Http.send VariablesResponded
+                        (GraphQL.Http.postOperation
                             (Variables.translation
                                 { id = "hello.world"
                                 , language = Optional.Present Language.En
@@ -183,8 +175,8 @@ update msg model =
             case model.mutations of
                 None ->
                     ( { model | mutations = Loading }
-                    , send MutationsResponded
-                        (postMutation
+                    , GraphQL.Http.send MutationsResponded
+                        (GraphQL.Http.postOperation
                             (Mutations.postMessage { message = "Hello" })
                         )
                     )
@@ -206,8 +198,8 @@ update msg model =
             case model.batch of
                 None ->
                     ( { model | batch = Loading }
-                    , sendBatch BatchResponded
-                        (postBatch
+                    , GraphQL.Http.sendBatch BatchResponded
+                        (GraphQL.Http.postBatch
                             (Batch.batch BatchData
                                 |> Batch.query Aliases.query
                                 |> Batch.mutation

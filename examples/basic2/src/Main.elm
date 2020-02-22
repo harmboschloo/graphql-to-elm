@@ -1,7 +1,7 @@
 module Main exposing (main)
 
 import Browser exposing (Document)
-import GraphQL.Http exposing (Response, getQuery, postMutation, send)
+import GraphQL.Http
 import Html exposing (Html, button, div, form, h1, hr, input, li, text, ul)
 import Html.Attributes exposing (type_, value)
 import Html.Events exposing (onInput, onSubmit)
@@ -29,7 +29,7 @@ type Model
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Loading
-    , send MessagesResponded (getQuery Messages.messages)
+    , GraphQL.Http.send MessagesResponded (GraphQL.Http.getQuery Messages.messages)
     )
 
 
@@ -76,8 +76,8 @@ update msg model =
                         { messages = messages
                         , messageInput = messageInput
                         }
-                    , send PostMessageResponded
-                        (postMutation
+                    , GraphQL.Http.send PostMessageResponded
+                        (GraphQL.Http.postMutation
                             (Messages.postMessage { message = messageInput })
                         )
                     )

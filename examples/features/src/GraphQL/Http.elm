@@ -1,65 +1,34 @@
 module GraphQL.Http exposing
-    ( Batch
-    , Errors
-    , Mutation
-    , Query
-    , Response
-    , postBatch
-    , postMutation
-    , postQuery
+    ( postBatch
+    , postOperation
     , send
     , sendBatch
     )
 
-import GraphQL.Batch
-import GraphQL.Errors
-import GraphQL.Http.Basic
-import GraphQL.Operation
-import GraphQL.Response
+import GraphQL.Batch exposing (Batch)
+import GraphQL.Errors exposing (Errors)
+import GraphQL.Operation exposing (Operation)
+import GraphQL.Response exposing (Response)
 import Http
 
 
-type alias Errors =
-    GraphQL.Errors.Errors
+postOperation : Operation t Errors a -> Http.Request (Response Errors a)
+postOperation operation =
+    Http.post
+        "/graphql"
+        (Http.jsonBody <| GraphQL.Operation.encode operation)
+        (GraphQL.Response.decoder operation)
 
 
-type alias Query a =
-    GraphQL.Operation.Operation GraphQL.Operation.Query Errors a
+postBatch : Batch Errors a -> Http.Request (Result Errors a)
+postBatch batch =
+    Http.post
+        "/graphql"
+        (Http.jsonBody <| GraphQL.Batch.encode batch)
+        (GraphQL.Batch.decoder batch)
 
 
-type alias Mutation a =
-    GraphQL.Operation.Operation GraphQL.Operation.Mutation Errors a
-
-
-type alias Batch a =
-    GraphQL.Batch.Batch Errors a
-
-
-type alias Response a =
-    GraphQL.Response.Response Errors a
-
-
-endpoint : String
-endpoint =
-    "/graphql"
-
-
-postQuery : Query a -> Http.Request (Response a)
-postQuery =
-    GraphQL.Http.Basic.postQuery endpoint
-
-
-postMutation : Mutation a -> Http.Request (Response a)
-postMutation =
-    GraphQL.Http.Basic.postMutation endpoint
-
-
-postBatch : Batch a -> Http.Request (Result Errors a)
-postBatch =
-    GraphQL.Http.Basic.postBatch endpoint
-
-
-send : (Result String a -> msg) -> Http.Request (Response a) -> Cmd msg
+send : (Result String a -> msg) -> Http.Request (Response Errors a) -> Cmd msg
 send resultMsg =
     Http.send (mapResult >> resultMsg)
 
@@ -69,7 +38,7 @@ sendBatch resultMsg =
     Http.send (mapBatchResult >> resultMsg)
 
 
-mapResult : Result Http.Error (Response a) -> Result String a
+mapResult : Result Http.Error (Response Errors a) -> Result String a
 mapResult =
     Result.map GraphQL.Response.toResult >> mapBatchResult
 

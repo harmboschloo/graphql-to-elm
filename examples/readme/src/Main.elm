@@ -2,11 +2,23 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import GraphQL.Errors exposing (Errors)
-import GraphQL.Http.Basic exposing (postQuery)
-import GraphQL.Response as Response exposing (Response)
+import GraphQL.Operation exposing (Operation, Query)
+import GraphQL.Response exposing (Response)
 import Html
 import Http
 import MyQuery
+
+
+
+-- Requests
+
+
+postQuery : Operation Query Errors a -> Http.Request (Response Errors a)
+postQuery operation =
+    Http.post
+        "/graphql"
+        (Http.jsonBody (GraphQL.Operation.encode operation))
+        (GraphQL.Response.decoder operation)
 
 
 
@@ -15,7 +27,7 @@ import MyQuery
 
 init : () -> ( String, Cmd Msg )
 init _ =
-    ( "", Http.send GotUserName (postQuery "/graphql" MyQuery.userName) )
+    ( "", Http.send GotUserName (postQuery MyQuery.userName) )
 
 
 
@@ -27,12 +39,12 @@ type Msg
 
 
 update : Msg -> String -> ( String, Cmd Msg )
-update msg model =
+update msg _ =
     case msg of
-        GotUserName (Ok (Response.Data data)) ->
+        GotUserName (Ok (GraphQL.Response.Data data)) ->
             ( "user name: " ++ data.user.name, Cmd.none )
 
-        GotUserName (Ok (Response.Errors _ _)) ->
+        GotUserName (Ok (GraphQL.Response.Errors _ _)) ->
             ( "GraphQL error", Cmd.none )
 
         GotUserName (Err _) ->

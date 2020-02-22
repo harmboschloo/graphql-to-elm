@@ -1,62 +1,37 @@
 module GraphQL.Http exposing
-    ( Errors
-    , Mutation
-    , Query
-    , Request
-    , Response
-    , getQuery
+    ( getQuery
     , postMutation
     , send
     )
 
-import GraphQL.Errors
-import GraphQL.Http.Basic
-import GraphQL.Operation
-import GraphQL.Response
+import GraphQL.Errors exposing (Errors)
+import GraphQL.Operation exposing (Mutation, Operation, Query)
+import GraphQL.Response exposing (Response)
 import Http
+import Url.Builder
 
 
-type alias Errors =
-    GraphQL.Errors.Errors
+getQuery : Operation Query Errors a -> Http.Request (Response Errors a)
+getQuery operation =
+    Http.get
+        (Url.Builder.absolute [ "graphql" ] (GraphQL.Operation.queryParameters operation))
+        (GraphQL.Response.decoder operation)
 
 
-type alias Query a =
-    GraphQL.Operation.Operation GraphQL.Operation.Query Errors a
+postMutation : Operation Mutation Errors a -> Http.Request (Response Errors a)
+postMutation operation =
+    Http.post
+        "/graphql"
+        (Http.jsonBody <| GraphQL.Operation.encode operation)
+        (GraphQL.Response.decoder operation)
 
 
-type alias Mutation a =
-    GraphQL.Operation.Operation GraphQL.Operation.Mutation Errors a
-
-
-type alias Response a =
-    GraphQL.Response.Response Errors a
-
-
-type alias Request a =
-    Http.Request (Response a)
-
-
-endpoint : String
-endpoint =
-    "/graphql"
-
-
-getQuery : Query a -> Request a
-getQuery =
-    GraphQL.Http.Basic.getQuery endpoint
-
-
-postMutation : Mutation a -> Request a
-postMutation =
-    GraphQL.Http.Basic.postMutation endpoint
-
-
-send : (Result String a -> msg) -> Request a -> Cmd msg
+send : (Result String a -> msg) -> Http.Request (Response Errors a) -> Cmd msg
 send resultMsg =
     Http.send (mapResult >> resultMsg)
 
 
-mapResult : Result Http.Error (Response a) -> Result String a
+mapResult : Result Http.Error (Response Errors a) -> Result String a
 mapResult result =
     case result of
         Err error ->
@@ -84,5 +59,5 @@ mapResult result =
                 GraphQL.Response.Errors [] _ ->
                     Err "GraphQL something went wrong"
 
-                GraphQL.Response.Errors (first :: rest) _ ->
+                GraphQL.Response.Errors (first :: _) _ ->
                     Err first.message

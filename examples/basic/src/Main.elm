@@ -1,9 +1,10 @@
 module Main exposing (main)
 
 import Browser exposing (Document)
-import GraphQL.Http exposing (Response, getQuery, send)
+import GraphQL.Errors exposing (Errors)
+import GraphQL.Http
 import GraphQL.Optional as Optional exposing (Optional)
-import GraphQL.Response as Response
+import GraphQL.Response as Response exposing (Response)
 import Html exposing (Html, div, h1, li, text, ul)
 import Http
 import Queries.Messages as Messages exposing (Message)
@@ -23,7 +24,7 @@ type Model
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Loading
-    , send MessagesResponded (getQuery Messages.query)
+    , GraphQL.Http.send MessagesResponded (GraphQL.Http.getQuery Messages.query)
     )
 
 
@@ -32,11 +33,11 @@ init _ =
 
 
 type Msg
-    = MessagesResponded (Result Http.Error (Response Messages.Query))
+    = MessagesResponded (Result Http.Error (Response Errors Messages.Query))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg _ =
     case msg of
         MessagesResponded result ->
             case result of

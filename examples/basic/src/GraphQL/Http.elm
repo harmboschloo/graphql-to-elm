@@ -1,38 +1,19 @@
-module GraphQL.Http exposing (Errors, Query, Request, Response, getQuery, send)
+module GraphQL.Http exposing (getQuery, send)
 
-import GraphQL.Errors
-import GraphQL.Http.Basic
-import GraphQL.Operation
-import GraphQL.Response
+import GraphQL.Errors exposing (Errors)
+import GraphQL.Operation exposing (Operation, Query)
+import GraphQL.Response exposing (Response)
 import Http
+import Url.Builder
 
 
-type alias Errors =
-    GraphQL.Errors.Errors
+getQuery : Operation Query Errors a -> Http.Request (Response Errors a)
+getQuery operation =
+    Http.get
+        (Url.Builder.absolute [ "graphql" ] (GraphQL.Operation.queryParameters operation))
+        (GraphQL.Response.decoder operation)
 
 
-type alias Query a =
-    GraphQL.Operation.Operation GraphQL.Operation.Query Errors a
-
-
-type alias Response a =
-    GraphQL.Response.Response Errors a
-
-
-type alias Request a =
-    Http.Request (Response a)
-
-
-endpoint : String
-endpoint =
-    "/graphql"
-
-
-getQuery : Query a -> Request a
-getQuery =
-    GraphQL.Http.Basic.getQuery endpoint
-
-
-send : (Result Http.Error (Response a) -> msg) -> Request a -> Cmd msg
+send : (Result Http.Error (Response Errors a) -> msg) -> Http.Request (Response Errors a) -> Cmd msg
 send =
     Http.send

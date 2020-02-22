@@ -11,5 +11,5 @@ os:
 script:
   - npm run validate
   - npm run build
-  - npm run build-examples
+  - npm run examples-build
   - npm run test

@@ -234,32 +234,27 @@ init _ =
 
 sendPostQuery : Test Query -> Cmd Msg
 sendPostQuery test =
-    Http.send (TestResponseReceived test.id) <|
-        postQuery ("/graphql/" ++ test.schemaId) test.operation
+    postQuery ("/graphql/" ++ test.schemaId) test.operation (TestResponseReceived test.id)
 
 
 sendPostMutation : Test Mutation -> Cmd Msg
 sendPostMutation test =
-    Http.send (TestResponseReceived test.id) <|
-        postMutation ("/graphql/" ++ test.schemaId) test.operation
+    postMutation ("/graphql/" ++ test.schemaId) test.operation (TestResponseReceived test.id)
 
 
 sendBatch : ( String, String, Batch String (List String) ) -> Cmd Msg
 sendBatch ( schemaId, id, batch ) =
-    Http.send (TestBatchResponseReceived id) <|
-        postBatch ("/graphql/" ++ schemaId) batch
+    postBatch ("/graphql/" ++ schemaId) batch (TestBatchResponseReceived id)
 
 
 sendPlainBatch : ( String, String, PlainBatch.Batch PlainBatchData ) -> Cmd Msg
 sendPlainBatch ( schemaId, id, batch ) =
-    Http.send (TestPlainBatchResponseReceived id) <|
-        postPlainBatch ("/graphql/" ++ schemaId) batch
+    postPlainBatch ("/graphql/" ++ schemaId) batch (TestPlainBatchResponseReceived id)
 
 
 sendGet : Test Query -> Cmd Msg
 sendGet test =
-    Http.send (TestResponseReceived test.id) <|
-        getQuery ("/graphql/" ++ test.schemaId) test.operation
+    getQuery ("/graphql/" ++ test.schemaId) test.operation (TestResponseReceived test.id)
 
 
 

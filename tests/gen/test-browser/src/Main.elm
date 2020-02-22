@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import GraphQL.Batch as Batch exposing (Batch)
-import GraphQL.Http.Basic
+import GraphQL.Http
     exposing
         ( getQuery
         , postBatch
@@ -13,7 +13,7 @@ import GraphQL.Http.Basic
 import GraphQL.Operation exposing (Mutation, Query)
 import GraphQL.PlainBatch as PlainBatch
 import GraphQL.Response as Response exposing (Response(..))
-import Html exposing (Html)
+import Html
 import Http
 import Set
 import Tests exposing (Test, mutationTests, queryTests)

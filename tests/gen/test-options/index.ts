@@ -1,5 +1,5 @@
 import * as test from "tape";
-import * as options from "../../src/options";
+import * as options from "../../../src/gen/options";
 
 const finalizeOptions = (opts?: any): any => options.finalizeOptions(opts);
 

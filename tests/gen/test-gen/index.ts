@@ -9,7 +9,7 @@ import {
   lstat
 } from "../utils";
 import { Fixture, getFixtures, clean as cleanFixtures } from "../fixtures";
-import { graphqlToElm } from "../../src/graphqlToElm";
+import { graphqlToElm } from "../../../src/gen/graphqlToElm";
 
 export type Config = {
   update?: boolean;

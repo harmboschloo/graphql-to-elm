@@ -12,13 +12,13 @@ import {
   QueryResult,
   getGraphqlToElm,
   writeResult
-} from "../../src/graphqlToElm";
-import { Options } from "../../src/options";
-import { getSchemaString } from "../../src/schema";
-import { ElmIntel } from "../../src/queries/elmIntel";
-import { ElmEncoder, ElmOperationType } from "../../src/queries/elmIntel";
-import { validModuleName } from "../../src/elmUtils";
-import { writeFile } from "../../src/utils";
+} from "../../../src/gen/graphqlToElm";
+import { Options } from "../../../src/gen/options";
+import { getSchemaString } from "../../../src/gen/schema";
+import { ElmIntel } from "../../../src/gen/queries/elmIntel";
+import { ElmEncoder, ElmOperationType } from "../../../src/gen/queries/elmIntel";
+import { validModuleName } from "../../../src/gen/elmUtils";
+import { writeFile } from "../../../src/gen/utils";
 
 interface FixtureResult {
   fixture: Fixture;

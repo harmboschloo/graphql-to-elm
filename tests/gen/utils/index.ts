@@ -5,7 +5,7 @@ import * as rimrafAsync from "rimraf";
 import * as globAsync from "glob";
 export { Stats } from "fs";
 export { Test } from "tape";
-export { readFile, writeFile } from "../../src/utils";
+export { readFile, writeFile } from "../../../src/gen/utils";
 
 export const test = (name: string, test?: tape.Test): Promise<tape.Test> =>
   new Promise(resolve =>

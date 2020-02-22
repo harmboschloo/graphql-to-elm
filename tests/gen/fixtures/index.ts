@@ -1,6 +1,6 @@
 import { resolve } from "path";
 import { rimraf } from "../utils";
-import { Options, SchemaString, TypeDecoders } from "../../src/options";
+import { Options, SchemaString, TypeDecoders } from "../../../src/gen/options";
 
 export interface Fixture {
   id: string;

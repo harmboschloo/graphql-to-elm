@@ -35,7 +35,7 @@
     "format": "npm run format-prettier && npm run format-elm",
     "format-prettier": "prettier --write index.* \"./{src,tests,examples}/**/*.{js,ts,gql}\"",
     "format-elm": "elm-format --yes ./src ./tests ./examples",
-    "validate": "yarn validate-prettier && yarn validate-elm",
+    "validate": "npm run validate-prettier && npm run validate-elm",
     "validate-prettier": "prettier -l index.* \"./{src,tests,examples}/**/*.{js,ts,gql}\"",
     "validate-elm": "elm-format --validate ./src ./tests ./examples",
     "prepublishOnly": "npm run validate && npm run build && npm run build-examples && npm run test"

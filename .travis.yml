@@ -9,6 +9,9 @@ os:
   - osx
   - windows
 
+git:
+  autocrlf: false
+
 script:
   - npm run validate
   - npm run build

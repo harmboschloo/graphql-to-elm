@@ -5,6 +5,7 @@ import {
   testNoThrow,
   glob,
   readFile,
+  fixLineEndings,
   Stats,
   lstat
 } from "../utils";
@@ -134,7 +135,11 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
                         readFile(actualFile),
                         readFile(expectedFile)
                       ]).then(([actualContent, expectedContent]: string[]) => {
-                        t.equal(actualContent, expectedContent, message);
+                        t.equal(
+                          actualContent,
+                          fixLineEndings(expectedContent),
+                          message
+                        );
                         return Promise.resolve();
                       });
                     }

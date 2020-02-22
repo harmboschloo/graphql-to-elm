@@ -12,7 +12,8 @@ export const writeFile = (dest: string, data: string): Promise<void> =>
 const writeFileWithDir = (dest: string, data: string): Promise<void> =>
   mkdirp(dirname(dest)).then(() => fs.promises.writeFile(dest, data, "utf8"));
 
-const fixLineEndings = (data: string): string => data.replace(/\r?\n|\r/g, EOL);
+export const fixLineEndings = (data: string): string =>
+  data.replace(/\r?\n|\r/g, EOL);
 
 export const writeFileIfChanged = (
   dest: string,

@@ -30,7 +30,6 @@
     "test-gen": "tape -r ts-node/register tests/gen/test-gen/start.ts | tap-diff",
     "test-gen-update": "tape -r ts-node/register tests/gen/test-gen/update.ts | tap-diff",
     "test-browser": "tape -r ts-node/register tests/gen/test-browser/start.ts | tap-diff",
-    "examples-install": "cd examples/basic && npm install && cd ../basic2 && npm install && cd ../features && npm install && cd ../readme && npm install",
     "examples-build": "cd examples/basic && npm run build && cd ../basic2 && npm run build && cd ../features && npm run build && cd ../readme && npm run build",
     "format": "npm run format-prettier && npm run format-elm",
     "format-prettier": "prettier --write index.* \"./{src,tests,examples}/**/*.{js,ts,gql}\"",

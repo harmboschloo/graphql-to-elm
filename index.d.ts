@@ -1,5 +1,5 @@
 export as namespace graphqlToElm;
-import { Options } from "./src/options";
+import { Options } from "./src/gen/options";
 export {
   Options,
   SchemaString,
@@ -8,6 +8,6 @@ export {
   TypeEncoder,
   TypeDecoders,
   TypeDecoder
-} from "./src/options";
+} from "./src/gen/options";
 export declare const graphqlToElm: (options: Options) => Promise<void>;
 export default graphqlToElm;

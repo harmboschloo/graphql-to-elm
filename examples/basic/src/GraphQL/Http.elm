@@ -1,4 +1,4 @@
-module GraphQL.Http exposing (getQuery, send)
+module GraphQL.Http exposing (get)
 
 import GraphQL.Errors exposing (Errors)
 import GraphQL.Operation exposing (Operation, Query)
@@ -7,13 +7,9 @@ import Http
 import Url.Builder
 
 
-getQuery : Operation Query Errors a -> Http.Request (Response Errors a)
-getQuery operation =
+get : Operation Query Errors a -> (Result Http.Error (Response Errors a) -> msg) -> Cmd msg
+get operation msg =
     Http.get
-        (Url.Builder.absolute [ "graphql" ] (GraphQL.Operation.queryParameters operation))
-        (GraphQL.Response.decoder operation)
-
-
-send : (Result Http.Error (Response Errors a) -> msg) -> Http.Request (Response Errors a) -> Cmd msg
-send =
-    Http.send
+        { url = Url.Builder.absolute [ "graphql" ] (GraphQL.Operation.queryParameters operation)
+        , expect = Http.expectJson msg (GraphQL.Response.decoder operation)
+        }

@@ -24,7 +24,7 @@ type Model
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Loading
-    , GraphQL.Http.send MessagesResponded (GraphQL.Http.getQuery Messages.query)
+    , GraphQL.Http.get Messages.query MessagesResponded
     )
 
 

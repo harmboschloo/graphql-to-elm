@@ -2,7 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (Document)
 import GraphQL.Errors exposing (Errors)
-import GraphQL.Operation exposing (Operation, Query)
+import GraphQL.Operation exposing (Operation)
 import GraphQL.Response exposing (Response)
 import Html
 import Http
@@ -13,12 +13,13 @@ import MyQuery
 -- Requests
 
 
-postQuery : Operation Query Errors a -> Http.Request (Response Errors a)
-postQuery operation =
+postOperation : Operation any Errors data -> (Result Http.Error (Response Errors data) -> msg) -> Cmd msg
+postOperation operation msg =
     Http.post
-        "/graphql"
-        (Http.jsonBody (GraphQL.Operation.encode operation))
-        (GraphQL.Response.decoder operation)
+        { url = "/graphql"
+        , body = Http.jsonBody (GraphQL.Operation.encode operation)
+        , expect = Http.expectJson msg (GraphQL.Response.decoder operation)
+        }
 
 
 
@@ -27,7 +28,7 @@ postQuery operation =
 
 init : () -> ( String, Cmd Msg )
 init _ =
-    ( "", Http.send GotUserName (postQuery MyQuery.userName) )
+    ( "", postOperation MyQuery.userName GotUserName )
 
 
 

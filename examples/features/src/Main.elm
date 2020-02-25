@@ -88,7 +88,7 @@ update msg model =
             case model.fields of
                 None ->
                     ( { model | fields = Loading }
-                    , GraphQL.Http.send FieldsResponded (GraphQL.Http.postOperation Fields.query)
+                    , GraphQL.Http.post Fields.query FieldsResponded
                     )
 
                 _ ->
@@ -108,7 +108,7 @@ update msg model =
             case model.aliases of
                 None ->
                     ( { model | aliases = Loading }
-                    , GraphQL.Http.send AliasesResponded (GraphQL.Http.postOperation Aliases.query)
+                    , GraphQL.Http.post Aliases.query AliasesResponded
                     )
 
                 _ ->
@@ -128,7 +128,7 @@ update msg model =
             case model.fragments of
                 None ->
                     ( { model | fragments = Loading }
-                    , GraphQL.Http.send FragmentsResponded (GraphQL.Http.postOperation Fragments.query)
+                    , GraphQL.Http.post Fragments.query FragmentsResponded
                     )
 
                 _ ->
@@ -148,14 +148,13 @@ update msg model =
             case model.variables of
                 None ->
                     ( { model | variables = Loading }
-                    , GraphQL.Http.send VariablesResponded
-                        (GraphQL.Http.postOperation
-                            (Variables.translation
-                                { id = "hello.world"
-                                , language = Optional.Present Language.En
-                                }
-                            )
+                    , GraphQL.Http.post
+                        (Variables.translation
+                            { id = "hello.world"
+                            , language = Optional.Present Language.En
+                            }
                         )
+                        VariablesResponded
                     )
 
                 _ ->
@@ -175,10 +174,7 @@ update msg model =
             case model.mutations of
                 None ->
                     ( { model | mutations = Loading }
-                    , GraphQL.Http.send MutationsResponded
-                        (GraphQL.Http.postOperation
-                            (Mutations.postMessage { message = "Hello" })
-                        )
+                    , GraphQL.Http.post (Mutations.postMessage { message = "Hello" }) MutationsResponded
                     )
 
                 _ ->
@@ -198,16 +194,15 @@ update msg model =
             case model.batch of
                 None ->
                     ( { model | batch = Loading }
-                    , GraphQL.Http.sendBatch BatchResponded
-                        (GraphQL.Http.postBatch
-                            (Batch.batch BatchData
-                                |> Batch.query Aliases.query
-                                |> Batch.mutation
-                                    (Mutations.postMessage
-                                        { message = "Hello Batch" }
-                                    )
-                            )
+                    , GraphQL.Http.postBatch
+                        (Batch.batch BatchData
+                            |> Batch.query Aliases.query
+                            |> Batch.mutation
+                                (Mutations.postMessage
+                                    { message = "Hello Batch" }
+                                )
                         )
+                        BatchResponded
                     )
 
                 _ ->

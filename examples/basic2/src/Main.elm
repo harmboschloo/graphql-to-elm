@@ -29,7 +29,7 @@ type Model
 init : () -> ( Model, Cmd Msg )
 init _ =
     ( Loading
-    , GraphQL.Http.send MessagesResponded (GraphQL.Http.getQuery Messages.messages)
+    , GraphQL.Http.get Messages.messages MessagesResponded
     )
 
 
@@ -76,10 +76,9 @@ update msg model =
                         { messages = messages
                         , messageInput = messageInput
                         }
-                    , GraphQL.Http.send PostMessageResponded
-                        (GraphQL.Http.postMutation
-                            (Messages.postMessage { message = messageInput })
-                        )
+                    , GraphQL.Http.post
+                        (Messages.postMessage { message = messageInput })
+                        PostMessageResponded
                     )
 
                 _ ->

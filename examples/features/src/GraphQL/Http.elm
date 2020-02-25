@@ -1,8 +1,6 @@
 module GraphQL.Http exposing
-    ( postBatch
-    , postOperation
-    , send
-    , sendBatch
+    ( post
+    , postBatch
     )
 
 import GraphQL.Batch exposing (Batch)
@@ -12,35 +10,27 @@ import GraphQL.Response exposing (Response)
 import Http
 
 
-postOperation : Operation t Errors a -> Http.Request (Response Errors a)
-postOperation operation =
+post : Operation t Errors a -> (Result String a -> msg) -> Cmd msg
+post operation msg =
     Http.post
-        "/graphql"
-        (Http.jsonBody <| GraphQL.Operation.encode operation)
-        (GraphQL.Response.decoder operation)
-
-
-postBatch : Batch Errors a -> Http.Request (Result Errors a)
-postBatch batch =
-    Http.post
-        "/graphql"
-        (Http.jsonBody <| GraphQL.Batch.encode batch)
-        (GraphQL.Batch.decoder batch)
-
-
-send : (Result String a -> msg) -> Http.Request (Response Errors a) -> Cmd msg
-send resultMsg =
-    Http.send (mapResult >> resultMsg)
-
-
-sendBatch : (Result String a -> msg) -> Http.Request (Result Errors a) -> Cmd msg
-sendBatch resultMsg =
-    Http.send (mapBatchResult >> resultMsg)
+        { url = "/graphql"
+        , body = Http.jsonBody (GraphQL.Operation.encode operation)
+        , expect = Http.expectJson (mapResult >> msg) (GraphQL.Response.decoder operation)
+        }
 
 
 mapResult : Result Http.Error (Response Errors a) -> Result String a
 mapResult =
     Result.map GraphQL.Response.toResult >> mapBatchResult
+
+
+postBatch : Batch Errors a -> (Result String a -> msg) -> Cmd msg
+postBatch batch msg =
+    Http.post
+        { url = "/graphql"
+        , body = Http.jsonBody (GraphQL.Batch.encode batch)
+        , expect = Http.expectJson (mapBatchResult >> msg) (GraphQL.Batch.decoder batch)
+        }
 
 
 mapBatchResult : Result Http.Error (Result Errors a) -> Result String a
@@ -73,8 +63,8 @@ httpErrorToString error =
         Http.NetworkError ->
             "Http network error"
 
-        Http.BadStatus response ->
-            "Http bad status: " ++ response.status.message
+        Http.BadStatus status ->
+            "Http bad status: " ++ String.fromInt status
 
-        Http.BadPayload message _ ->
-            "Http bad payload: : " ++ message
+        Http.BadBody body ->
+            "Http bad body: : " ++ body

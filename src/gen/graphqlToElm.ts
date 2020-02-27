@@ -1,6 +1,6 @@
-import { GraphQLSchema, buildSchema } from "graphql";
+import { GraphQLSchema } from "graphql";
 import { Options, FinalOptions, finalizeOptions } from "./options";
-import { getSchemaString } from "./schema";
+import { getSchemaString, processSchemaString } from "./schema";
 import * as enums from "./enums";
 import { EnumIntel } from "./enums";
 import { QueryIntel, readQueryIntel } from "./queries/queryIntel";
@@ -30,7 +30,7 @@ export const getGraphqlToElm = (userOptions: Options): Promise<Result> => {
 
   return getSchemaString(options).then((schemaString: string) => {
     options.log(`processing schema`);
-    const schema: GraphQLSchema = buildSchema(schemaString);
+    const schema: GraphQLSchema = processSchemaString(schemaString);
 
     options.log(`processing enums`);
     const enumsIntel: EnumIntel[] = enums.getIntel(schema, options);

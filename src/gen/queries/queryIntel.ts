@@ -80,14 +80,18 @@ export const readQueryIntel = (
   schema: GraphQLSchema,
   options: FinalOptions
 ): Promise<QueryIntel> => {
-  return readFile(src).then(query => {
-    options.log(`processing query ${src}`);
-    query = query.trim().replace(/\r\n/g, "\n");
-    return {
-      ...getQueryIntel(query, schema),
-      src
-    };
-  });
+  return readFile(src)
+    .then(query => {
+      options.log(`processing query ${src}`);
+      query = query.trim().replace(/\r\n/g, "\n");
+      return {
+        ...getQueryIntel(query, schema),
+        src
+      };
+    })
+    .catch((error: Error) => {
+      throw new Error(`processing query ${src}\n${error.toString()}`);
+    });
 };
 
 export const getQueryIntel = (

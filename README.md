@@ -36,6 +36,9 @@ graphqlToElm({
   queries: ["./src/myQuery.gql"],
   src: "./src",
   dest: "./src-generated"
+}).catch(error => {
+  console.error(error);
+  process.exit(1);
 });
 ```
 
@@ -114,6 +117,9 @@ You'll need to have [node/npm](https://nodejs.org) installed.
       queries: ["./src/MyQueries1.gql", "./src/MyQueries2.gql"],
       src: "./src",
       dest: "./src-generated"
+    }).catch(error => {
+      console.error(error);
+      process.exit(1);
     });
     ```
 

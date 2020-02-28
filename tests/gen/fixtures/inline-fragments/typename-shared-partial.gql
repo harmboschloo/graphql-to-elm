@@ -1,0 +1,8 @@
+query TypenameSharedPartial {
+  animal {
+    __typename
+    ... on Dolphin {
+      color
+    }
+  }
+}

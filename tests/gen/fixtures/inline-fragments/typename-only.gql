@@ -1,0 +1,8 @@
+query TypenameOnly {
+  flip {
+    __typename
+  }
+  animal {
+    __typename
+  }
+}

@@ -1,0 +1,6 @@
+query TypenameOnlyMore {
+  animal {
+    __typename
+    color
+  }
+}

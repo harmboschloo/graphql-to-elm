@@ -703,24 +703,47 @@ const getFieldsOrFragments = (
     isTypenameOutput(field.value)
   );
 
-  if (typenameFields.length > 0 && inFragments.length > 0) {
-    fields = fields.filter(field => !typenameFields.includes(field));
-    inFragments.forEach(fragment => {
-      if (fragment.kind === "object-fragment") {
-        fragment.fields.push(...typenameFields);
-      }
-    });
-  }
-
   const possibleFragmentTypes: ReadonlyArray<GraphQLObjectType> = isAbstractType(
     type
   )
     ? schema.getPossibleTypes(type)
     : [];
 
-  const includedFragmentTypes: GraphQLNamedType[] = inFragments
-    .map(fragment => fragment.type)
-    .reduce(getAllIncludedTypes(schema), []);
+  if (typenameFields.length > 0) {
+    if (possibleFragmentTypes.length > 0) {
+      const fragmentTypeNames = getAllIncludedFragmentTypes(
+        inFragments,
+        schema
+      ).map(type => type.name);
+
+      const missingFragmentTypes = possibleFragmentTypes.filter(
+        type => !fragmentTypeNames.includes(type.name)
+      );
+
+      missingFragmentTypes.forEach(type =>
+        inFragments.push({
+          kind: "object-fragment",
+          type,
+          typeName: type.name,
+          fields: []
+        })
+      );
+    }
+
+    if (inFragments.length > 0) {
+      fields = fields.filter(field => !typenameFields.includes(field));
+      inFragments.forEach(fragment => {
+        if (fragment.kind === "object-fragment") {
+          fragment.fields.push(...typenameFields);
+        }
+      });
+    }
+  }
+
+  const includedFragmentTypes: GraphQLNamedType[] = getAllIncludedFragmentTypes(
+    inFragments,
+    schema
+  );
 
   const hasAllPossibleTypes: boolean = possibleFragmentTypes.every(type =>
     includedFragmentTypes.includes(type)
@@ -779,17 +802,26 @@ const getFieldsOrFragments = (
   throw Error("no fields or fragments");
 };
 
-const getAllIncludedTypes = (schema: GraphQLSchema) => {
-  const getAllTypes = (
-    types: GraphQLNamedType[],
+const getAllIncludedFragmentTypes = (
+  fragments: QueryCompositeFragmentOutput[],
+  schema: GraphQLSchema
+): GraphQLNamedType[] =>
+  getAllIncludedTypes(
+    fragments.map(fragment => fragment.type),
+    schema
+  );
+
+const getAllIncludedTypes = (
+  types: GraphQLCompositeType[],
+  schema: GraphQLSchema
+): GraphQLNamedType[] => {
+  const helper = (
+    collected: GraphQLNamedType[],
     type: GraphQLNamedType
   ): GraphQLNamedType[] =>
-    types.concat(
-      type,
-      ...(isAbstractType(type) ? schema.getPossibleTypes(type) : []).reduce(
-        getAllTypes,
-        []
-      )
-    );
-  return getAllTypes;
+    isAbstractType(type)
+      ? schema.getPossibleTypes(type).reduce(helper, [...collected, type])
+      : [...collected, type];
+
+  return types.reduce(helper, []);
 };

@@ -1,0 +1,8 @@
+query TypenameMixed {
+  animal {
+    __typename
+    ... on Mammal {
+      __typename
+    }
+  }
+}

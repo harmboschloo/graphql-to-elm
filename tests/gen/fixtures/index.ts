@@ -146,6 +146,10 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "typename.gql",
       "typename-shared.gql",
       "typename-shared-more.gql",
+      "typename-shared-partial.gql",
+      "typename-only.gql",
+      "typename-only-more.gql",
+      "typename-mixed.gql",
       "fragment-in-fragment.gql",
       "fragment-in-fragment-shared.gql",
       "fragment-in-fragment-partial.gql"

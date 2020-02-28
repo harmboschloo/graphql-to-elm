@@ -15,4 +15,5 @@ type Query {
   id: ID!
   timeOrNull: Time
   time: Time!
+  at(time: Time!): Int
 }

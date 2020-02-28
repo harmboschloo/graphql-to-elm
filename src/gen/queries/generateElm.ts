@@ -133,6 +133,8 @@ const generateImports = (intel: ElmIntel): string => {
     addImport("GraphQL.Response");
 
     if (operation.variables) {
+      addImport("Json.Encode");
+
       visitEncoders(operation.variables, {
         record: (encoder: ElmRecordEncoder) => {
           encoder.fields.map(addWrapperImports);

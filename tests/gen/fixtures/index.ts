@@ -1,6 +1,11 @@
 import { resolve } from "path";
 import { rimraf } from "../utils";
-import { Options, SchemaString, TypeDecoders } from "../../../src/gen/options";
+import {
+  Options,
+  SchemaString,
+  TypeDecoders,
+  TypeEncoders
+} from "../../../src/gen/options";
 
 export interface Fixture {
   id: string;
@@ -36,6 +41,7 @@ interface Config {
   queries: string[];
   scalarDecoders?: TypeDecoders;
   enumDecoders?: TypeDecoders;
+  scalarEncoders?: TypeEncoders;
   src?: string;
   dest?: string;
   operationKind?: "query" | "named" | "named_prefixed";
@@ -55,6 +61,7 @@ const create = ({
   queries,
   scalarDecoders,
   enumDecoders,
+  scalarEncoders,
   src,
   dest = "generated-output",
   operationKind,
@@ -66,6 +73,7 @@ const create = ({
     queries,
     scalarDecoders,
     enumDecoders,
+    scalarEncoders,
     src,
     dest,
     operationKind
@@ -79,7 +87,11 @@ const getData = (): { [key: string]: FinalConfig } => ({
   aliases: create({ queries: ["query.gql"] }),
 
   customScalars: create({
-    queries: ["custom-scalar-types.gql", "custom-nullable-scalar-types.gql"],
+    queries: [
+      "custom-scalar-types.gql",
+      "custom-scalar-input.gql",
+      "custom-nullable-scalar-types.gql"
+    ],
     scalarDecoders: {
       ID: {
         type: "Data.Id.Id",
@@ -88,6 +100,12 @@ const getData = (): { [key: string]: FinalConfig } => ({
       Time: {
         type: "Data.Time.Posix",
         decoder: "Data.Time.decoder"
+      }
+    },
+    scalarEncoders: {
+      Time: {
+        type: "Data.Time.Posix",
+        encoder: "Data.Time.encode"
       }
     }
   }),

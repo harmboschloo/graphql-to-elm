@@ -167,6 +167,7 @@ const writeTests = (results: FixtureResult[]): Promise<void> => {
 import GraphQL.Operation as Operation exposing (Operation, Query, Mutation)
 import GraphQL.Optional as Optional
 ${imports.join("\n")}
+import Time
 
 
 type alias Test t =
@@ -216,6 +217,8 @@ const generateVariables = (encoder: ElmEncoder): string => {
           return "False";
         case "String":
           return '""';
+        case "Data.Time.Posix":
+          return "Time.millisToPosix 123";
         default:
           throw new Error(`unhandled encoder type: ${encoder.type}`);
       }

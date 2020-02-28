@@ -79,6 +79,7 @@ If you are using GraphQL over http you can define a function to post your operat
 import GraphQL.Errors exposing (Errors)
 import GraphQL.Operation exposing (Operation)
 import GraphQL.Response exposing (Response)
+import Http
 
 postOperation : Operation any Errors data -> (Result Http.Error (Response Errors data) -> msg) -> Cmd msg
 postOperation operation msg =

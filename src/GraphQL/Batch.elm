@@ -30,7 +30,7 @@ module GraphQL.Batch exposing
 
 import GraphQL.Helpers.Decode as DecodeHelpers
 import GraphQL.Operation as Operation exposing (Mutation, Operation, Query)
-import GraphQL.Response as Response exposing (Response)
+import GraphQL.Response as Response
 import Json.Decode as Decode exposing (Decoder, decodeValue)
 import Json.Encode as Encode
 

@@ -47,7 +47,7 @@
   "devDependencies": {
     "@detools/tap-diff": "^0.2.2",
     "@types/mkdirp": "^1.0.0",
-    "@types/node": "^13.7.4",
+    "@types/node": "^13.7.7",
     "@types/phantom": "^3.2.5",
     "@types/rimraf": "^2.0.3",
     "@types/tape": "^4.2.34",
@@ -63,6 +63,6 @@
     "tape": "^4.13.0",
     "tree-kill": "^1.2.2",
     "ts-node": "^8.6.2",
-    "typescript": "^3.8.2"
+    "typescript": "^3.8.3"
   }
 }

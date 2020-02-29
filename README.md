@@ -135,7 +135,7 @@ You'll need to have [node/npm](https://nodejs.org) installed.
     with Elm types, encoders and decoders.
 
 5.  To use the generated files in your project you have to include the
-    destination folder in the `source-directories` field of your `elm-package.json`.
+    destination folder in the `source-directories` field of your `elm.json`.
     It should look something like this:
 
     ```json
@@ -214,7 +214,6 @@ dest?: string = "src"
 
 Destination folder for the generateed Elm files.
 
-
 ### encoders
 
 ```TypeScript
@@ -243,7 +242,6 @@ enumEncoders?: TypeEncoders = {}
 ```
 
 Enum type encoders.
-
 
 ### decoders
 

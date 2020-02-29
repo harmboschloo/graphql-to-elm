@@ -38,7 +38,7 @@
     "validate-prettier": "prettier -l index.* \"./{src,tests,examples}/**/*.{js,ts,gql}\"",
     "validate-elm": "elm-format --validate ./src ./tests ./examples",
     "doc-preview": "elm-doc-preview",
-    "prepublishOnly": "npm run validate && npm run build && npm run build-examples && npm run test"
+    "prepublishOnly": "npm run validate && npm run build && npm run examples-build && npm run test"
   },
   "dependencies": {
     "graphql": "^14.1.1",

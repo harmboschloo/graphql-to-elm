@@ -7,8 +7,10 @@ module Queries.Messages exposing
     , PostMessageResponse(..)
     , PostMessageResponse2
     , PostMessageVariables
+    , encodePostMessageVariables
     , messages
     , postMessage
+    , postMessageVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -93,6 +95,12 @@ encodePostMessageVariables inputs =
     Json.Encode.object
         [ ( "message", Json.Encode.string inputs.message )
         ]
+
+
+postMessageVariablesDecoder : Json.Decode.Decoder PostMessageVariables
+postMessageVariablesDecoder =
+    Json.Decode.map PostMessageVariables
+        (Json.Decode.field "message" Json.Decode.string)
 
 
 type alias PostMessageMutation =

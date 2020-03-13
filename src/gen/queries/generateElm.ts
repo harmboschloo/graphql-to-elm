@@ -278,13 +278,18 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
   const generatedItems: string[] = [];
   const items: string[] = [];
 
-  const newType = (type: string, item: string, createDeclarations: () => string[], createItems: () => string[]) => {
+  const newType = (
+    type: string,
+    item: string,
+    createDeclarations: () => string[],
+    createItems: () => string[]
+  ) => {
     if (!generatedTypes.includes(type)) {
       generatedTypes.push(type);
       items.push(...createDeclarations());
     }
     if (!generatedItems.includes(type + item)) {
-      generatedItems.push(type + item)
+      generatedItems.push(type + item);
       items.push(...createItems());
     }
   };
@@ -308,16 +313,22 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
 
 const generateEncoders = (
   encoder: ElmEncoder,
-  newType: (type: string, item: string, createDeclarations: () => string[], createItems: () => string[]) => void,
+  newType: (
+    type: string,
+    item: string,
+    createDeclarations: () => string[],
+    createItems: () => string[]
+  ) => void,
   scope: ElmScope
 ): void => {
   visitEncoders(encoder, {
     record: (encoder: ElmRecordEncoder) => {
-      newType(encoder.type, 'Encoder', () => [
-        generateRecordTypeDeclaration(encoder),
-      ], () => [
-        generateRecordEncoder(encoder, scope)
-      ]);
+      newType(
+        encoder.type,
+        "Encoder",
+        () => [generateRecordTypeDeclaration(encoder)],
+        () => [generateRecordEncoder(encoder, scope)]
+      );
     },
     value: (encoder: ElmValueEncoder) => {}
   });
@@ -401,23 +412,39 @@ const wrapEncoder = (
 
 const generateDecoders = (
   decoder: ElmDecoder,
-  newType: (type: string, item: string, createDeclarations: () => string[], createItems: () => string[]) => void
+  newType: (
+    type: string,
+    item: string,
+    createDeclarations: () => string[],
+    createItems: () => string[]
+  ) => void
 ): void => {
   visitDecoders(decoder, {
     value: (decoder: ElmValueDecoder) => {},
     constantString: (decoder: ElmConstantStringDecoder) => {},
     record: (decoder: ElmRecordDecoder) => {
-      newType(decoder.type, 'Decoder', () => [
-        generateRecordTypeDeclaration(decoder),
-      ], () => [
-        generateRecordDecoder(decoder)
-      ]);
+      newType(
+        decoder.type,
+        "Decoder",
+        () => [generateRecordTypeDeclaration(decoder)],
+        () => [generateRecordDecoder(decoder)]
+      );
     },
     union: (decoder: ElmUnionDecoder) => {
-      newType(decoder.type, 'Decoder', () => [], () => generateUnionDecoder(decoder));
+      newType(
+        decoder.type,
+        "Decoder",
+        () => [],
+        () => generateUnionDecoder(decoder)
+      );
     },
     unionOn: (decoder: ElmUnionOnDecoder) => {
-      newType(decoder.type, 'Decoder', () => [], () => generateUnionDecoder(decoder));
+      newType(
+        decoder.type,
+        "Decoder",
+        () => [],
+        () => generateUnionDecoder(decoder)
+      );
     },
     empty: (decoder: ElmEmptyDecoder) => {}
   });

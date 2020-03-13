@@ -826,7 +826,6 @@ const getAllIncludedTypes = (
   return types.reduce(helper, []);
 };
 
-
 // Convert Input types as compatible Output types
 
 const inputValueListItemWrapperAsOutput = (
@@ -834,14 +833,13 @@ const inputValueListItemWrapperAsOutput = (
 ): false | "non-null" | "nullable" => {
   switch (inputWrapper) {
     case "optional":
-      return "nullable"
+      return "nullable";
     case "non-null":
-      return "non-null"
+      return "non-null";
     case false:
-      return false
+      return false;
   }
-}
-
+};
 
 const queryInputFieldAsOutput = (
   inputField: QueryInputField
@@ -853,8 +851,10 @@ const queryInputFieldAsOutput = (
         name: inputField.name,
         value: queryInputAsOutput(inputField.value),
         valueWrapper: inputField.valueWrapper,
-        valueListItemWrapper: inputValueListItemWrapperAsOutput(inputField.valueListItemWrapper),
-      }
+        valueListItemWrapper: inputValueListItemWrapperAsOutput(
+          inputField.valueListItemWrapper
+        )
+      };
       break;
 
     case "object":
@@ -862,26 +862,26 @@ const queryInputFieldAsOutput = (
         name: inputField.name,
         value: queryInputAsOutput(inputField.value),
         valueWrapper: inputField.valueWrapper,
-        valueListItemWrapper: inputValueListItemWrapperAsOutput(inputField.valueListItemWrapper),
-      }
+        valueListItemWrapper: inputValueListItemWrapperAsOutput(
+          inputField.valueListItemWrapper
+        )
+      };
       break;
   }
-}
+};
 
-const queryInputAsOutput = (
-  input: QueryInput
-): QueryNonFragmentOutput => {
+const queryInputAsOutput = (input: QueryInput): QueryNonFragmentOutput => {
   switch (input.kind) {
     case "object":
-      return queryObjectInputAsOutput(input)
+      return queryObjectInputAsOutput(input);
 
     default:
       return {
         kind: input.kind,
-        typeName: input.typeName,
-      }
+        typeName: input.typeName
+      };
   }
-}
+};
 
 export const queryObjectInputAsOutput = (
   input: QueryObjectInput
@@ -889,6 +889,6 @@ export const queryObjectInputAsOutput = (
   return {
     kind: "object",
     typeName: input.typeName,
-    fields: input.fields.map(queryInputFieldAsOutput),
-  }
-}
+    fields: input.fields.map(queryInputFieldAsOutput)
+  };
+};

@@ -175,7 +175,11 @@ const getOperation = (
     : undefined;
 
   const variablesDecoder: ElmDecoder | undefined = queryOperation.inputs
-    ? getCompositeDecoder(queryObjectInputAsOutput(queryOperation.inputs), scope, options)
+    ? getCompositeDecoder(
+        queryObjectInputAsOutput(queryOperation.inputs),
+        scope,
+        options
+      )
     : undefined;
 
   const data: ElmDecoder = getCompositeDecoder(

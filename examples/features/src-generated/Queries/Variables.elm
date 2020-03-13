@@ -2,7 +2,9 @@ module Queries.Variables exposing
     ( TranslationQuery
     , TranslationResponse
     , TranslationVariables
+    , encodeTranslationVariables
     , translation
+    , translationVariablesDecoder
     )
 
 import GraphQL.Enum.Language
@@ -41,6 +43,13 @@ encodeTranslationVariables inputs =
         [ ( "id", (Json.Encode.string >> GraphQL.Optional.Present) inputs.id )
         , ( "language", GraphQL.Optional.map GraphQL.Enum.Language.encode inputs.language )
         ]
+
+
+translationVariablesDecoder : Json.Decode.Decoder TranslationVariables
+translationVariablesDecoder =
+    Json.Decode.map2 TranslationVariables
+        (Json.Decode.field "id" Json.Decode.string)
+        (GraphQL.Optional.fieldDecoder "language" GraphQL.Enum.Language.decoder)
 
 
 type alias TranslationQuery =

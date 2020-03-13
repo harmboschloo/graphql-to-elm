@@ -107,13 +107,6 @@ encodeOptionalInputs inputs =
         ]
 
 
-encodeOtherInputs : OtherInputs -> Json.Encode.Value
-encodeOtherInputs inputs =
-    Json.Encode.object
-        [ ( "string", Json.Encode.string inputs.string )
-        ]
-
-
 type alias ListsVariables2 =
     { ints : GraphQL.Optional.Optional (List Int)
     , floats : GraphQL.Optional.Optional (List (Maybe.Maybe Float))
@@ -151,12 +144,6 @@ optionalInputsDecoder =
         (GraphQL.Optional.fieldDecoder "int" Json.Decode.int)
         (GraphQL.Optional.fieldDecoder "float" Json.Decode.float)
         (GraphQL.Optional.fieldDecoder "other" otherInputsDecoder)
-
-
-otherInputsDecoder : Json.Decode.Decoder OtherInputs
-otherInputsDecoder =
-    Json.Decode.map OtherInputs
-        (Json.Decode.field "string" Json.Decode.string)
 
 
 type alias ListsQuery =

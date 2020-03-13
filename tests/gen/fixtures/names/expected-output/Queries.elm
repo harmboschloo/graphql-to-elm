@@ -218,12 +218,6 @@ nodeDecoder =
         ]
 
 
-userDecoder : Json.Decode.Decoder User
-userDecoder =
-    Json.Decode.map User
-        (Json.Decode.field "name" Json.Decode.string)
-
-
 type Node2
     = OnGroup Group
     | OnUser2 User
@@ -248,12 +242,6 @@ groupDecoder =
     Json.Decode.map2 Group
         (Json.Decode.field "name" Json.Decode.string)
         (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Group"))
-
-
-userDecoder : Json.Decode.Decoder User
-userDecoder =
-    Json.Decode.map User
-        (Json.Decode.field "name" Json.Decode.string)
 
 
 type Node3

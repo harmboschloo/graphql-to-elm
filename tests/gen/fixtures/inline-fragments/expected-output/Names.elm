@@ -108,31 +108,6 @@ tailsDecoder =
         (Json.Decode.field "length" Json.Decode.float)
 
 
-type Flip
-    = OnHeads Heads
-    | OnTails Tails
-
-
-flipDecoder : Json.Decode.Decoder Flip
-flipDecoder =
-    Json.Decode.oneOf
-        [ Json.Decode.map OnHeads headsDecoder
-        , Json.Decode.map OnTails tailsDecoder
-        ]
-
-
-headsDecoder : Json.Decode.Decoder Heads
-headsDecoder =
-    Json.Decode.map Heads
-        (Json.Decode.field "name" Json.Decode.string)
-
-
-tailsDecoder : Json.Decode.Decoder Tails
-tailsDecoder =
-    Json.Decode.map Tails
-        (Json.Decode.field "length" Json.Decode.float)
-
-
 type Flip2
     = OnHeads2 Heads
     | OnOtherFlip
@@ -146,12 +121,6 @@ flip2Decoder =
         ]
 
 
-headsDecoder : Json.Decode.Decoder Heads
-headsDecoder =
-    Json.Decode.map Heads
-        (Json.Decode.field "name" Json.Decode.string)
-
-
 type Flip3
     = OnTails2 Tails
     | OnOtherFlip2
@@ -163,9 +132,3 @@ flip3Decoder =
         [ Json.Decode.map OnTails2 tailsDecoder
         , GraphQL.Helpers.Decode.emptyObject OnOtherFlip2
         ]
-
-
-tailsDecoder : Json.Decode.Decoder Tails
-tailsDecoder =
-    Json.Decode.map Tails
-        (Json.Decode.field "length" Json.Decode.float)

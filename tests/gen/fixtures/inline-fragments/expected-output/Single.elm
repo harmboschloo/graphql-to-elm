@@ -61,10 +61,3 @@ animalDecoder =
     Json.Decode.map2 Animal
         (Json.Decode.field "color" Json.Decode.string)
         (Json.Decode.field "size" Json.Decode.float)
-
-
-animalDecoder : Json.Decode.Decoder Animal
-animalDecoder =
-    Json.Decode.map2 Animal
-        (Json.Decode.field "size" Json.Decode.float)
-        (Json.Decode.field "color" Json.Decode.string)

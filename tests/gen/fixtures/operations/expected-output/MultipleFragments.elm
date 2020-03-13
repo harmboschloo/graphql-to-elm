@@ -178,12 +178,6 @@ operation2Decoder =
         (Json.Decode.field "query" Json.Decode.string)
 
 
-operation2Decoder : Json.Decode.Decoder Operation2
-operation2Decoder =
-    Json.Decode.map Operation2
-        (Json.Decode.field "query" Json.Decode.string)
-
-
 type alias Fragment =
     { name : String
     }
@@ -204,9 +198,3 @@ mutationMutationDecoder : Json.Decode.Decoder MutationMutation
 mutationMutationDecoder =
     Json.Decode.map MutationMutation
         (Json.Decode.field "fragment" (Json.Decode.nullable fragmentDecoder))
-
-
-fragmentDecoder : Json.Decode.Decoder Fragment
-fragmentDecoder =
-    Json.Decode.map Fragment
-        (Json.Decode.field "name" Json.Decode.string)

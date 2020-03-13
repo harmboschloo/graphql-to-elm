@@ -63,21 +63,3 @@ friendDecoder : Json.Decode.Decoder Friend
 friendDecoder =
     Json.Decode.map Friend
         (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
-
-
-friendDecoder : Json.Decode.Decoder Friend
-friendDecoder =
-    Json.Decode.map Friend
-        (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
-
-
-friendDecoder : Json.Decode.Decoder Friend
-friendDecoder =
-    Json.Decode.map Friend
-        (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))
-
-
-friendDecoder : Json.Decode.Decoder Friend
-friendDecoder =
-    Json.Decode.map Friend
-        (Json.Decode.field "name" (Json.Decode.nullable Json.Decode.string))

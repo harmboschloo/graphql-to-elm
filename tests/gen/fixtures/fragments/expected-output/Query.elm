@@ -121,30 +121,6 @@ userDecoder =
         (Json.Decode.field "email" Json.Decode.string)
 
 
-userDecoder : Json.Decode.Decoder User
-userDecoder =
-    Json.Decode.map3 User
-        (Json.Decode.field "id" Json.Decode.string)
-        (Json.Decode.field "name" Json.Decode.string)
-        (Json.Decode.field "email" Json.Decode.string)
-
-
-userDecoder : Json.Decode.Decoder User
-userDecoder =
-    Json.Decode.map3 User
-        (Json.Decode.field "id" Json.Decode.string)
-        (Json.Decode.field "name" Json.Decode.string)
-        (Json.Decode.field "email" Json.Decode.string)
-
-
-userDecoder : Json.Decode.Decoder User
-userDecoder =
-    Json.Decode.map3 User
-        (Json.Decode.field "id" Json.Decode.string)
-        (Json.Decode.field "name" Json.Decode.string)
-        (Json.Decode.field "email" Json.Decode.string)
-
-
 type Flip
     = OnHeads Heads
     | OnTails Tails

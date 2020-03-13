@@ -2,7 +2,9 @@ module Mixed2 exposing
     ( Mixed2Query
     , Mixed2Response
     , Mixed2Variables
+    , encodeMixed2Variables
     , mixed2
+    , mixed2VariablesDecoder
     )
 
 import GraphQL.Errors
@@ -42,6 +44,13 @@ encodeMixed2Variables inputs =
         [ ( "withSchool", Json.Encode.bool inputs.withSchool )
         , ( "withCity", Json.Encode.bool inputs.withCity )
         ]
+
+
+mixed2VariablesDecoder : Json.Decode.Decoder Mixed2Variables
+mixed2VariablesDecoder =
+    Json.Decode.map2 Mixed2Variables
+        (Json.Decode.field "withSchool" Json.Decode.bool)
+        (Json.Decode.field "withCity" Json.Decode.bool)
 
 
 type alias Mixed2Query =

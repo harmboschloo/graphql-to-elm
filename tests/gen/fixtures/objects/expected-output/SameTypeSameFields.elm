@@ -57,3 +57,10 @@ personDecoder =
     Json.Decode.map2 Person
         (Json.Decode.field "name" Json.Decode.string)
         (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+
+
+personDecoder : Json.Decode.Decoder Person
+personDecoder =
+    Json.Decode.map2 Person
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+        (Json.Decode.field "name" Json.Decode.string)

@@ -2,7 +2,9 @@ module Scalars exposing
     ( ScalarsQuery
     , ScalarsResponse
     , ScalarsVariables
+    , encodeScalarsVariables
     , scalars
+    , scalarsVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -39,6 +41,13 @@ encodeScalarsVariables inputs =
         [ ( "string", Json.Encode.string inputs.string )
         , ( "int", Json.Encode.int inputs.int )
         ]
+
+
+scalarsVariablesDecoder : Json.Decode.Decoder ScalarsVariables
+scalarsVariablesDecoder =
+    Json.Decode.map2 ScalarsVariables
+        (Json.Decode.field "string" Json.Decode.string)
+        (Json.Decode.field "int" Json.Decode.int)
 
 
 type alias ScalarsQuery =

@@ -6,7 +6,9 @@ module Query exposing
     , Heads
     , Tails
     , User
+    , encodeFragmentsVariables
     , fragments
+    , fragmentsVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -79,6 +81,12 @@ encodeFragmentsVariables inputs =
         ]
 
 
+fragmentsVariablesDecoder : Json.Decode.Decoder FragmentsVariables
+fragmentsVariablesDecoder =
+    Json.Decode.map FragmentsVariables
+        (Json.Decode.field "id" Json.Decode.string)
+
+
 type alias FragmentsQuery =
     { user1 : User
     , user2 : User
@@ -103,6 +111,30 @@ type alias User =
     , name : String
     , email : String
     }
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map3 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map3 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map3 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
 
 
 userDecoder : Json.Decode.Decoder User

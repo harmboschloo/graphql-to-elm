@@ -4,7 +4,13 @@ module InputsMultiple exposing
     , InputsMultipleResponse
     , InputsMultipleVariables
     , OtherInputs
+    , encodeInputs
+    , encodeInputsMultipleVariables
+    , encodeOtherInputs
+    , inputsDecoder
     , inputsMultiple
+    , inputsMultipleVariablesDecoder
+    , otherInputsDecoder
     )
 
 import GraphQL.Errors
@@ -70,6 +76,57 @@ encodeOtherInputs inputs =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs.string )
         ]
+
+
+encodeInputs : Inputs -> Json.Encode.Value
+encodeInputs inputs =
+    Json.Encode.object
+        [ ( "int", Json.Encode.int inputs.int )
+        , ( "float", Json.Encode.float inputs.float )
+        , ( "other", encodeOtherInputs inputs.other )
+        ]
+
+
+encodeOtherInputs : OtherInputs -> Json.Encode.Value
+encodeOtherInputs inputs =
+    Json.Encode.object
+        [ ( "string", Json.Encode.string inputs.string )
+        ]
+
+
+inputsMultipleVariablesDecoder : Json.Decode.Decoder InputsMultipleVariables
+inputsMultipleVariablesDecoder =
+    Json.Decode.map2 InputsMultipleVariables
+        (Json.Decode.field "inputs" inputsDecoder)
+        (GraphQL.Optional.fieldDecoder "inputs2" inputsDecoder)
+
+
+inputsDecoder : Json.Decode.Decoder Inputs
+inputsDecoder =
+    Json.Decode.map3 Inputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (Json.Decode.field "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
+
+
+inputsDecoder : Json.Decode.Decoder Inputs
+inputsDecoder =
+    Json.Decode.map3 Inputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (Json.Decode.field "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
 
 
 type alias InputsMultipleQuery =

@@ -127,6 +127,19 @@ user3Decoder =
         (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
 
 
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map User
+        (Json.Decode.field "name" Json.Decode.string)
+
+
+user2Decoder : Json.Decode.Decoder User2
+user2Decoder =
+    Json.Decode.map2 User2
+        (Json.Decode.field "age" (Json.Decode.nullable Json.Decode.int))
+        (Json.Decode.field "name" Json.Decode.string)
+
+
 type alias User5 =
     { age : Maybe.Maybe Int
     }

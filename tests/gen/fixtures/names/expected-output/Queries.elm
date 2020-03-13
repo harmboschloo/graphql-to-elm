@@ -16,7 +16,9 @@ module Queries exposing
     , UserEmailResponse
     , UserNameQuery
     , UserNameResponse
+    , encodeNodeVariables
     , node
+    , nodeVariablesDecoder
     , underscores
     , userEmail
     , userName
@@ -180,6 +182,14 @@ encodeNodeVariables inputs =
         ]
 
 
+nodeVariablesDecoder : Json.Decode.Decoder NodeVariables
+nodeVariablesDecoder =
+    Json.Decode.map3 NodeVariables
+        (Json.Decode.field "ID_UPPER" Json.Decode.string)
+        (Json.Decode.field "id_lower" Json.Decode.string)
+        (Json.Decode.field "id_lowerAndUpper" Json.Decode.string)
+
+
 type alias NodeQuery =
     { nodeUpper : Maybe.Maybe Node
     , node_lower : Maybe.Maybe Node2
@@ -208,6 +218,12 @@ nodeDecoder =
         ]
 
 
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map User
+        (Json.Decode.field "name" Json.Decode.string)
+
+
 type Node2
     = OnGroup Group
     | OnUser2 User
@@ -232,6 +248,12 @@ groupDecoder =
     Json.Decode.map2 Group
         (Json.Decode.field "name" Json.Decode.string)
         (Json.Decode.field "__typename" (GraphQL.Helpers.Decode.constantString "Group"))
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map User
+        (Json.Decode.field "name" Json.Decode.string)
 
 
 type Node3

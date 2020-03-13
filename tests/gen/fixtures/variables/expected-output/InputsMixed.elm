@@ -4,7 +4,13 @@ module InputsMixed exposing
     , InputsMixedVariables
     , MixedInputs
     , OtherInputs
+    , encodeInputsMixedVariables
+    , encodeMixedInputs
+    , encodeOtherInputs
     , inputsMixed
+    , inputsMixedVariablesDecoder
+    , mixedInputsDecoder
+    , otherInputsDecoder
     )
 
 import GraphQL.Errors
@@ -70,6 +76,57 @@ encodeOtherInputs inputs =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs.string )
         ]
+
+
+encodeMixedInputs : MixedInputs -> Json.Encode.Value
+encodeMixedInputs inputs =
+    GraphQL.Optional.encodeObject
+        [ ( "int", (Json.Encode.int >> GraphQL.Optional.Present) inputs.int )
+        , ( "float", GraphQL.Optional.map Json.Encode.float inputs.float )
+        , ( "other", (encodeOtherInputs >> GraphQL.Optional.Present) inputs.other )
+        ]
+
+
+encodeOtherInputs : OtherInputs -> Json.Encode.Value
+encodeOtherInputs inputs =
+    Json.Encode.object
+        [ ( "string", Json.Encode.string inputs.string )
+        ]
+
+
+inputsMixedVariablesDecoder : Json.Decode.Decoder InputsMixedVariables
+inputsMixedVariablesDecoder =
+    Json.Decode.map2 InputsMixedVariables
+        (Json.Decode.field "inputs" mixedInputsDecoder)
+        (GraphQL.Optional.fieldDecoder "inputs2" mixedInputsDecoder)
+
+
+mixedInputsDecoder : Json.Decode.Decoder MixedInputs
+mixedInputsDecoder =
+    Json.Decode.map3 MixedInputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (GraphQL.Optional.fieldDecoder "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
+
+
+mixedInputsDecoder : Json.Decode.Decoder MixedInputs
+mixedInputsDecoder =
+    Json.Decode.map3 MixedInputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (GraphQL.Optional.fieldDecoder "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
 
 
 type alias InputsMixedQuery =

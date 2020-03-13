@@ -4,7 +4,13 @@ module Inputs exposing
     , InputsResponse
     , InputsVariables
     , OtherInputs
+    , encodeInputs
+    , encodeInputsVariables
+    , encodeOtherInputs
     , inputs
+    , inputsDecoder
+    , inputsVariablesDecoder
+    , otherInputsDecoder
     )
 
 import GraphQL.Errors
@@ -67,6 +73,26 @@ encodeOtherInputs inputs2 =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs2.string )
         ]
+
+
+inputsVariablesDecoder : Json.Decode.Decoder InputsVariables
+inputsVariablesDecoder =
+    Json.Decode.map InputsVariables
+        (Json.Decode.field "inputs" inputsDecoder)
+
+
+inputsDecoder : Json.Decode.Decoder Inputs
+inputsDecoder =
+    Json.Decode.map3 Inputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (Json.Decode.field "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
 
 
 type alias InputsQuery =

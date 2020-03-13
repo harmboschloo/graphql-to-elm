@@ -9,8 +9,10 @@ module MultipleFragments exposing
     , Query1Variables
     , Query2Query
     , Query2Response
+    , encodeQuery1Variables
     , mutation
     , query1
+    , query1VariablesDecoder
     , query2
     )
 
@@ -120,6 +122,12 @@ encodeQuery1Variables inputs =
         ]
 
 
+query1VariablesDecoder : Json.Decode.Decoder Query1Variables
+query1VariablesDecoder =
+    Json.Decode.map Query1Variables
+        (GraphQL.Optional.fieldDecoder "name" Json.Decode.string)
+
+
 type alias Query1Query =
     { operation : Maybe.Maybe Operation
     }
@@ -170,6 +178,12 @@ operation2Decoder =
         (Json.Decode.field "query" Json.Decode.string)
 
 
+operation2Decoder : Json.Decode.Decoder Operation2
+operation2Decoder =
+    Json.Decode.map Operation2
+        (Json.Decode.field "query" Json.Decode.string)
+
+
 type alias Fragment =
     { name : String
     }
@@ -190,3 +204,9 @@ mutationMutationDecoder : Json.Decode.Decoder MutationMutation
 mutationMutationDecoder =
     Json.Decode.map MutationMutation
         (Json.Decode.field "fragment" (Json.Decode.nullable fragmentDecoder))
+
+
+fragmentDecoder : Json.Decode.Decoder Fragment
+fragmentDecoder =
+    Json.Decode.map Fragment
+        (Json.Decode.field "name" Json.Decode.string)

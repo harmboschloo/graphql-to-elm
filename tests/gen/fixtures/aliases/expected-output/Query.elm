@@ -95,3 +95,31 @@ user2Decoder =
     Json.Decode.map2 User2
         (Json.Decode.field "id" Json.Decode.string)
         (Json.Decode.field "name" Json.Decode.string)
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map2 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
+
+
+user2Decoder : Json.Decode.Decoder User2
+user2Decoder =
+    Json.Decode.map2 User2
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
+
+
+userDecoder : Json.Decode.Decoder User
+userDecoder =
+    Json.Decode.map2 User
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "email" Json.Decode.string)
+
+
+user2Decoder : Json.Decode.Decoder User2
+user2Decoder =
+    Json.Decode.map2 User2
+        (Json.Decode.field "id" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)

@@ -62,6 +62,7 @@ const generateExports = (intel: ElmIntel): string => {
       visitEncoders(operation.variables, {
         record: (encoder: ElmRecordEncoder) => {
           addType(encoder.type);
+          addVariable(encoder.encoder);
         },
         value: (encoder: ElmValueEncoder) => {}
       });

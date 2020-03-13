@@ -825,3 +825,70 @@ const getAllIncludedTypes = (
 
   return types.reduce(helper, []);
 };
+
+
+// Convert Input types as compatible Output types
+
+const inputValueListItemWrapperAsOutput = (
+  inputWrapper: false | "non-null" | "optional"
+): false | "non-null" | "nullable" => {
+  switch (inputWrapper) {
+    case "optional":
+      return "nullable"
+    case "non-null":
+      return "non-null"
+    case false:
+      return false
+  }
+}
+
+
+const queryInputFieldAsOutput = (
+  inputField: QueryInputField
+): QueryOutputField => {
+  switch (inputField.value.kind) {
+    case "scalar":
+    case "enum":
+      return {
+        name: inputField.name,
+        value: queryInputAsOutput(inputField.value),
+        valueWrapper: inputField.valueWrapper,
+        valueListItemWrapper: inputValueListItemWrapperAsOutput(inputField.valueListItemWrapper),
+      }
+      break;
+
+    case "object":
+      return {
+        name: inputField.name,
+        value: queryInputAsOutput(inputField.value),
+        valueWrapper: inputField.valueWrapper,
+        valueListItemWrapper: inputValueListItemWrapperAsOutput(inputField.valueListItemWrapper),
+      }
+      break;
+  }
+}
+
+const queryInputAsOutput = (
+  input: QueryInput
+): QueryNonFragmentOutput => {
+  switch (input.kind) {
+    case "object":
+      return queryObjectInputAsOutput(input)
+
+    default:
+      return {
+        kind: input.kind,
+        typeName: input.typeName,
+      }
+  }
+}
+
+export const queryObjectInputAsOutput = (
+  input: QueryObjectInput
+): QueryCompositeNonFragmentOutput => {
+  return {
+    kind: "object",
+    typeName: input.typeName,
+    fields: input.fields.map(queryInputFieldAsOutput),
+  }
+}

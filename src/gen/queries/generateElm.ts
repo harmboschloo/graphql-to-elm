@@ -67,6 +67,20 @@ const generateExports = (intel: ElmIntel): string => {
       });
     }
 
+    if (operation.variablesDecoder) {
+      visitDecoders(operation.variablesDecoder, {
+        value: (decoder: ElmValueDecoder) => {},
+        constantString: (decoder: ElmConstantStringDecoder) => {},
+        record: (decoder: ElmRecordDecoder) => {
+          addType(decoder.type);
+          addVariable(decoder.decoder);
+        },
+        union: (decoder: ElmUnionDecoder) => {},
+        unionOn: (decoder: ElmUnionOnDecoder) => {},
+        empty: (decoder: ElmEmptyDecoder) => {}
+      });
+    }
+
     visitDecoders(operation.data, {
       value: (decoder: ElmValueDecoder) => {},
       constantString: (decoder: ElmConstantStringDecoder) => {},
@@ -265,13 +279,16 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
   const newType = (type: string, createItems: () => string[]) => {
     if (!generatedTypes.includes(type)) {
       generatedTypes.push(type);
-      items.push(...createItems());
     }
+    items.push(...createItems());
   };
 
   intel.operations.map(operation => {
     if (operation.variables) {
       generateEncoders(operation.variables, newType, intel.scope);
+    }
+    if (operation.variablesDecoder) {
+      generateDecoders(operation.variablesDecoder, newType);
     }
     generateDecoders(operation.data, newType);
   });

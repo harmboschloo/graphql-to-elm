@@ -3,6 +3,8 @@ module CustomScalarInput exposing
     , AtResponse
     , AtVariables
     , at
+    , atVariablesDecoder
+    , encodeAtVariables
     )
 
 import Data.Time
@@ -38,6 +40,12 @@ encodeAtVariables inputs =
     Json.Encode.object
         [ ( "time", Data.Time.encode inputs.time )
         ]
+
+
+atVariablesDecoder : Json.Decode.Decoder AtVariables
+atVariablesDecoder =
+    Json.Decode.map AtVariables
+        (Json.Decode.field "time" Data.Time.decoder)
 
 
 type alias AtQuery =

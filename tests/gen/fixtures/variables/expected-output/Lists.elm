@@ -3,9 +3,18 @@ module Lists exposing
     , ListsQuery
     , ListsResponse
     , ListsVariables
+    , ListsVariables2
     , OptionalInputs
     , OtherInputs
+    , encodeInputs
+    , encodeListsVariables
+    , encodeOptionalInputs
+    , encodeOtherInputs
+    , inputsDecoder
     , lists
+    , listsVariables2Decoder
+    , optionalInputsDecoder
+    , otherInputsDecoder
     )
 
 import GraphQL.Errors
@@ -96,6 +105,45 @@ encodeOptionalInputs inputs =
         , ( "float", GraphQL.Optional.map Json.Encode.float inputs.float )
         , ( "other", GraphQL.Optional.map encodeOtherInputs inputs.other )
         ]
+
+
+type alias ListsVariables2 =
+    { ints : GraphQL.Optional.Optional (List Int)
+    , floats : GraphQL.Optional.Optional (List (Maybe.Maybe Float))
+    , inputs : List Inputs
+    , inputs2 : List (Maybe.Maybe OptionalInputs)
+    }
+
+
+listsVariables2Decoder : Json.Decode.Decoder ListsVariables2
+listsVariables2Decoder =
+    Json.Decode.map4 ListsVariables2
+        (GraphQL.Optional.fieldDecoder "ints" (Json.Decode.list Json.Decode.int))
+        (GraphQL.Optional.fieldDecoder "floats" (Json.Decode.list (Json.Decode.nullable Json.Decode.float)))
+        (Json.Decode.field "inputs" (Json.Decode.list inputsDecoder))
+        (Json.Decode.field "inputs2" (Json.Decode.list (Json.Decode.nullable optionalInputsDecoder)))
+
+
+inputsDecoder : Json.Decode.Decoder Inputs
+inputsDecoder =
+    Json.Decode.map3 Inputs
+        (Json.Decode.field "int" Json.Decode.int)
+        (Json.Decode.field "float" Json.Decode.float)
+        (Json.Decode.field "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
+
+
+optionalInputsDecoder : Json.Decode.Decoder OptionalInputs
+optionalInputsDecoder =
+    Json.Decode.map3 OptionalInputs
+        (GraphQL.Optional.fieldDecoder "int" Json.Decode.int)
+        (GraphQL.Optional.fieldDecoder "float" Json.Decode.float)
+        (GraphQL.Optional.fieldDecoder "other" otherInputsDecoder)
 
 
 type alias ListsQuery =

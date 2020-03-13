@@ -2,7 +2,9 @@ module Include exposing
     ( IncludeQuery
     , IncludeResponse
     , IncludeVariables
+    , encodeIncludeVariables
     , include
+    , includeVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -42,6 +44,13 @@ encodeIncludeVariables inputs =
         [ ( "withSchool", Json.Encode.bool inputs.withSchool )
         , ( "withCity", Json.Encode.bool inputs.withCity )
         ]
+
+
+includeVariablesDecoder : Json.Decode.Decoder IncludeVariables
+includeVariablesDecoder =
+    Json.Decode.map2 IncludeVariables
+        (Json.Decode.field "withSchool" Json.Decode.bool)
+        (Json.Decode.field "withCity" Json.Decode.bool)
 
 
 type alias IncludeQuery =

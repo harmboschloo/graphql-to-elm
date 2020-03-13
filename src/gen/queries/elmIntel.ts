@@ -2,6 +2,7 @@ import * as path from "path";
 import { FinalOptions, TypeEncoder, TypeDecoder } from "../options";
 import { cachedValue, assertOk } from "../utils";
 import {
+  queryObjectInputAsOutput,
   QueryIntel,
   QueryOperation,
   QueryOperationType,
@@ -123,6 +124,7 @@ export interface ElmQueryOperation {
   query: string;
   fragments: string[];
   variables: ElmRecordEncoder | undefined;
+  variablesDecoder: ElmDecoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
   responseTypeName: string;
@@ -134,6 +136,7 @@ export interface ElmNamedOperation {
   name: string;
   gqlName: string;
   variables: ElmRecordEncoder | undefined;
+  variablesDecoder: ElmDecoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
   responseTypeName: string;
@@ -146,6 +149,7 @@ export interface ElmNamedPrefixedOperation {
   gqlName: string;
   gqlFilename: string;
   variables: ElmRecordEncoder | undefined;
+  variablesDecoder: ElmDecoder | undefined;
   data: ElmDecoder;
   errors: TypeDecoder;
   responseTypeName: string;
@@ -170,6 +174,14 @@ const getOperation = (
     ? getRecordEncoder(queryOperation.inputs, scope, options)
     : undefined;
 
+  const variablesDecoder: ElmDecoder | undefined = queryOperation.inputs
+    ? getCompositeDecoder(
+        queryObjectInputAsOutput(queryOperation.inputs),
+        scope,
+        options
+      )
+    : undefined;
+
   const data: ElmDecoder = getCompositeDecoder(
     queryOperation.outputs,
     scope,
@@ -192,6 +204,7 @@ const getOperation = (
         query: queryOperation.query,
         fragments: queryOperation.fragmentNames,
         variables,
+        variablesDecoder,
         data,
         errors,
         responseTypeName
@@ -203,6 +216,7 @@ const getOperation = (
         name,
         gqlName: assertOperationName(queryOperation),
         variables,
+        variablesDecoder,
         data,
         errors,
         responseTypeName
@@ -215,6 +229,7 @@ const getOperation = (
         gqlName: assertOperationName(queryOperation),
         gqlFilename: relativeSrc.replace(/\\/g, "/"),
         variables,
+        variablesDecoder,
         data,
         errors,
         responseTypeName

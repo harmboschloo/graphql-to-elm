@@ -16,7 +16,9 @@ module Queries exposing
     , UserEmailResponse
     , UserNameQuery
     , UserNameResponse
+    , encodeNodeVariables
     , node
+    , nodeVariablesDecoder
     , underscores
     , userEmail
     , userName
@@ -178,6 +180,14 @@ encodeNodeVariables inputs =
         , ( "id_lower", Json.Encode.string inputs.id_lower )
         , ( "id_lowerAndUpper", Json.Encode.string inputs.id_lowerAndUpper )
         ]
+
+
+nodeVariablesDecoder : Json.Decode.Decoder NodeVariables
+nodeVariablesDecoder =
+    Json.Decode.map3 NodeVariables
+        (Json.Decode.field "ID_UPPER" Json.Decode.string)
+        (Json.Decode.field "id_lower" Json.Decode.string)
+        (Json.Decode.field "id_lowerAndUpper" Json.Decode.string)
 
 
 type alias NodeQuery =

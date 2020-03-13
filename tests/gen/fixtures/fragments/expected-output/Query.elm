@@ -6,7 +6,9 @@ module Query exposing
     , Heads
     , Tails
     , User
+    , encodeFragmentsVariables
     , fragments
+    , fragmentsVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -77,6 +79,12 @@ encodeFragmentsVariables inputs =
     Json.Encode.object
         [ ( "id", Json.Encode.string inputs.id )
         ]
+
+
+fragmentsVariablesDecoder : Json.Decode.Decoder FragmentsVariables
+fragmentsVariablesDecoder =
+    Json.Decode.map FragmentsVariables
+        (Json.Decode.field "id" Json.Decode.string)
 
 
 type alias FragmentsQuery =

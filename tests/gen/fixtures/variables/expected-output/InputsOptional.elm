@@ -4,7 +4,13 @@ module InputsOptional exposing
     , InputsOptionalVariables
     , OptionalInputs
     , OtherInputs
+    , encodeInputsOptionalVariables
+    , encodeOptionalInputs
+    , encodeOtherInputs
     , inputsOptional
+    , inputsOptionalVariablesDecoder
+    , optionalInputsDecoder
+    , otherInputsDecoder
     )
 
 import GraphQL.Errors
@@ -68,6 +74,26 @@ encodeOtherInputs inputs =
     Json.Encode.object
         [ ( "string", Json.Encode.string inputs.string )
         ]
+
+
+inputsOptionalVariablesDecoder : Json.Decode.Decoder InputsOptionalVariables
+inputsOptionalVariablesDecoder =
+    Json.Decode.map InputsOptionalVariables
+        (GraphQL.Optional.fieldDecoder "inputs" optionalInputsDecoder)
+
+
+optionalInputsDecoder : Json.Decode.Decoder OptionalInputs
+optionalInputsDecoder =
+    Json.Decode.map3 OptionalInputs
+        (GraphQL.Optional.fieldDecoder "int" Json.Decode.int)
+        (GraphQL.Optional.fieldDecoder "float" Json.Decode.float)
+        (GraphQL.Optional.fieldDecoder "other" otherInputsDecoder)
+
+
+otherInputsDecoder : Json.Decode.Decoder OtherInputs
+otherInputsDecoder =
+    Json.Decode.map OtherInputs
+        (Json.Decode.field "string" Json.Decode.string)
 
 
 type alias InputsOptionalQuery =

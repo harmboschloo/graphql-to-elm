@@ -2,7 +2,9 @@ module Skip exposing
     ( SkipQuery
     , SkipResponse
     , SkipVariables
+    , encodeSkipVariables
     , skip
+    , skipVariablesDecoder
     )
 
 import GraphQL.Errors
@@ -42,6 +44,13 @@ encodeSkipVariables inputs =
         [ ( "withSchool", Json.Encode.bool inputs.withSchool )
         , ( "withCity", Json.Encode.bool inputs.withCity )
         ]
+
+
+skipVariablesDecoder : Json.Decode.Decoder SkipVariables
+skipVariablesDecoder =
+    Json.Decode.map2 SkipVariables
+        (Json.Decode.field "withSchool" Json.Decode.bool)
+        (Json.Decode.field "withCity" Json.Decode.bool)
 
 
 type alias SkipQuery =

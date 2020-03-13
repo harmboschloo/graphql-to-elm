@@ -9,8 +9,10 @@ module MultipleFragments exposing
     , Query1Variables
     , Query2Query
     , Query2Response
+    , encodeQuery1Variables
     , mutation
     , query1
+    , query1VariablesDecoder
     , query2
     )
 
@@ -118,6 +120,12 @@ encodeQuery1Variables inputs =
     GraphQL.Optional.encodeObject
         [ ( "name", GraphQL.Optional.map Json.Encode.string inputs.name )
         ]
+
+
+query1VariablesDecoder : Json.Decode.Decoder Query1Variables
+query1VariablesDecoder =
+    Json.Decode.map Query1Variables
+        (GraphQL.Optional.fieldDecoder "name" Json.Decode.string)
 
 
 type alias Query1Query =

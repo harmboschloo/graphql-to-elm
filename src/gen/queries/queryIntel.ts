@@ -255,6 +255,7 @@ const nodeToInputField = (
       name: node.variable.name.value,
       type: getInputType(node, schema),
       extensions: null,
+      deprecationReason: null,
     },
     schema
   );

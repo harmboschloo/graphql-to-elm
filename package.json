@@ -41,7 +41,7 @@
     "prepublishOnly": "npm run validate && npm run build && npm run examples-build && npm run test"
   },
   "dependencies": {
-    "graphql": "^14.7.0",
+    "graphql": "^15.5.0",
     "mkdirp": "^1.0.4"
   },
   "devDependencies": {

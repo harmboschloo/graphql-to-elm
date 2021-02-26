@@ -62,58 +62,58 @@ export interface TypeDecoder {
 }
 
 const defaultEnumOptions: FinalEnumOptions = {
-  baseModule: "GraphQL.Enum"
+  baseModule: "GraphQL.Enum",
 };
 
 const defaultScalarEncoders: TypeEncoders = {
   Int: {
     type: "Int",
-    encoder: "Json.Encode.int"
+    encoder: "Json.Encode.int",
   },
   Float: {
     type: "Float",
-    encoder: "Json.Encode.float"
+    encoder: "Json.Encode.float",
   },
   Boolean: {
     type: "Bool",
-    encoder: "Json.Encode.bool"
+    encoder: "Json.Encode.bool",
   },
   String: {
     type: "String",
-    encoder: "Json.Encode.string"
+    encoder: "Json.Encode.string",
   },
   ID: {
     type: "String",
-    encoder: "Json.Encode.string"
-  }
+    encoder: "Json.Encode.string",
+  },
 };
 
 const defaultScalarDecoders: TypeDecoders = {
   Int: {
     type: "Int",
-    decoder: "Json.Decode.int"
+    decoder: "Json.Decode.int",
   },
   Float: {
     type: "Float",
-    decoder: "Json.Decode.float"
+    decoder: "Json.Decode.float",
   },
   Boolean: {
     type: "Bool",
-    decoder: "Json.Decode.bool"
+    decoder: "Json.Decode.bool",
   },
   String: {
     type: "String",
-    decoder: "Json.Decode.string"
+    decoder: "Json.Decode.string",
   },
   ID: {
     type: "String",
-    decoder: "Json.Decode.string"
-  }
+    decoder: "Json.Decode.string",
+  },
 };
 
 const defaultErrorsDecoder: TypeDecoder = {
   type: "GraphQL.Errors.Errors",
-  decoder: "GraphQL.Errors.decoder"
+  decoder: "GraphQL.Errors.decoder",
 };
 
 export const finalizeOptions = (options: Options): FinalOptions => {
@@ -123,17 +123,17 @@ export const finalizeOptions = (options: Options): FinalOptions => {
 
   const enums = {
     ...defaultEnumOptions,
-    ...withDefault({}, options.enums)
+    ...withDefault({}, options.enums),
   };
 
   const scalarEncoders = {
     ...defaultScalarEncoders,
-    ...withDefault({}, options.scalarEncoders)
+    ...withDefault({}, options.scalarEncoders),
   };
   const enumEncoders = withDefault({}, options.enumEncoders);
   const scalarDecoders = {
     ...defaultScalarDecoders,
-    ...withDefault({}, options.scalarDecoders)
+    ...withDefault({}, options.scalarDecoders),
   };
   const enumDecoders = withDefault({}, options.enumDecoders);
   const errorsDecoder = withDefault(
@@ -145,7 +145,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
   const operationKind = withDefault("query", options.operationKind);
   const log =
     typeof options.log !== "undefined"
-      ? options.log || (x => {})
+      ? options.log || ((x) => {})
       : (message: string) => console.log(message);
 
   return {
@@ -160,7 +160,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
     src,
     dest,
     operationKind,
-    log
+    log,
   };
 };
 
@@ -226,7 +226,7 @@ const validateQueries = (queries: string[]) => {
     `options.queries must be an array, but found: ${queries}`
   );
 
-  queries.forEach(query =>
+  queries.forEach((query) =>
     assert.strictEqual(
       typeof query,
       "string",
@@ -246,7 +246,7 @@ const validateTypeEncoders = (name: string, typeEncoders?: TypeEncoders) => {
     `options.${name} must be an object, but found: ${typeEncoders}`
   );
 
-  Object.keys(typeEncoders).forEach(key =>
+  Object.keys(typeEncoders).forEach((key) =>
     validateTypeEncoder(name, typeEncoders[key])
   );
 };
@@ -270,7 +270,7 @@ const validateTypeDecoders = (name: string, typeDecoders?: TypeDecoders) => {
     `options.${name} must be an object, but found: ${typeDecoders}`
   );
 
-  Object.keys(typeDecoders).forEach(key =>
+  Object.keys(typeDecoders).forEach((key) =>
     validateTypeDecoder(name, typeDecoders[key])
   );
 };

@@ -4,7 +4,7 @@ import { readFile } from "./utils";
 
 export const getSchemaString = ({
   schema,
-  log
+  log,
 }: {
   schema: string | SchemaString;
   log?: (message: string) => void;

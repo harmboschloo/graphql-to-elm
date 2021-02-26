@@ -8,7 +8,7 @@ export { Test } from "tape";
 export { readFile, writeFile, fixLineEndings } from "../../../src/gen/utils";
 
 export const test = (name: string, test?: tape.Test): Promise<tape.Test> =>
-  new Promise(resolve =>
+  new Promise((resolve) =>
     test ? test.test(name, resolve) : tape(name, resolve)
   );
 
@@ -16,11 +16,11 @@ export const testNoThrow = (
   test: tape.Test,
   message: string
 ): Promise<tape.Test> =>
-  new Promise(resolve => test.doesNotThrow(() => resolve(test), message));
+  new Promise((resolve) => test.doesNotThrow(() => resolve(test), message));
 
 export const rimraf = (pattern: string): Promise<void> =>
   new Promise((resolve, reject) =>
-    rimrafAsync(pattern, error => (error ? reject(error) : resolve()))
+    rimrafAsync(pattern, (error) => (error ? reject(error) : resolve()))
   );
 
 export const glob = (pattern: string): Promise<string[]> =>

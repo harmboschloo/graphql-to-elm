@@ -5,7 +5,7 @@ import {
   TypeDecoders,
   TypeDecoder,
   TypeEncoders,
-  TypeEncoder
+  TypeEncoder,
 } from "./options";
 import { validTypeName, validTypeConstructorName } from "./elmUtils";
 
@@ -38,9 +38,9 @@ export const getIntel = (
 
       if (gqlType instanceof GraphQLEnumType) {
         const typeName: string = validTypeName(gqlType.name);
-        const values: EnumValue[] = gqlType.getValues().map(value => ({
+        const values: EnumValue[] = gqlType.getValues().map((value) => ({
           gqlValue: value.name,
-          value: validTypeConstructorName(value.name)
+          value: validTypeConstructorName(value.name),
         }));
 
         const module: string = `${options.enums.baseModule}.${typeName}`;
@@ -49,11 +49,11 @@ export const getIntel = (
           path.resolve(options.dest, ...moduleParts) + ".elm";
         const encoder: TypeEncoder = {
           type: `${module}.${typeName}`,
-          encoder: `${module}.encode`
+          encoder: `${module}.encode`,
         };
         const decoder: TypeDecoder = {
           type: `${module}.${typeName}`,
-          decoder: `${module}.decoder`
+          decoder: `${module}.decoder`,
         };
 
         const intel: EnumIntel = {
@@ -63,7 +63,7 @@ export const getIntel = (
           values,
           encoder,
           decoder,
-          dest
+          dest,
         };
 
         return [...enums, intel];
@@ -101,7 +101,7 @@ import Json.Encode
 
 
 type ${typeName}
-    = ${values.map(x => x.value).join("\n    | ")}
+    = ${values.map((x) => x.value).join("\n    | ")}
 
 
 encode : ${typeName} -> Json.Encode.Value
@@ -126,7 +126,7 @@ toString : ${typeName} -> String
 toString value =
     case value of
         ${values
-          .map(x => `${x.value} ->\n            "${x.gqlValue}"`)
+          .map((x) => `${x.value} ->\n            "${x.gqlValue}"`)
           .join("\n\n        ")}
 
 
@@ -134,7 +134,7 @@ fromString : String -> Maybe ${typeName}
 fromString value =
     case value of
         ${values
-          .map(x => `"${x.gqlValue}" ->\n            Just ${x.value}`)
+          .map((x) => `"${x.gqlValue}" ->\n            Just ${x.value}`)
           .join("\n\n        ")}
 
         _ ->

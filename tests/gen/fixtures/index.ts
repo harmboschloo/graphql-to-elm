@@ -4,7 +4,7 @@ import {
   Options,
   SchemaString,
   TypeDecoders,
-  TypeEncoders
+  TypeEncoders,
 } from "../../../src/gen/options";
 
 export interface Fixture {
@@ -25,13 +25,13 @@ export type FixturesConfig = {
 export const getFixtures = (config: FixturesConfig = {}): Fixture[] => {
   const data = getData();
   return Object.keys(data)
-    .map(key => ({
+    .map((key) => ({
       id: key,
       dir: resolve(__dirname, key),
-      ...data[key]
+      ...data[key],
     }))
     .filter(
-      fixture =>
+      (fixture) =>
         !config.onlyFixtureWithId || fixture.id === config.onlyFixtureWithId
     );
 };
@@ -66,7 +66,7 @@ const create = ({
   dest = "generated-output",
   operationKind,
   expect = "expected-output",
-  throws
+  throws,
 }: Config): FinalConfig => ({
   options: {
     schema,
@@ -76,11 +76,11 @@ const create = ({
     scalarEncoders,
     src,
     dest,
-    operationKind
+    operationKind,
   },
   actual: dest,
   expect,
-  throws
+  throws,
 });
 
 const getData = (): { [key: string]: FinalConfig } => ({
@@ -90,28 +90,28 @@ const getData = (): { [key: string]: FinalConfig } => ({
     queries: [
       "custom-scalar-types.gql",
       "custom-scalar-input.gql",
-      "custom-nullable-scalar-types.gql"
+      "custom-nullable-scalar-types.gql",
     ],
     scalarDecoders: {
       ID: {
         type: "Data.Id.Id",
-        decoder: "Data.Id.decoder"
+        decoder: "Data.Id.decoder",
       },
       Time: {
         type: "Data.Time.Posix",
-        decoder: "Data.Time.decoder"
-      }
+        decoder: "Data.Time.decoder",
+      },
     },
     scalarEncoders: {
       Time: {
         type: "Data.Time.Posix",
-        encoder: "Data.Time.encode"
-      }
-    }
+        encoder: "Data.Time.encode",
+      },
+    },
   }),
 
   directives: create({
-    queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"]
+    queries: ["include.gql", "skip.gql", "mixed1.gql", "mixed2.gql"],
   }),
 
   enums: create({
@@ -119,13 +119,13 @@ const getData = (): { [key: string]: FinalConfig } => ({
     enumDecoders: {
       Binary: {
         type: "Data.Binary.Binary",
-        decoder: "Data.Binary.decoder"
-      }
-    }
+        decoder: "Data.Binary.decoder",
+      },
+    },
   }),
 
   fragments: create({
-    queries: ["query.gql"]
+    queries: ["query.gql"],
   }),
 
   "inline-fragments": create({
@@ -152,15 +152,15 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "typename-mixed.gql",
       "fragment-in-fragment.gql",
       "fragment-in-fragment-shared.gql",
-      "fragment-in-fragment-partial.gql"
+      "fragment-in-fragment-partial.gql",
     ],
-    schema: "schema.gql"
+    schema: "schema.gql",
   }),
 
   "inline-fragments-throws": create({
     queries: ["same-signature.gql"],
     throws:
-      "multiple union constructors with the same decode signature: color : String"
+      "multiple union constructors with the same decode signature: color : String",
   }),
 
   keywords: create({ queries: ["query.gql"] }),
@@ -182,8 +182,8 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "same-type-other-fields.gql",
       "other-type-same-fields.gql",
       "other-type-other-fields.gql",
-      "recursive.gql"
-    ]
+      "recursive.gql",
+    ],
   }),
 
   operations: create({
@@ -191,13 +191,13 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "anonymous-query.gql",
       "anonymous-mutation.gql",
       "multiple.gql",
-      "multiple-fragments.gql"
-    ]
+      "multiple-fragments.gql",
+    ],
   }),
 
   "operations-named": create({
     queries: ["query.gql"],
-    operationKind: "named"
+    operationKind: "named",
   }),
 
   "operations-named_prefixed": create({
@@ -205,13 +205,13 @@ const getData = (): { [key: string]: FinalConfig } => ({
     queries: [
       "query.gql",
       resolve(__dirname, "operations-named_prefixed/Queries/Query.gql"),
-      "queries2/Queries/query2.gql"
+      "queries2/Queries/query2.gql",
     ],
-    operationKind: "named_prefixed"
+    operationKind: "named_prefixed",
   }),
 
   scalars: create({
-    queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"]
+    queries: ["default-scalar-types.gql", "default-nullable-scalar-types.gql"],
   }),
 
   "schema-string": create({
@@ -227,9 +227,9 @@ const getData = (): { [key: string]: FinalConfig } => ({
       type Query {
         hello: String!
       }
-      `
+      `,
     },
-    queries: ["query.gql"]
+    queries: ["query.gql"],
   }),
 
   variables: create({
@@ -241,7 +241,7 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "inputs-optional.gql",
       "inputs-mixed.gql",
       "inputs-multiple.gql",
-      "lists.gql"
-    ]
-  })
+      "lists.gql",
+    ],
+  }),
 });

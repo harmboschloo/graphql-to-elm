@@ -11,14 +11,14 @@ import {
   Result,
   QueryResult,
   getGraphqlToElm,
-  writeResult
+  writeResult,
 } from "../../../src/gen/graphqlToElm";
 import { Options } from "../../../src/gen/options";
 import { getSchemaString } from "../../../src/gen/schema";
 import { ElmIntel } from "../../../src/gen/queries/elmIntel";
 import {
   ElmEncoder,
-  ElmOperationType
+  ElmOperationType,
 } from "../../../src/gen/queries/elmIntel";
 import { validModuleName } from "../../../src/gen/elmUtils";
 import { writeFile } from "../../../src/gen/utils";
@@ -32,7 +32,7 @@ const basePath = __dirname;
 const generatePath = resolve(basePath, "generated");
 
 export const testBrowser = () => {
-  test("graphqlToElm browser test", async t => {
+  test("graphqlToElm browser test", async (t) => {
     try {
       await generateTestFiles(t);
       await makeElm(t);
@@ -50,8 +50,8 @@ const generateTestFiles = (t: Test): Promise<any> => {
   rimraf.sync(generatePath);
 
   const fixtures: Fixture[] = getFixtures()
-    .filter(fixture => !fixture.throws)
-    .map(fixture => {
+    .filter((fixture) => !fixture.throws)
+    .map((fixture) => {
       fixture.options.schema =
         typeof fixture.options.schema === "string"
           ? resolve(__dirname, fixture.dir, fixture.options.schema)
@@ -65,7 +65,7 @@ const generateTestFiles = (t: Test): Promise<any> => {
     Promise.all([
       writeTests(results),
       writeNamedQueries(results),
-      writeSchemas(fixtures)
+      writeSchemas(fixtures),
     ])
   );
 };
@@ -77,7 +77,7 @@ const writeQueries = (t: Test) => async (
 
   const enumOptions = {
     baseModule: "GraphQL.Enum",
-    ...(fixture.options.enums || {})
+    ...(fixture.options.enums || {}),
   };
 
   const schemaString = await getSchemaString(fixture.options);
@@ -87,18 +87,18 @@ const writeQueries = (t: Test) => async (
     schema: { string: schemaString },
     enums: {
       ...enumOptions,
-      baseModule: `${baseModule}.${enumOptions.baseModule}`
+      baseModule: `${baseModule}.${enumOptions.baseModule}`,
     },
-    queries: fixture.options.queries.map(query =>
+    queries: fixture.options.queries.map((query) =>
       resolve(__dirname, fixture.dir, query)
     ),
     src: resolve(__dirname, fixture.dir, fixture.options.src || ""),
-    log: t.comment
+    log: t.comment,
   };
 
   const result: Result = await getGraphqlToElm(options);
 
-  result.enums = result.enums.map(enumIntel => {
+  result.enums = result.enums.map((enumIntel) => {
     enumIntel.dest = resolve(
       generatePath,
       `${enumIntel.module.replace(/\./g, "/")}.elm`
@@ -106,7 +106,7 @@ const writeQueries = (t: Test) => async (
     return enumIntel;
   });
 
-  result.queries = result.queries.map(query => {
+  result.queries = result.queries.map((query) => {
     query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
     query.elmIntel.dest = resolve(
       generatePath,
@@ -145,9 +145,9 @@ const writeTests = (results: FixtureResult[]): Promise<void> => {
       (tests: string[], { fixture, elmIntel }) => [
         ...tests,
         ...elmIntel.operations
-          .filter(operation => operation.type === operationType)
+          .filter((operation) => operation.type === operationType)
           .map(
-            operation =>
+            (operation) =>
               `{ id = "${fixture.id}-${elmIntel.module}-${operation.name}"
       , schemaId = "${fixture.id}"
       , operation = ${elmIntel.module}.${operation.name}${
@@ -157,7 +157,7 @@ const writeTests = (results: FixtureResult[]): Promise<void> => {
               } |> Operation.mapData Debug.toString |> Operation.mapErrors Debug.toString
       }
 `
-          )
+          ),
       ],
       []
     );
@@ -196,7 +196,7 @@ const generateVariables = (encoder: ElmEncoder): string => {
   switch (encoder.kind) {
     case "record-encoder": {
       const fields = encoder.fields.map(
-        field =>
+        (field) =>
           `${field.name} = ${
             field.valueWrapper === "optional"
               ? "Optional.Absent"
@@ -234,17 +234,17 @@ const writeNamedQueries = (results: FixtureResult[]): Promise<void> => {
   const namedQueries: NamedQuery[] = [];
 
   results.forEach(({ result, fixture }) => {
-    result.queries.forEach(query =>
-      query.elmIntel.operations.forEach(operation => {
+    result.queries.forEach((query) =>
+      query.elmIntel.operations.forEach((operation) => {
         if (operation.kind === "named") {
           namedQueries.push({
             id: `${fixture.id}/${operation.gqlName}`,
-            query: query.queryIntel.query
+            query: query.queryIntel.query,
           });
         } else if (operation.kind === "named_prefixed") {
           namedQueries.push({
             id: `${fixture.id}/${operation.gqlFilename}:${operation.gqlName}`,
-            query: query.queryIntel.query
+            query: query.queryIntel.query,
           });
         }
       })
@@ -266,9 +266,9 @@ const writeNamedQueries = (results: FixtureResult[]): Promise<void> => {
 const writeSchemas = (fixtures: Fixture[]): Promise<void> =>
   Promise.all(
     fixtures.map(({ id, options }) =>
-      getSchemaString(options).then(schema => ({ id, schema }))
+      getSchemaString(options).then((schema) => ({ id, schema }))
     )
-  ).then(schemas => {
+  ).then((schemas) => {
     const entries = schemas.map(({ id, schema }) => `  "${id}": \`${schema}\``);
     const content = `export const schemas: { [id: string]: string } = {\n${entries.join(
       ",\n"
@@ -283,7 +283,7 @@ export const makeElm = (t: Test) => {
   t.comment("running elm make");
   const log = execSync(`elm make src/Main.elm --output=generated/index.html`, {
     cwd: basePath,
-    stdio: "ignore" // elm make messes with the console
+    stdio: "ignore", // elm make messes with the console
   });
   t.comment(log ? log.toString() : "no log");
   t.comment("done");
@@ -295,7 +295,7 @@ export const runServer = (t: Test): Promise<ChildProcess> =>
 
     const server: ChildProcess = spawn("ts-node", ["server.ts"], {
       cwd: basePath,
-      shell: true
+      shell: true,
     });
 
     if (server.stdout === null) {
@@ -308,12 +308,12 @@ export const runServer = (t: Test): Promise<ChildProcess> =>
       return;
     }
 
-    server.stdout.on("data", data => {
+    server.stdout.on("data", (data) => {
       t.comment(`[SERVER] ${data.toString()}`);
       resolve(server);
     });
 
-    server.stderr.on("data", data => {
+    server.stderr.on("data", (data) => {
       reject(`[SERVER] ${data.toString()}`);
     });
   });
@@ -339,7 +339,7 @@ export const openTestPage = (t: Test): Promise<void> =>
       }
     });
 
-    await page.on("onError", error => {
+    await page.on("onError", (error) => {
       t.comment(`[Browser] ${error.toString()}`);
       instance.exit();
       reject(error);

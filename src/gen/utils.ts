@@ -4,7 +4,7 @@ import { dirname } from "path";
 import * as mkdirp from "mkdirp";
 
 export const readFile = (path: string): Promise<string> =>
-  fs.promises.readFile(path, "utf8").then(data => data.toString());
+  fs.promises.readFile(path, "utf8").then((data) => data.toString());
 
 export const writeFile = (dest: string, data: string): Promise<void> =>
   writeFileWithDir(dest, fixLineEndings(data));
@@ -23,7 +23,7 @@ export const writeFileIfChanged = (
     const fileData = fixLineEndings(data);
 
     isFileChanged(dest, fileData)
-      .then(changed =>
+      .then((changed) =>
         changed
           ? writeFileWithDir(dest, fileData).then(() => resolve(true))
           : resolve(false)
@@ -32,9 +32,9 @@ export const writeFileIfChanged = (
   });
 
 const isFileChanged = (dest: string, newData: string): Promise<boolean> =>
-  new Promise(resolve =>
+  new Promise((resolve) =>
     readFile(dest)
-      .then(currentData => resolve(currentData !== newData))
+      .then((currentData) => resolve(currentData !== newData))
       .catch(() => resolve(true))
   );
 

@@ -17,7 +17,7 @@ import {
   ElmUnionConstructor,
   ElmEncoderField,
   ElmDecoderField,
-  ElmRecordField
+  ElmRecordField,
 } from "./elmIntel";
 import { findUnusedName } from "../elmUtils";
 import { withParentheses, addOnce } from "../utils";
@@ -54,7 +54,7 @@ const generateExports = (intel: ElmIntel): string => {
   const addType = (type: string) => addOnce(type, types);
   const addVariable = (variable: string) => addOnce(variable, variables);
 
-  intel.operations.forEach(operation => {
+  intel.operations.forEach((operation) => {
     addType(operation.responseTypeName);
     addVariable(operation.name);
 
@@ -63,7 +63,7 @@ const generateExports = (intel: ElmIntel): string => {
         record: (encoder: ElmRecordEncoder) => {
           addType(encoder.type);
         },
-        value: (encoder: ElmValueEncoder) => {}
+        value: (encoder: ElmValueEncoder) => {},
       });
     }
 
@@ -79,7 +79,7 @@ const generateExports = (intel: ElmIntel): string => {
       unionOn: (decoder: ElmUnionOnDecoder) => {
         addType(`${decoder.type}(..)`);
       },
-      empty: (decoder: ElmEmptyDecoder) => {}
+      empty: (decoder: ElmEmptyDecoder) => {},
     });
   });
 
@@ -107,7 +107,7 @@ const generateImports = (intel: ElmIntel): string => {
 
   const addWrapperImports = ({
     valueWrapper,
-    valueListItemWrapper
+    valueListItemWrapper,
   }: {
     valueWrapper: TypeWrapper;
     valueListItemWrapper: ListItemWrapper;
@@ -128,7 +128,7 @@ const generateImports = (intel: ElmIntel): string => {
     }
   };
 
-  intel.operations.forEach(operation => {
+  intel.operations.forEach((operation) => {
     addImport("GraphQL.Operation");
     addImport("GraphQL.Response");
 
@@ -142,7 +142,7 @@ const generateImports = (intel: ElmIntel): string => {
         value: (encoder: ElmValueEncoder) => {
           addImportOf(encoder.type);
           addImportOf(encoder.encoder);
-        }
+        },
       });
     }
 
@@ -164,7 +164,7 @@ const generateImports = (intel: ElmIntel): string => {
       unionOn: (decoder: ElmUnionOnDecoder) => {},
       empty: (decoder: ElmEmptyDecoder) => {
         addImportOf(decoder.decoder);
-      }
+      },
     });
 
     addImportOf(operation.errors.type);
@@ -173,7 +173,7 @@ const generateImports = (intel: ElmIntel): string => {
 
   return imports
     .sort()
-    .map(name => `import ${name}`)
+    .map((name) => `import ${name}`)
     .join("\n");
 };
 
@@ -192,12 +192,12 @@ const generateOperation = (operation: ElmOperation): string => {
     ? {
         declaration: ` ${operation.variables.type} ->`,
         parameter: " variables",
-        value: `(Maybe.Just <| ${operation.variables.encoder} variables)`
+        value: `(Maybe.Just <| ${operation.variables.encoder} variables)`,
       }
     : {
         declaration: "",
         parameter: "",
-        value: "Maybe.Nothing"
+        value: "Maybe.Nothing",
       };
 
   const declaration = `${operation.name} :${variables.declaration} GraphQL.Operation.Operation GraphQL.Operation.${operation.type} ${operation.errors.type} ${operation.data.type}`;
@@ -234,7 +234,7 @@ const generateQuery = (operation: ElmQueryOperation): string =>
   wrapQuery(
     operation,
     `"""${operation.query}"""${operation.fragments
-      .map(name => `\n            ++ ${name}`)
+      .map((name) => `\n            ++ ${name}`)
       .join("")}`
   );
 
@@ -269,7 +269,7 @@ const generateEncodersAndDecoders = (intel: ElmIntel): string => {
     }
   };
 
-  intel.operations.map(operation => {
+  intel.operations.map((operation) => {
     if (operation.variables) {
       generateEncoders(operation.variables, newType, intel.scope);
     }
@@ -292,10 +292,10 @@ const generateEncoders = (
     record: (encoder: ElmRecordEncoder) => {
       newType(encoder.type, () => [
         generateRecordTypeDeclaration(encoder),
-        generateRecordEncoder(encoder, scope)
+        generateRecordEncoder(encoder, scope),
       ]);
     },
-    value: (encoder: ElmValueEncoder) => {}
+    value: (encoder: ElmValueEncoder) => {},
   });
 };
 
@@ -304,7 +304,7 @@ const generateRecordEncoder = (
   scope: ElmScope
 ): string => {
   const hasOptionals = encoder.fields.some(
-    field => field.valueWrapper === "optional"
+    (field) => field.valueWrapper === "optional"
   );
 
   const objectEncoder = hasOptionals
@@ -315,7 +315,7 @@ const generateRecordEncoder = (
 
   const fieldEncoders = encoder.fields
     .map(
-      field =>
+      (field) =>
         `( "${field.jsonName}", ${wrapEncoder(
           field,
           hasOptionals
@@ -385,7 +385,7 @@ const generateDecoders = (
     record: (decoder: ElmRecordDecoder) => {
       newType(decoder.type, () => [
         generateRecordTypeDeclaration(decoder),
-        generateRecordDecoder(decoder)
+        generateRecordDecoder(decoder),
       ]);
     },
     union: (decoder: ElmUnionDecoder) => {
@@ -394,7 +394,7 @@ const generateDecoders = (
     unionOn: (decoder: ElmUnionOnDecoder) => {
       newType(decoder.type, () => generateUnionDecoder(decoder));
     },
-    empty: (decoder: ElmEmptyDecoder) => {}
+    empty: (decoder: ElmEmptyDecoder) => {},
   });
 };
 
@@ -520,7 +520,7 @@ const generateRecordTypeDeclaration = (
 ): string => {
   const fields: ElmRecordField[] = item.fields;
   const fieldTypes: string[] = fields.map(
-    field => `${field.name} : ${wrappedType(field)}`
+    (field) => `${field.name} : ${wrappedType(field)}`
   );
 
   return `type alias ${item.type} =\n    { ${fieldTypes.join(
@@ -574,7 +574,7 @@ const visitEncoders = (encoder: ElmEncoder, visitor: EncoderVisitor) => {
   switch (encoder.kind) {
     case "record-encoder":
       visitor.record(encoder);
-      encoder.fields.forEach(field => visitEncoders(field.value, visitor));
+      encoder.fields.forEach((field) => visitEncoders(field.value, visitor));
       break;
     case "value-encoder":
       visitor.value(encoder);
@@ -601,17 +601,17 @@ const visitDecoders = (decoder: ElmDecoder, visitor: DecoderVisitor) => {
       break;
     case "record-decoder":
       visitor.record(decoder);
-      decoder.fields.forEach(field => visitDecoders(field.value, visitor));
+      decoder.fields.forEach((field) => visitDecoders(field.value, visitor));
       break;
     case "union-decoder":
       visitor.union(decoder);
-      decoder.constructors.forEach(constructor =>
+      decoder.constructors.forEach((constructor) =>
         visitDecoders(constructor.decoder, visitor)
       );
       break;
     case "union-on-decoder":
       visitor.unionOn(decoder);
-      decoder.constructors.forEach(constructor =>
+      decoder.constructors.forEach((constructor) =>
         visitDecoders(constructor.decoder, visitor)
       );
       break;

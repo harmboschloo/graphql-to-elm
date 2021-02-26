@@ -39,32 +39,32 @@ export const getGraphqlToElm = (userOptions: Options): Promise<Result> => {
       ...options,
       enumEncoders: {
         ...enums.getEncoders(enumsIntel),
-        ...options.enumEncoders
+        ...options.enumEncoders,
       },
       enumDecoders: {
         ...enums.getDecoders(enumsIntel),
-        ...options.enumDecoders
-      }
+        ...options.enumDecoders,
+      },
     };
 
     return Promise.all(
-      options.queries.map(src =>
-        readQueryIntel(src, schema, options).then(queryIntel => ({
+      options.queries.map((src) =>
+        readQueryIntel(src, schema, options).then((queryIntel) => ({
           queryIntel,
-          elmIntel: queryToElmIntel(queryIntel, options)
+          elmIntel: queryToElmIntel(queryIntel, options),
         }))
       )
-    ).then(queriesResults => ({
+    ).then((queriesResults) => ({
       enums: enumsIntel,
       queries: queriesResults,
-      options
+      options,
     }));
   });
 };
 
 export const writeResult = (result: Result): Promise<Result> => {
   const writeEnums = Promise.all(
-    result.enums.map(enumIntel => {
+    result.enums.map((enumIntel) => {
       return writeFileIfChanged(
         enumIntel.dest,
         enums.generateElm(enumIntel)

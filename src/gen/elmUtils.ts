@@ -22,7 +22,7 @@ export const validNameUpper = (name: string): string => {
         .replace(/_(_*)/g, "-$1-")
         .split(/[^A-Z0-9_]/g)
         .filter(isEmpty)
-        .map(x => x.toLowerCase())
+        .map((x) => x.toLowerCase())
         .map(firstToUpperCase)
         .join("")
     : name
@@ -60,7 +60,7 @@ export const elmKeywords = [
   "port",
   "then",
   "type",
-  "where"
+  "where",
   // "alias",
   // "command",
   // "effect",

@@ -7,7 +7,7 @@ export {
   TypeEncoders,
   TypeEncoder,
   TypeDecoders,
-  TypeDecoder
+  TypeDecoder,
 } from "./src/gen/options";
 export declare const graphqlToElm: (options: Options) => Promise<void>;
 export default graphqlToElm;

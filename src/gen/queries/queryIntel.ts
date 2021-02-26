@@ -33,7 +33,7 @@ import {
   parse,
   visit,
   visitWithTypeInfo,
-  validate
+  validate,
 } from "graphql";
 import { FinalOptions } from "../options";
 import {
@@ -41,7 +41,7 @@ import {
   removeIndents,
   assertOk,
   addOnce,
-  firstToUpperCase
+  firstToUpperCase,
 } from "../utils";
 
 export interface QueryIntel {
@@ -81,12 +81,12 @@ export const readQueryIntel = (
   options: FinalOptions
 ): Promise<QueryIntel> => {
   return readFile(src)
-    .then(query => {
+    .then((query) => {
       options.log(`processing query ${src}`);
       query = query.trim().replace(/\r\n/g, "\n");
       return {
         ...getQueryIntel(query, schema),
-        src
+        src,
       };
     })
     .catch((error: Error) => {
@@ -106,7 +106,7 @@ export const getQueryIntel = (
     src: "",
     query,
     fragments,
-    operations
+    operations,
   };
 
   // console.log("query intel", JSON.stringify(intel, null, "  "));
@@ -131,9 +131,9 @@ const getOperationsInfo = (
       fragmentNodes[node.name.value] = node;
       fragments.push({
         name: node.name.value,
-        query: removeIndents(query.substring(location.start, location.end))
+        query: removeIndents(query.substring(location.start, location.end)),
       });
-    }
+    },
   });
 
   const operationsInfo: OperationNodeInfo[] = [];
@@ -143,9 +143,9 @@ const getOperationsInfo = (
       operationsInfo.push({
         query: removeIndents(query.substring(location.start, location.end)),
         node: node,
-        fragmentNames: []
+        fragmentNames: [],
       });
-    }
+    },
   });
 
   operationsInfo.forEach((info: OperationNodeInfo) => {
@@ -158,19 +158,19 @@ const getOperationsInfo = (
           typeCondition: fragmentNode.typeCondition,
           directives: fragmentNode.directives,
           selectionSet: fragmentNode.selectionSet,
-          loc: fragmentNode.loc
+          loc: fragmentNode.loc,
         };
-      }
+      },
     });
   });
 
   const findFragmentByName = (name: string): QueryFragment =>
-    assertOk(fragments.find(fragment => fragment.name === name));
+    assertOk(fragments.find((fragment) => fragment.name === name));
 
-  operationsInfo.forEach(info => {
+  operationsInfo.forEach((info) => {
     const fragmentQueries: string[] = info.fragmentNames
       .map(findFragmentByName)
-      .map(fragment => fragment.query);
+      .map((fragment) => fragment.query);
     const query = `${info.query}${fragmentQueries.join("")}`;
     parseAndValidate(query, schema);
   });
@@ -186,7 +186,7 @@ const getOperation = (schema: GraphQLSchema) => (
   query: info.query,
   fragmentNames: info.fragmentNames,
   inputs: getInputs(info.node, schema),
-  outputs: getOutputs(info.node, schema)
+  outputs: getOutputs(info.node, schema),
 });
 
 const assertLocation = (location: Location | undefined): Location =>
@@ -242,7 +242,7 @@ const getInputs = (
         kind: "object",
         fields: node.variableDefinitions.map((node: VariableDefinitionNode) =>
           nodeToInputField(node, schema)
-        )
+        ),
       }
     : undefined;
 
@@ -254,7 +254,7 @@ const nodeToInputField = (
     {
       name: node.variable.name.value,
       type: getInputType(node, schema),
-      extensions: null
+      extensions: null,
     },
     schema
   );
@@ -274,17 +274,19 @@ const mapInputField = (
     value = {
       kind: "object",
       typeName,
-      fields: Object.keys(fields).map(key => mapInputField(fields[key], schema))
+      fields: Object.keys(fields).map((key) =>
+        mapInputField(fields[key], schema)
+      ),
     };
   } else if (namedType instanceof GraphQLScalarType) {
     value = {
       kind: "scalar",
-      typeName
+      typeName,
     };
   } else if (namedType instanceof GraphQLEnumType) {
     value = {
       kind: "enum",
-      typeName
+      typeName,
     };
   }
 
@@ -297,7 +299,7 @@ const mapInputField = (
         ? nullableType.ofType instanceof GraphQLNonNull
           ? "non-null"
           : "optional"
-        : false
+        : false,
   };
 };
 
@@ -500,7 +502,7 @@ const getOutputs = (
           ? nullableType.ofType instanceof GraphQLNonNull
             ? "non-null"
             : "nullable"
-          : false
+          : false,
     };
 
     parentNodeInfo.fields.push(field);
@@ -521,7 +523,7 @@ const getOutputs = (
   const pushNodeInfo = () => {
     nodeInfoStack.push({
       fields: [],
-      fragments: []
+      fragments: [],
     });
   };
 
@@ -537,7 +539,7 @@ const getOutputs = (
       },
       InlineFragment() {
         pushNodeInfo();
-      }
+      },
     },
     leave: {
       OperationDefinition(node: OperationDefinitionNode) {
@@ -587,18 +589,18 @@ const getOutputs = (
             kind: "object-fragment",
             type,
             typeName,
-            fields: result.fields
+            fields: result.fields,
           });
         } else {
           addFragmentToParent({
             kind: "fragmented-fragment",
             type,
             typeName,
-            fragments: result.fragments
+            fragments: result.fragments,
           });
         }
-      }
-    }
+      },
+    },
   };
 
   visit(node, visitWithTypeInfo(typeInfo, visitor));
@@ -622,18 +624,18 @@ const getOutput = (
     if (name === "__typename") {
       return {
         typeName,
-        kind: "typename"
+        kind: "typename",
       };
     } else {
       return {
         typeName,
-        kind: "scalar"
+        kind: "scalar",
       };
     }
   } else if (namedType instanceof GraphQLEnumType) {
     return {
       typeName,
-      kind: "enum"
+      kind: "enum",
     };
   }
 
@@ -654,13 +656,13 @@ const getCompositeOutput = (
     return {
       kind: "object",
       typeName,
-      fields: result.fields
+      fields: result.fields,
     };
   } else {
     return {
       kind: "fragmented",
       typeName,
-      fragments: result.fragments
+      fragments: result.fragments,
     };
   }
 };
@@ -679,14 +681,14 @@ const getFragment = (
       kind: "object-fragment",
       type,
       typeName,
-      fields: result.fields
+      fields: result.fields,
     };
   } else {
     return {
       kind: "fragmented-fragment",
       type,
       typeName,
-      fragments: result.fragments
+      fragments: result.fragments,
     };
   }
 };
@@ -699,7 +701,7 @@ const getFieldsOrFragments = (
 ): { fields: QueryOutputField[] } | { fragments: QueryFragmentOutput[] } => {
   const typeName = type.name;
 
-  const typenameFields: QueryOutputField[] = fields.filter(field =>
+  const typenameFields: QueryOutputField[] = fields.filter((field) =>
     isTypenameOutput(field.value)
   );
 
@@ -714,25 +716,25 @@ const getFieldsOrFragments = (
       const fragmentTypeNames = getAllIncludedFragmentTypes(
         inFragments,
         schema
-      ).map(type => type.name);
+      ).map((type) => type.name);
 
       const missingFragmentTypes = possibleFragmentTypes.filter(
-        type => !fragmentTypeNames.includes(type.name)
+        (type) => !fragmentTypeNames.includes(type.name)
       );
 
-      missingFragmentTypes.forEach(type =>
+      missingFragmentTypes.forEach((type) =>
         inFragments.push({
           kind: "object-fragment",
           type,
           typeName: type.name,
-          fields: []
+          fields: [],
         })
       );
     }
 
     if (inFragments.length > 0) {
-      fields = fields.filter(field => !typenameFields.includes(field));
-      inFragments.forEach(fragment => {
+      fields = fields.filter((field) => !typenameFields.includes(field));
+      inFragments.forEach((fragment) => {
         if (fragment.kind === "object-fragment") {
           fragment.fields.push(...typenameFields);
         }
@@ -745,7 +747,7 @@ const getFieldsOrFragments = (
     schema
   );
 
-  const hasAllPossibleTypes: boolean = possibleFragmentTypes.every(type =>
+  const hasAllPossibleTypes: boolean = possibleFragmentTypes.every((type) =>
     includedFragmentTypes.includes(type)
   );
 
@@ -763,7 +765,7 @@ const getFieldsOrFragments = (
     if (!hasAllPossibleTypes) {
       fragments.push({
         kind: "empty-fragment",
-        typeName
+        typeName,
       });
     }
   }
@@ -772,7 +774,7 @@ const getFieldsOrFragments = (
     if (!hasAllPossibleTypes) {
       fragments.push({
         kind: "other-fragment",
-        typeName
+        typeName,
       });
     }
 
@@ -781,10 +783,10 @@ const getFieldsOrFragments = (
       value: {
         kind: "fragmented-on",
         typeName: `On${typeName}`,
-        fragments
+        fragments,
       },
       valueWrapper: false,
-      valueListItemWrapper: false
+      valueListItemWrapper: false,
     };
 
     fields = [...fields, onField];
@@ -807,7 +809,7 @@ const getAllIncludedFragmentTypes = (
   schema: GraphQLSchema
 ): GraphQLNamedType[] =>
   getAllIncludedTypes(
-    fragments.map(fragment => fragment.type),
+    fragments.map((fragment) => fragment.type),
     schema
   );
 

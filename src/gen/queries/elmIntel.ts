@@ -17,7 +17,7 @@ import {
   QueryFragmentedOutput,
   QueryFragmentedOnOutput,
   QueryFragmentedFragmentOutput,
-  QueryFragmentOutput
+  QueryFragmentOutput,
 } from "./queryIntel";
 import {
   validModuleName,
@@ -26,7 +26,7 @@ import {
   validFieldName,
   validTypeConstructorName,
   validNameUpper,
-  newUnusedName
+  newUnusedName,
 } from "../elmUtils";
 
 export interface ElmIntel {
@@ -64,7 +64,7 @@ export const queryToElmIntel = (
 
     const moduleParts = srcInfo.dir
       .split(/[\\/]/)
-      .filter(x => !!x)
+      .filter((x) => !!x)
       .concat(srcInfo.name)
       .map(validModuleName);
 
@@ -77,10 +77,10 @@ export const queryToElmIntel = (
     typesBySignature: {},
     fragmentsByName: {},
     encodersByType: {},
-    decodersByType: {}
+    decodersByType: {},
   };
 
-  const operations = queryIntel.operations.map(operation =>
+  const operations = queryIntel.operations.map((operation) =>
     getOperation(relativeSrc, operation, scope, options)
   );
 
@@ -94,7 +94,7 @@ export const queryToElmIntel = (
     module,
     operations,
     fragments,
-    scope
+    scope,
   };
 
   // console.log("elm scope", JSON.stringify(scope, null, "  "));
@@ -194,7 +194,7 @@ const getOperation = (
         variables,
         data,
         errors,
-        responseTypeName
+        responseTypeName,
       };
     case "named":
       return {
@@ -205,7 +205,7 @@ const getOperation = (
         variables,
         data,
         errors,
-        responseTypeName
+        responseTypeName,
       };
     case "named_prefixed":
       return {
@@ -217,7 +217,7 @@ const getOperation = (
         variables,
         data,
         errors,
-        responseTypeName
+        responseTypeName,
       };
   }
 };
@@ -249,9 +249,9 @@ const fixFragmentNames = (
   operations: ElmOperation[],
   scope: ElmScope
 ): void => {
-  operations.forEach(operation => {
+  operations.forEach((operation) => {
     if (operation.kind === "query") {
-      operation.fragments = operation.fragments.map(name =>
+      operation.fragments = operation.fragments.map((name) =>
         assertOk(scope.fragmentsByName[name])
       );
     }
@@ -274,7 +274,7 @@ const getFragments = (
 ): ElmFragment[] => {
   switch (options.operationKind) {
     case "query":
-      return fragments.map(fragment => getFragment(fragment, scope));
+      return fragments.map((fragment) => getFragment(fragment, scope));
     case "named":
     case "named_prefixed":
       return [];
@@ -292,7 +292,7 @@ const getFragment = (
   scope.fragmentsByName[queryFragment.name] = name;
   return {
     name,
-    query: queryFragment.query
+    query: queryFragment.query,
   };
 };
 
@@ -340,7 +340,7 @@ const getEncoder = (
 
       return {
         ...scalarEncoder,
-        kind: "value-encoder"
+        kind: "value-encoder",
       };
     }
 
@@ -352,7 +352,7 @@ const getEncoder = (
 
       return {
         ...enumEncoder,
-        kind: "value-encoder"
+        kind: "value-encoder",
       };
     }
   }
@@ -370,7 +370,7 @@ const getRecordEncoder = (
       name: newUnusedName(validFieldName(field.name), usedFieldNames),
       value: getEncoder(field.value, scope, options),
       valueWrapper: field.valueWrapper,
-      valueListItemWrapper: field.valueListItemWrapper
+      valueListItemWrapper: field.valueListItemWrapper,
     })
   );
   const type = getRecordType(input, fields, scope);
@@ -379,7 +379,7 @@ const getRecordEncoder = (
     kind: "record-encoder",
     type,
     encoder: getEncoderName(type, scope),
-    fields
+    fields,
   };
 };
 
@@ -492,7 +492,7 @@ const getDecoder = (
         kind: "constant-string-decoder",
         type: output.typeName,
         value: `"${parentOutput.typeName}"`,
-        decoder: "Json.Decode.string"
+        decoder: "Json.Decode.string",
       };
 
     case "scalar": {
@@ -503,7 +503,7 @@ const getDecoder = (
 
       return {
         ...scalarDecoder,
-        kind: "value-decoder"
+        kind: "value-decoder",
       };
     }
 
@@ -515,7 +515,7 @@ const getDecoder = (
 
       return {
         ...enumDecoder,
-        kind: "value-decoder"
+        kind: "value-decoder",
       };
     }
   }
@@ -533,7 +533,7 @@ const getRecordDecoder = (
       name: newUnusedName(validFieldName(field.name), usedFieldNames),
       value: getDecoder(output, field.value, scope, options),
       valueWrapper: field.valueWrapper,
-      valueListItemWrapper: field.valueListItemWrapper
+      valueListItemWrapper: field.valueListItemWrapper,
     })
   );
   const type = getRecordType(output, fields, scope);
@@ -542,7 +542,7 @@ const getRecordDecoder = (
     kind: "record-decoder",
     type,
     decoder: getDecoderName(type, scope),
-    fields
+    fields,
   };
 };
 
@@ -559,7 +559,7 @@ const getUnionDecoder = (
     kind: "union-decoder",
     type,
     decoder: getDecoderName(type, scope),
-    constructors
+    constructors,
   };
 };
 
@@ -576,7 +576,7 @@ const getUnionOnDecoder = (
     kind: "union-on-decoder",
     type,
     decoder: getDecoderName(type, scope),
-    constructors
+    constructors,
   };
 };
 
@@ -589,7 +589,7 @@ const getUnionConstructorDecoders = (
   options: FinalOptions
 ): ElmUnionConstructorDecoder[] =>
   checkUnionConstructorDecodeSignatures(
-    output.fragments.map(fragment =>
+    output.fragments.map((fragment) =>
       getUnionConstructorDecoder(fragment, scope, options)
     )
   );
@@ -610,14 +610,14 @@ const getUnionConstructorDecoder = (
       return {
         kind: "empty-decoder",
         type: `Other${validNameUpper(fragment.typeName)}`,
-        decoder: "GraphQL.Helpers.Decode.emptyObject"
+        decoder: "GraphQL.Helpers.Decode.emptyObject",
       };
 
     case "other-fragment": {
       return {
         kind: "empty-decoder",
         type: `Other${validNameUpper(fragment.typeName)}`,
-        decoder: "Json.Decode.succeed"
+        decoder: "Json.Decode.succeed",
       };
     }
   }
@@ -650,7 +650,7 @@ const getDecodeSignature = (decoder: ElmDecoder): string => {
     case "record-decoder":
       return decoder.fields
         .map(
-          field =>
+          (field) =>
             `${field.jsonName} : ${wrapList(
               field.valueListItemWrapper,
               getDecodeSignature(field.value)
@@ -662,7 +662,7 @@ const getDecodeSignature = (decoder: ElmDecoder): string => {
     case "union-decoder":
     case "union-on-decoder":
       return `${decoder.type} : ${decoder.constructors
-        .map(constructor => getDecodeSignature(constructor.decoder))
+        .map((constructor) => getDecodeSignature(constructor.decoder))
         .sort()
         .join(" | ")}`;
 
@@ -689,16 +689,18 @@ const getUnionSignature = (
   queryItem: { typeName: string },
   decoders: ElmUnionConstructorDecoder[]
 ): string =>
-  `${queryItem.typeName}: ${decoders.map(decoder => decoder.type).join(" | ")}`;
+  `${queryItem.typeName}: ${decoders
+    .map((decoder) => decoder.type)
+    .join(" | ")}`;
 
 const getUnionConstructors = (
   unionType: string,
   decoders: ElmUnionConstructorDecoder[],
   scope: ElmScope
 ): ElmUnionConstructor[] =>
-  decoders.map(decoder => ({
+  decoders.map((decoder) => ({
     name: getUnionConstructorName(unionType, decoder.type, scope),
-    decoder
+    decoder,
   }));
 
 const getUnionConstructorName = (
@@ -742,7 +744,7 @@ const getRecordSignature = (
 
 const getRecordFieldsSignature = (fields: ElmRecordField[]): string =>
   fields
-    .map(field => `${field.name} : ${wrappedTypeSignature(field)}`)
+    .map((field) => `${field.name} : ${wrappedTypeSignature(field)}`)
     .sort()
     .join(", ");
 

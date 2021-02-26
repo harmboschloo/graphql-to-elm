@@ -10,13 +10,13 @@ const typeDefs = gql(readFileSync("src/schema.gql", "utf8"));
 
 const resolvers = {
   Query: {
-    messages: () => messages
-  }
+    messages: () => messages,
+  },
 };
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
 });
 
 const app = express();

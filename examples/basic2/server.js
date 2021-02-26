@@ -10,7 +10,7 @@ const typeDefs = gql(readFileSync("src/schema.gql", "utf8"));
 
 const resolvers = {
   Query: {
-    messages: () => messages
+    messages: () => messages,
   },
 
   Mutation: {
@@ -21,21 +21,21 @@ const resolvers = {
 
       const message = {
         id: messages.length,
-        message: args.message
+        message: args.message,
       };
       messages.push(message);
       return message;
-    }
+    },
   },
 
   PostMessageResponse: {
-    __resolveType: data => (data.error ? "MutationError" : "Message")
-  }
+    __resolveType: (data) => (data.error ? "MutationError" : "Message"),
+  },
 };
 
 const server = new ApolloServer({
   typeDefs,
-  resolvers
+  resolvers,
 });
 
 const app = express();

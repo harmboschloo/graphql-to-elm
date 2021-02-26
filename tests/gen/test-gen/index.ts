@@ -7,7 +7,7 @@ import {
   readFile,
   fixLineEndings,
   Stats,
-  lstat
+  lstat,
 } from "../utils";
 import { Fixture, getFixtures, clean as cleanFixtures } from "../fixtures";
 import { graphqlToElm } from "../../../src/gen/graphqlToElm";
@@ -18,7 +18,7 @@ export type Config = {
 };
 
 export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
-  test("graphqlToElm generate test").then(t =>
+  test("graphqlToElm generate test").then((t) =>
     cleanFixtures()
       .then(() => {
         const cwd = process.cwd();
@@ -38,7 +38,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
     options,
     actual,
     expect,
-    throws
+    throws,
   }: Fixture): Promise<void> =>
     test(`== fixture ${id} ==`, t).then(
       (t: Test): Promise<void> => {
@@ -51,7 +51,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
           if (throws) {
             return fn()
               .then(() => t.fail(`Expected error message: ${throws}`))
-              .catch(error =>
+              .catch((error) =>
                 t.equal(error.message, throws, "Expected error message")
               );
           } else {
@@ -66,7 +66,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
             () =>
               graphqlToElm({
                 ...options,
-                log: t.comment
+                log: t.comment,
               }),
             "graphqlToElm"
           )
@@ -82,7 +82,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
               graphqlToElm({
                 ...options,
                 dest: expect,
-                log: t.comment
+                log: t.comment,
               }),
             "graphqlToElm UPDATE"
           ).then(runFixtureTest);
@@ -97,12 +97,12 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
     { actual, expect }: { actual: string; expect: string }
   ): Promise<Test> =>
     Promise.all([
-      glob(p.resolve(actual, "**/*")).then(matches =>
-        matches.map(path => p.relative(actual, path))
+      glob(p.resolve(actual, "**/*")).then((matches) =>
+        matches.map((path) => p.relative(actual, path))
       ),
-      glob(p.resolve(expect, "**/*")).then(matches =>
-        matches.map(path => p.relative(expect, path))
-      )
+      glob(p.resolve(expect, "**/*")).then((matches) =>
+        matches.map((path) => p.relative(expect, path))
+      ),
     ])
       .then(
         ([actualFiles, expectedFiles]): Promise<any> => {
@@ -124,7 +124,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
 
                 return Promise.all([
                   lstat(actualFile),
-                  lstat(expectedFile)
+                  lstat(expectedFile),
                 ]).then(
                   ([actualStats, expectedStats]: Stats[]): Promise<void> => {
                     if (actualStats.isDirectory()) {
@@ -133,7 +133,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
                     } else {
                       return Promise.all([
                         readFile(actualFile),
-                        readFile(expectedFile)
+                        readFile(expectedFile),
                       ]).then(([actualContent, expectedContent]: string[]) => {
                         t.equal(
                           actualContent,

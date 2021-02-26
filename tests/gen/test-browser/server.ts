@@ -4,7 +4,7 @@ import { GraphQLScalarType } from "graphql";
 import {
   ApolloServer,
   makeExecutableSchema,
-  addMockFunctionsToSchema
+  addMockFunctionsToSchema,
 } from "apollo-server-express";
 import { namedQueries } from "./generated/namedQueries";
 import { schemas } from "./generated/schemas";
@@ -13,13 +13,13 @@ const app = express();
 
 const timeScalar = new GraphQLScalarType({
   name: "Time",
-  serialize: value => `${value}`,
-  parseValue: value => parseInt(value, 10),
-  parseLiteral: ast =>
-    ast.kind == "StringValue" ? parseInt(ast.value, 10) : null
+  serialize: (value) => `${value}`,
+  parseValue: (value) => parseInt(value, 10),
+  parseLiteral: (ast) =>
+    ast.kind == "StringValue" ? parseInt(ast.value, 10) : null,
 });
 
-Object.keys(schemas).forEach(id => {
+Object.keys(schemas).forEach((id) => {
   const setNamedQuery = (payload: any) => {
     if (payload.operationName && !payload.query) {
       payload.query = namedQueries[`${id}/${payload.operationName}`];
@@ -42,7 +42,7 @@ Object.keys(schemas).forEach(id => {
   const schema = makeExecutableSchema({
     typeDefs,
     resolvers,
-    resolverValidationOptions: { requireResolversForResolveType: false }
+    resolverValidationOptions: { requireResolversForResolveType: false },
   });
 
   addMockFunctionsToSchema({ schema, mocks });
@@ -50,7 +50,7 @@ Object.keys(schemas).forEach(id => {
   const server = new ApolloServer({
     schema,
     introspection: false,
-    playground: false
+    playground: false,
   });
 
   const endpointURL = `/graphql/${id}`;

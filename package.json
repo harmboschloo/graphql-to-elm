@@ -36,7 +36,7 @@
     "format-elm": "elm-format --yes ./src ./tests ./examples",
     "validate": "npm run validate-prettier && npm run validate-elm",
     "validate-prettier": "prettier -l index.* \"./{src,tests,examples}/**/*.{js,ts,gql}\"",
-    "validate-elm": "elm-format --validate ./src ./tests ./examples",
+    "validate-elm": "elm-format --validate ./src ./tests/gen/test-browser/src ./tests/GraphQL ./examples",
     "doc-preview": "elm-doc-preview",
     "prepublishOnly": "npm run validate && npm run build && npm run examples-build && npm run test"
   },

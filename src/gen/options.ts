@@ -145,7 +145,7 @@ export const finalizeOptions = (options: Options): FinalOptions => {
   const operationKind = withDefault("query", options.operationKind);
   const log =
     typeof options.log !== "undefined"
-      ? options.log || ((x) => {})
+      ? options.log || ((_) => {})
       : (message: string) => console.log(message);
 
   return {

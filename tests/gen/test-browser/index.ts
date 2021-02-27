@@ -21,7 +21,7 @@ import {
   ElmOperationType,
 } from "../../../src/gen/queries/elmIntel";
 import { validModuleName } from "../../../src/gen/elmUtils";
-import { writeFile } from "../../../src/gen/utils";
+import { assertNever, writeFile } from "../../../src/gen/utils";
 
 interface FixtureResult {
   fixture: Fixture;
@@ -222,7 +222,10 @@ const generateVariables = (encoder: ElmEncoder): string => {
         default:
           throw new Error(`unhandled encoder type: ${encoder.type}`);
       }
+    default:
+      assertNever(encoder);
   }
+  return "";
 };
 
 type NamedQuery = {

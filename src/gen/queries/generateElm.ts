@@ -20,7 +20,7 @@ import {
   ElmRecordField,
 } from "./elmIntel";
 import { findUnusedName } from "../elmUtils";
-import { withParentheses, addOnce } from "../utils";
+import { withParentheses, addOnce, assertNever } from "../utils";
 
 type TypeWrapper = false | "nullable" | "optional" | "non-null-optional";
 type ListItemWrapper = false | "non-null" | "nullable" | "optional";
@@ -63,13 +63,13 @@ const generateExports = (intel: ElmIntel): string => {
         record: (encoder: ElmRecordEncoder) => {
           addType(encoder.type);
         },
-        value: (encoder: ElmValueEncoder) => {},
+        value: (_encoder: ElmValueEncoder) => {},
       });
     }
 
     visitDecoders(operation.data, {
-      value: (decoder: ElmValueDecoder) => {},
-      constantString: (decoder: ElmConstantStringDecoder) => {},
+      value: (_decoder: ElmValueDecoder) => {},
+      constantString: (_decoder: ElmConstantStringDecoder) => {},
       record: (decoder: ElmRecordDecoder) => {
         addType(decoder.type);
       },
@@ -79,7 +79,7 @@ const generateExports = (intel: ElmIntel): string => {
       unionOn: (decoder: ElmUnionOnDecoder) => {
         addType(`${decoder.type}(..)`);
       },
-      empty: (decoder: ElmEmptyDecoder) => {},
+      empty: (_decoder: ElmEmptyDecoder) => {},
     });
   });
 
@@ -151,7 +151,7 @@ const generateImports = (intel: ElmIntel): string => {
         addImportOf(decoder.type);
         addImportOf(decoder.decoder);
       },
-      constantString: (decoder: ElmConstantStringDecoder) => {
+      constantString: (_decoder: ElmConstantStringDecoder) => {
         addImport("GraphQL.Helpers.Decode");
       },
       record: (decoder: ElmRecordDecoder) => {
@@ -160,8 +160,8 @@ const generateImports = (intel: ElmIntel): string => {
           addImport("GraphQL.Helpers.Decode");
         }
       },
-      union: (decoder: ElmUnionDecoder) => {},
-      unionOn: (decoder: ElmUnionOnDecoder) => {},
+      union: (_decoder: ElmUnionDecoder) => {},
+      unionOn: (_decoder: ElmUnionOnDecoder) => {},
       empty: (decoder: ElmEmptyDecoder) => {
         addImportOf(decoder.decoder);
       },
@@ -227,6 +227,8 @@ ${operation.name}${variables.parameter} =
         ${variables.value}
         ${operation.data.decoder}
         ${operation.errors.decoder}`;
+    default:
+      return assertNever(operation);
   }
 };
 
@@ -295,7 +297,7 @@ const generateEncoders = (
         generateRecordEncoder(encoder, scope),
       ]);
     },
-    value: (encoder: ElmValueEncoder) => {},
+    value: (_encoder: ElmValueEncoder) => {},
   });
 };
 
@@ -386,8 +388,8 @@ const generateDecoders = (
   newType: (type: string, createItems: () => string[]) => void
 ): void => {
   visitDecoders(decoder, {
-    value: (decoder: ElmValueDecoder) => {},
-    constantString: (decoder: ElmConstantStringDecoder) => {},
+    value: (_decoder: ElmValueDecoder) => {},
+    constantString: (_decoder: ElmConstantStringDecoder) => {},
     record: (decoder: ElmRecordDecoder) => {
       newType(decoder.type, () => [
         generateRecordTypeDeclaration(decoder),
@@ -400,7 +402,7 @@ const generateDecoders = (
     unionOn: (decoder: ElmUnionOnDecoder) => {
       newType(decoder.type, () => generateUnionDecoder(decoder));
     },
-    empty: (decoder: ElmEmptyDecoder) => {},
+    empty: (_decoder: ElmEmptyDecoder) => {},
   });
 };
 
@@ -475,6 +477,8 @@ const generateUnionDecoder = (
           return `${constructor.name} ${constructor.decoder.type}`;
         case "empty-decoder":
           return constructor.name;
+        default:
+          return assertNever(constructor.decoder);
       }
     }
   );
@@ -493,6 +497,8 @@ const generateUnionDecoder = (
           return `Json.Decode.map ${constructor.name} ${constructor.decoder.decoder}`;
         case "empty-decoder":
           return `${constructor.decoder.decoder} ${constructor.name}`;
+        default:
+          return assertNever(constructor.decoder);
       }
     }
   );
@@ -514,6 +520,8 @@ const numberOfChildren = (constructor: ElmUnionConstructor): number => {
       return constructor.decoder.constructors.length;
     case "empty-decoder":
       return 0;
+    default:
+      return assertNever(constructor.decoder);
   }
 };
 
@@ -589,6 +597,8 @@ const visitEncoders = (encoder: ElmEncoder, visitor: EncoderVisitor) => {
     case "value-encoder":
       visitor.value(encoder);
       break;
+    default:
+      assertNever(encoder);
   }
 };
 

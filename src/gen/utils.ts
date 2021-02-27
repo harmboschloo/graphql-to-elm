@@ -57,9 +57,13 @@ export const assertOk = <T>(
   errorMessage: string = "not ok"
 ): T => {
   if (typeof a === "undefined") {
-    throw Error(errorMessage);
+    throw new Error(errorMessage);
   }
   return a;
+};
+
+export const assertNever = (x: never): never => {
+  throw new Error(`Unexpected ${x}`);
 };
 
 export const withDefault = <T>(defaultValue: T, value: T | undefined): T =>

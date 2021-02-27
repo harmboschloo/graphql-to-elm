@@ -1,6 +1,6 @@
 import * as path from "path";
 import { FinalOptions, TypeEncoder, TypeDecoder } from "../options";
-import { cachedValue, assertOk } from "../utils";
+import { cachedValue, assertOk, assertNever } from "../utils";
 import {
   QueryIntel,
   QueryOperation,
@@ -186,7 +186,7 @@ const getOperation = (
   switch (options.operationKind) {
     case "query":
       return {
-        type: getOperationType(queryOperation.type),
+        type,
         kind: "query",
         name,
         query: queryOperation.query,
@@ -198,7 +198,7 @@ const getOperation = (
       };
     case "named":
       return {
-        type: getOperationType(queryOperation.type),
+        type,
         kind: "named",
         name,
         gqlName: assertOperationName(queryOperation),
@@ -209,7 +209,7 @@ const getOperation = (
       };
     case "named_prefixed":
       return {
-        type: getOperationType(queryOperation.type),
+        type,
         kind: "named_prefixed",
         name,
         gqlName: assertOperationName(queryOperation),
@@ -230,6 +230,8 @@ const getOperationType = (type: QueryOperationType): ElmOperationType => {
       return "Mutation";
     case "subscription":
       return "Subscription";
+    default:
+      return assertNever(type);
   }
 };
 
@@ -355,6 +357,8 @@ const getEncoder = (
         kind: "value-encoder",
       };
     }
+    default:
+      return assertNever(input);
   }
 };
 
@@ -472,6 +476,8 @@ const getCompositeDecoder = (
 
     case "fragmented-on":
       return getUnionOnDecoder(output, scope, options);
+    default:
+      return assertNever(output);
   }
 };
 
@@ -518,6 +524,8 @@ const getDecoder = (
         kind: "value-decoder",
       };
     }
+    default:
+      return assertNever(output);
   }
 };
 
@@ -620,6 +628,8 @@ const getUnionConstructorDecoder = (
         decoder: "Json.Decode.succeed",
       };
     }
+    default:
+      return assertNever(fragment);
   }
 };
 
@@ -668,6 +678,8 @@ const getDecodeSignature = (decoder: ElmDecoder): string => {
 
     case "empty-decoder":
       return "{}";
+    default:
+      return assertNever(decoder);
   }
 };
 

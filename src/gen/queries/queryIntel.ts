@@ -10,7 +10,6 @@ import {
   GraphQLObjectType,
   GraphQLInputType,
   GraphQLInputObjectType,
-  GraphQLInputFieldMap,
   GraphQLInputField,
   DocumentNode,
   OperationDefinitionNode,
@@ -42,6 +41,7 @@ import {
   assertOk,
   addOnce,
   firstToUpperCase,
+  assertNever,
 } from "../utils";
 
 export interface QueryIntel {
@@ -449,6 +449,8 @@ export const isFragmentOutput = (
     case "empty-fragment":
     case "other-fragment":
       return true;
+    default:
+      return assertNever(output);
   }
 };
 
@@ -570,12 +572,10 @@ const getOutputs = (
     leave: {
       OperationDefinition(node: OperationDefinitionNode) {
         const nodeInfo: NodeInfo = popNodeInfo();
-        const name: string = "";
         const type: GraphQLCompositeType = assertCompositeType(
           typeInfo.getType()
         );
         rootOutput = getCompositeOutput(
-          name,
           type,
           nodeInfo.fields,
           nodeInfo.fragments,
@@ -645,7 +645,7 @@ const getOutput = (
   const typeName = namedType.name;
 
   if (isCompositeType(namedType)) {
-    return getCompositeOutput(name, namedType, fields, fragments, schema);
+    return getCompositeOutput(namedType, fields, fragments, schema);
   } else if (namedType instanceof GraphQLScalarType) {
     if (name === "__typename") {
       return {
@@ -669,7 +669,6 @@ const getOutput = (
 };
 
 const getCompositeOutput = (
-  name: string,
   type: GraphQLCompositeType,
   fields: QueryOutputField[],
   fragments: QueryCompositeFragmentOutput[],
@@ -687,32 +686,6 @@ const getCompositeOutput = (
   } else {
     return {
       kind: "fragmented",
-      typeName,
-      fragments: result.fragments,
-    };
-  }
-};
-
-const getFragment = (
-  type: GraphQLCompositeType,
-  fields: QueryOutputField[],
-  fragments: QueryCompositeFragmentOutput[],
-  schema: GraphQLSchema
-): QueryCompositeFragmentOutput => {
-  const namedType = getNamedType(type);
-  const typeName = namedType.name;
-  const result = getFieldsOrFragments(schema, type, fields, fragments);
-  if ("fields" in result) {
-    return {
-      kind: "object-fragment",
-      type,
-      typeName,
-      fields: result.fields,
-    };
-  } else {
-    return {
-      kind: "fragmented-fragment",
-      type,
       typeName,
       fragments: result.fragments,
     };

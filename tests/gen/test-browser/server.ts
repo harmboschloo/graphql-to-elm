@@ -55,7 +55,7 @@ Object.keys(schemas).forEach((id) => {
 
   const endpointURL = `/graphql/${id}`;
 
-  app.use(endpointURL, bodyParser.json(), (req, resp, next) => {
+  app.use(endpointURL, bodyParser.json(), (req, _resp, next) => {
     if (Array.isArray(req.body)) {
       req.body.forEach(setNamedQuery);
     } else {

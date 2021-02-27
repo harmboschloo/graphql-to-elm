@@ -55,7 +55,7 @@
     "elm": "^0.19.1-5",
     "elm-doc-preview": "^5.0.5",
     "elm-format": "^0.8.5",
-    "elm-test": "^0.19.1-revision6",
+    "elm-test": "0.19.1-revision4",
     "express": "^4.17.1",
     "phantom": "^6.3.0",
     "prettier": "^2.2.1",

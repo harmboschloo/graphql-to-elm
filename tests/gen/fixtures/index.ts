@@ -242,6 +242,7 @@ const getData = (): { [key: string]: FinalConfig } => ({
       "inputs-mixed.gql",
       "inputs-multiple.gql",
       "lists.gql",
+      "recursive.gql",
     ],
   }),
 });

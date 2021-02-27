@@ -303,6 +303,8 @@ const generateRecordEncoder = (
   encoder: ElmRecordEncoder,
   scope: ElmScope
 ): string => {
+  const typeDeclaration = `${encoder.encoder} : ${encoder.type} -> Json.Encode.Value`;
+
   const hasOptionals = encoder.fields.some(
     (field) => field.valueWrapper === "optional"
   );
@@ -312,6 +314,10 @@ const generateRecordEncoder = (
     : "Json.Encode.object";
 
   const argumentName = findUnusedName("inputs", scope.names);
+
+  if (!encoder.fields.length) {
+    return `${typeDeclaration}\n${encoder.encoder} ${argumentName} =\n    ${objectEncoder} []`;
+  }
 
   const fieldEncoders = encoder.fields
     .map(
@@ -323,7 +329,7 @@ const generateRecordEncoder = (
     )
     .join("\n        , ");
 
-  return `${encoder.encoder} : ${encoder.type} -> Json.Encode.Value
+  return `${typeDeclaration}
 ${encoder.encoder} ${argumentName} =
     ${objectEncoder}
         [ ${fieldEncoders}
@@ -518,6 +524,10 @@ const numberOfChildren = (constructor: ElmUnionConstructor): number => {
 const generateRecordTypeDeclaration = (
   item: ElmRecordEncoder | ElmRecordDecoder
 ): string => {
+  if (!item.fields.length) {
+    return `type alias ${item.type} =\n    {}`;
+  }
+
   const fields: ElmRecordField[] = item.fields;
   const fieldTypes: string[] = fields.map(
     (field) => `${field.name} : ${wrappedType(field)}`

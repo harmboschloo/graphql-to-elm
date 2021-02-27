@@ -27,6 +27,8 @@ type Query {
     inputs: [Inputs!]!
     inputs2: [OptionalInputs]!
   ): String
+
+  recursive(input: RecursiveInput!): String
 }
 
 input Inputs {
@@ -49,4 +51,8 @@ input MixedInputs {
 
 input OtherInputs {
   string: String!
+}
+
+input RecursiveInput {
+  child: RecursiveInput
 }

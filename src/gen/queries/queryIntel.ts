@@ -232,6 +232,14 @@ export interface QueryEnumInput {
   typeName: string;
 }
 
+interface InputContext {
+  depth: number;
+  recursive: boolean;
+  objectTypeNames: Set<string>;
+}
+
+const maxRecursiveInputDepth = 50;
+
 const getInputs = (
   node: OperationDefinitionNode,
   schema: GraphQLSchema
@@ -241,14 +249,19 @@ const getInputs = (
         typeName: `${node.name ? node.name.value : ""}Variables`,
         kind: "object",
         fields: node.variableDefinitions.map((node: VariableDefinitionNode) =>
-          nodeToInputField(node, schema)
+          nodeToInputField(node, schema, {
+            depth: 0,
+            recursive: false,
+            objectTypeNames: new Set(),
+          })
         ),
       }
     : undefined;
 
 const nodeToInputField = (
   node: VariableDefinitionNode,
-  schema: GraphQLSchema
+  schema: GraphQLSchema,
+  context: InputContext
 ): QueryInputField =>
   mapInputField(
     {
@@ -257,12 +270,14 @@ const nodeToInputField = (
       extensions: null,
       deprecationReason: null,
     },
-    schema
+    schema,
+    context
   );
 
 const mapInputField = (
   field: GraphQLInputField,
-  schema: GraphQLSchema
+  schema: GraphQLSchema,
+  context: InputContext
 ): QueryInputField => {
   const namedType: GraphQLNamedType = getNamedType(field.type);
   const nullableType = getNullableType(field.type);
@@ -271,13 +286,23 @@ const mapInputField = (
   let value: QueryInput | undefined = undefined;
 
   if (namedType instanceof GraphQLInputObjectType) {
-    const fields: GraphQLInputFieldMap = namedType.getFields();
+    if (context.objectTypeNames.has(typeName)) {
+      context.recursive = true;
+    }
+    context.objectTypeNames.add(typeName);
+    context.depth += 1;
+
+    const maxRecursiveInputDepthReached =
+      context.recursive && context.depth >= maxRecursiveInputDepth;
+
     value = {
       kind: "object",
       typeName,
-      fields: Object.keys(fields).map((key) =>
-        mapInputField(fields[key], schema)
-      ),
+      fields: maxRecursiveInputDepthReached
+        ? []
+        : Object.values(namedType.getFields()).map((field) =>
+            mapInputField(field, schema, context)
+          ),
     };
   } else if (namedType instanceof GraphQLScalarType) {
     value = {

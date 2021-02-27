@@ -1,0 +1,3 @@
+query Recursive($input: RecursiveInput!) {
+  recursive(input: $input)
+}

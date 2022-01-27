@@ -1,7 +1,5 @@
 # graphql-to-elm
 
-[![Build Status](https://travis-ci.org/harmboschloo/graphql-to-elm.svg?branch=master)](https://travis-ci.org/harmboschloo/graphql-to-elm)
-
 `graphql-to-elm` validates GraphQL queries and converts them to Elm code.
 Allowing you to use your queries and schema types in a type-safe way.
 
@@ -35,8 +33,8 @@ graphqlToElm({
   schema: "./src/mySchema.gql",
   queries: ["./src/myQuery.gql"],
   src: "./src",
-  dest: "./src-generated"
-}).catch(error => {
+  dest: "./src-generated",
+}).catch((error) => {
   console.error(error);
   process.exit(1);
 });
@@ -117,8 +115,8 @@ You'll need to have [node/npm](https://nodejs.org) installed.
       schema: "./src/schema.gql",
       queries: ["./src/MyQueries1.gql", "./src/MyQueries2.gql"],
       src: "./src",
-      dest: "./src-generated"
-    }).catch(error => {
+      dest: "./src-generated",
+    }).catch((error) => {
       console.error(error);
       process.exit(1);
     });

@@ -22,6 +22,7 @@ type Person {
   bestFriend: Person2
   friends: [Person2]
   intel: Intel
+  intel10: Intel10
 }
 
 type Person2 {
@@ -35,7 +36,7 @@ type Dog {
   color: String!
 }
 
-type Intel {
+type Intel implements Intel10 {
   field1: Int!
   field2: String!
   field3: Float!
@@ -48,6 +49,33 @@ type Intel {
   field10: [Int!]!
   field11: [String!]!
   field12: [Float!]!
+}
+
+type OtherIntel implements Intel10 {
+  field1: Int!
+  field2: String!
+  field3: Float!
+  field4: [Int!]!
+  field5: [String!]!
+  field6: [Float!]!
+  field7: Int!
+  field8: String!
+  field9: Float!
+  field10: [Int!]!
+  field11: [String!]!
+}
+
+interface Intel10 {
+  field1: Int!
+  field2: String!
+  field3: Float!
+  field4: [Int!]!
+  field5: [String!]!
+  field6: [Float!]!
+  field7: Int!
+  field8: String!
+  field9: Float!
+  field10: [Int!]!
 }
 
 type Comment {

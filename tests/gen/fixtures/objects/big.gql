@@ -14,5 +14,25 @@
       field11
       field12
     }
+    intel10 {
+      field1
+      field2
+      field3
+      field4
+      field5
+      field6
+      field7
+      field8
+      field9
+      field10
+      __typename
+      ... on Intel {
+        field11
+        field12
+      }
+      ... on OtherIntel {
+        field11
+      }
+    }
   }
 }

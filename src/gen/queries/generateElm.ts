@@ -418,7 +418,7 @@ const generateRecordDecoder = (decoder: ElmRecordDecoder): string => {
 
   const fieldDecoders = fields.map((field, index) =>
     field.value.kind === "union-on-decoder"
-      ? `        ${field.value.decoder}`
+      ? `        ${prefix(index)}${field.value.decoder}`
       : `        ${prefix(index)}(${fieldDecoder(field)} "${
           field.jsonName
         }" ${wrapFieldDecoder(field)})`

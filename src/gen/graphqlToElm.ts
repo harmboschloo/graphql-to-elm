@@ -85,10 +85,10 @@ export const writeResult = (result: Result): Promise<Result> => {
     .then(() => result);
 };
 
-const logWrite = (options: FinalOptions, label: string, dest: string) => (
-  changed: boolean
-): void => {
-  if (changed) {
-    options.log(`${label} file written: ${dest}`);
-  }
-};
+const logWrite =
+  (options: FinalOptions, label: string, dest: string) =>
+  (changed: boolean): void => {
+    if (changed) {
+      options.log(`${label} file written: ${dest}`);
+    }
+  };

@@ -6,6 +6,7 @@ import {
   GraphQLScalarType,
   GraphQLEnumType,
   GraphQLNamedType,
+  ASTVisitor,
   GraphQLCompositeType,
   GraphQLObjectType,
   GraphQLInputType,
@@ -178,16 +179,16 @@ const getOperationsInfo = (
   return { operationsInfo, fragments };
 };
 
-const getOperation = (schema: GraphQLSchema) => (
-  info: OperationNodeInfo
-): QueryOperation => ({
-  type: info.node.operation,
-  name: info.node.name ? info.node.name.value : undefined,
-  query: info.query,
-  fragmentNames: info.fragmentNames,
-  inputs: getInputs(info.node, schema),
-  outputs: getOutputs(info.node, schema),
-});
+const getOperation =
+  (schema: GraphQLSchema) =>
+  (info: OperationNodeInfo): QueryOperation => ({
+    type: info.node.operation,
+    name: info.node.name ? info.node.name.value : undefined,
+    query: info.query,
+    fragmentNames: info.fragmentNames,
+    inputs: getInputs(info.node, schema),
+    outputs: getOutputs(info.node, schema),
+  });
 
 const assertLocation = (location: Location | undefined): Location =>
   assertOk(location, "no query location");
@@ -267,8 +268,11 @@ const nodeToInputField = (
     {
       name: node.variable.name.value,
       type: getInputType(node, schema),
-      extensions: null,
-      deprecationReason: null,
+      extensions: {},
+      deprecationReason: undefined,
+      description: undefined,
+      defaultValue: undefined,
+      astNode: undefined,
     },
     schema,
     context
@@ -557,75 +561,83 @@ const getOutputs = (
 
   const popNodeInfo = (): NodeInfo => assertOk(nodeInfoStack.pop());
 
-  const visitor = {
-    enter: {
-      OperationDefinition() {
-        pushNodeInfo();
-      },
-      Field() {
-        pushNodeInfo();
-      },
-      InlineFragment() {
-        pushNodeInfo();
-      },
+  const visitor: ASTVisitor = {
+    enter(node) {
+      switch (node.kind) {
+        case Kind.OPERATION_DEFINITION:
+        case Kind.FIELD:
+        case Kind.INLINE_FRAGMENT:
+          pushNodeInfo();
+          break;
+      }
     },
-    leave: {
-      OperationDefinition(node: OperationDefinitionNode) {
-        const nodeInfo: NodeInfo = popNodeInfo();
-        const type: GraphQLCompositeType = assertCompositeType(
-          typeInfo.getType()
-        );
-        rootOutput = getCompositeOutput(
-          type,
-          nodeInfo.fields,
-          nodeInfo.fragments,
-          schema
-        );
-        rootOutput.typeName = `${
-          node.name ? node.name.value : ""
-        }${firstToUpperCase(rootOutput.typeName)}`;
-      },
-      Field(node: FieldNode) {
-        const nodeInfo: NodeInfo = popNodeInfo();
-        const name: string = node.alias ? node.alias.value : node.name.value;
-        const type: GraphQLType = assertType(typeInfo.getType());
-        const output: QueryNonFragmentOutput = getOutput(
-          name,
-          type,
-          nodeInfo.fields,
-          nodeInfo.fragments,
-          schema
-        );
-        addFieldToParent(node, name, type, output);
-      },
-      InlineFragment() {
-        const nodeInfo: NodeInfo = popNodeInfo();
-        const type: GraphQLCompositeType = assertCompositeType(
-          typeInfo.getType()
-        );
-        const typeName: string = type.name;
-        const result = getFieldsOrFragments(
-          schema,
-          type,
-          nodeInfo.fields,
-          nodeInfo.fragments
-        );
-        if ("fields" in result) {
-          addFragmentToParent({
-            kind: "object-fragment",
-            type,
-            typeName,
-            fields: result.fields,
-          });
-        } else {
-          addFragmentToParent({
-            kind: "fragmented-fragment",
-            type,
-            typeName,
-            fragments: result.fragments,
-          });
-        }
-      },
+    leave(node) {
+      switch (node.kind) {
+        case Kind.OPERATION_DEFINITION:
+          {
+            const nodeInfo: NodeInfo = popNodeInfo();
+            const type: GraphQLCompositeType = assertCompositeType(
+              typeInfo.getType()
+            );
+            rootOutput = getCompositeOutput(
+              type,
+              nodeInfo.fields,
+              nodeInfo.fragments,
+              schema
+            );
+            rootOutput.typeName = `${
+              node.name ? node.name.value : ""
+            }${firstToUpperCase(rootOutput.typeName)}`;
+          }
+          break;
+        case Kind.FIELD:
+          {
+            const nodeInfo: NodeInfo = popNodeInfo();
+            const name: string = node.alias
+              ? node.alias.value
+              : node.name.value;
+            const type: GraphQLType = assertType(typeInfo.getType());
+            const output: QueryNonFragmentOutput = getOutput(
+              name,
+              type,
+              nodeInfo.fields,
+              nodeInfo.fragments,
+              schema
+            );
+            addFieldToParent(node, name, type, output);
+          }
+          break;
+        case Kind.INLINE_FRAGMENT:
+          {
+            const nodeInfo: NodeInfo = popNodeInfo();
+            const type: GraphQLCompositeType = assertCompositeType(
+              typeInfo.getType()
+            );
+            const typeName: string = type.name;
+            const result = getFieldsOrFragments(
+              schema,
+              type,
+              nodeInfo.fields,
+              nodeInfo.fragments
+            );
+            if ("fields" in result) {
+              addFragmentToParent({
+                kind: "object-fragment",
+                type,
+                typeName,
+                fields: result.fields,
+              });
+            } else {
+              addFragmentToParent({
+                kind: "fragmented-fragment",
+                type,
+                typeName,
+                fragments: result.fragments,
+              });
+            }
+          }
+          break;
+      }
     },
   };
 
@@ -704,11 +716,8 @@ const getFieldsOrFragments = (
     isTypenameOutput(field.value)
   );
 
-  const possibleFragmentTypes: ReadonlyArray<GraphQLObjectType> = isAbstractType(
-    type
-  )
-    ? schema.getPossibleTypes(type)
-    : [];
+  const possibleFragmentTypes: ReadonlyArray<GraphQLObjectType> =
+    isAbstractType(type) ? schema.getPossibleTypes(type) : [];
 
   if (typenameFields.length > 0) {
     if (possibleFragmentTypes.length > 0) {

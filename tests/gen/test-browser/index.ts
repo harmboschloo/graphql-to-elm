@@ -38,10 +38,12 @@ export const testBrowser = () => {
       await makeElm(t);
       const server: ChildProcess = await runServer(t);
       await openTestPage(t);
-      kill(server.pid);
+      if (typeof server.pid === "number") {
+        kill(server.pid);
+      }
       t.end();
     } catch (error) {
-      t.end(error.toString());
+      t.end(error);
     }
   });
 };
@@ -59,68 +61,67 @@ const generateTestFiles = (t: Test): Promise<any> => {
       return fixture;
     });
 
-  return Promise.all(
-    fixtures.map(writeQueries(t))
-  ).then((results: FixtureResult[]) =>
-    Promise.all([
-      writeTests(results),
-      writeNamedQueries(results),
-      writeSchemas(fixtures),
-    ])
+  return Promise.all(fixtures.map(writeQueries(t))).then(
+    (results: FixtureResult[]) =>
+      Promise.all([
+        writeTests(results),
+        writeNamedQueries(results),
+        writeSchemas(fixtures),
+      ])
   );
 };
 
-const writeQueries = (t: Test) => async (
-  fixture: Fixture
-): Promise<FixtureResult> => {
-  const baseModule = `Tests.${validModuleName(fixture.id)}`;
+const writeQueries =
+  (t: Test) =>
+  async (fixture: Fixture): Promise<FixtureResult> => {
+    const baseModule = `Tests.${validModuleName(fixture.id)}`;
 
-  const enumOptions = {
-    baseModule: "GraphQL.Enum",
-    ...(fixture.options.enums || {}),
+    const enumOptions = {
+      baseModule: "GraphQL.Enum",
+      ...(fixture.options.enums || {}),
+    };
+
+    const schemaString = await getSchemaString(fixture.options);
+
+    const options: Options = {
+      ...fixture.options,
+      schema: { string: schemaString },
+      enums: {
+        ...enumOptions,
+        baseModule: `${baseModule}.${enumOptions.baseModule}`,
+      },
+      queries: fixture.options.queries.map((query) =>
+        resolve(__dirname, fixture.dir, query)
+      ),
+      src: resolve(__dirname, fixture.dir, fixture.options.src || ""),
+      log: t.comment,
+    };
+
+    const result: Result = await getGraphqlToElm(options);
+
+    result.enums = result.enums.map((enumIntel) => {
+      enumIntel.dest = resolve(
+        generatePath,
+        `${enumIntel.module.replace(/\./g, "/")}.elm`
+      );
+      return enumIntel;
+    });
+
+    result.queries = result.queries.map((query) => {
+      query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
+      query.elmIntel.dest = resolve(
+        generatePath,
+        `${query.elmIntel.module.replace(/\./g, "/")}.elm`
+      );
+      return query;
+    });
+
+    result.options.dest = generatePath;
+
+    await writeResult(result);
+
+    return { fixture, result };
   };
-
-  const schemaString = await getSchemaString(fixture.options);
-
-  const options: Options = {
-    ...fixture.options,
-    schema: { string: schemaString },
-    enums: {
-      ...enumOptions,
-      baseModule: `${baseModule}.${enumOptions.baseModule}`,
-    },
-    queries: fixture.options.queries.map((query) =>
-      resolve(__dirname, fixture.dir, query)
-    ),
-    src: resolve(__dirname, fixture.dir, fixture.options.src || ""),
-    log: t.comment,
-  };
-
-  const result: Result = await getGraphqlToElm(options);
-
-  result.enums = result.enums.map((enumIntel) => {
-    enumIntel.dest = resolve(
-      generatePath,
-      `${enumIntel.module.replace(/\./g, "/")}.elm`
-    );
-    return enumIntel;
-  });
-
-  result.queries = result.queries.map((query) => {
-    query.elmIntel.module = `${baseModule}.${query.elmIntel.module}`;
-    query.elmIntel.dest = resolve(
-      generatePath,
-      `${query.elmIntel.module.replace(/\./g, "/")}.elm`
-    );
-    return query;
-  });
-
-  result.options.dest = generatePath;
-
-  await writeResult(result);
-
-  return { fixture, result };
-};
 
 interface FixtureElmIntel {
   fixture: Fixture;

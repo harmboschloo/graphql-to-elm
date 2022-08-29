@@ -32,16 +32,10 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
       .then(() => t.end(onlyFixtureWithId ? "with fixture filter" : undefined))
   );
 
-  const testFixture = (t: Test) => ({
-    id,
-    dir,
-    options,
-    actual,
-    expect,
-    throws,
-  }: Fixture): Promise<void> =>
-    test(`== fixture ${id} ==`, t).then(
-      (t: Test): Promise<void> => {
+  const testFixture =
+    (t: Test) =>
+    ({ id, dir, options, actual, expect, throws }: Fixture): Promise<void> =>
+      test(`== fixture ${id} ==`, t).then((t: Test): Promise<void> => {
         process.chdir(p.resolve(__dirname, dir));
 
         const runTest = (
@@ -89,8 +83,7 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
         } else {
           return runFixtureTest();
         }
-      }
-    );
+      });
 
   const compareDirs = (
     t: Test,
@@ -104,51 +97,44 @@ export const testGen = ({ update, onlyFixtureWithId }: Config = {}): void => {
         matches.map((path) => p.relative(expect, path))
       ),
     ])
-      .then(
-        ([actualFiles, expectedFiles]): Promise<any> => {
-          t.deepEqual(
-            actualFiles,
-            expectedFiles,
-            `${actual}/**/* === ${expect}/**/*`
-          );
+      .then(([actualFiles, expectedFiles]): Promise<any> => {
+        t.deepEqual(
+          actualFiles,
+          expectedFiles,
+          `${actual}/**/* === ${expect}/**/*`
+        );
 
-          return Promise.all(
-            actualFiles.map(
-              (file: string): Promise<any> => {
-                const actualFile: string = p.resolve(actual, file);
-                const expectedFile: string = p.resolve(expect, file);
-                const message: string = `${p.relative(
-                  process.cwd(),
-                  actualFile
-                )} === ${p.relative(process.cwd(), expectedFile)}`;
+        return Promise.all(
+          actualFiles.map((file: string): Promise<any> => {
+            const actualFile: string = p.resolve(actual, file);
+            const expectedFile: string = p.resolve(expect, file);
+            const message: string = `${p.relative(
+              process.cwd(),
+              actualFile
+            )} === ${p.relative(process.cwd(), expectedFile)}`;
 
-                return Promise.all([
-                  lstat(actualFile),
-                  lstat(expectedFile),
-                ]).then(
-                  ([actualStats, expectedStats]: Stats[]): Promise<void> => {
-                    if (actualStats.isDirectory()) {
-                      t.equal(true, expectedStats.isDirectory(), message);
-                      return Promise.resolve();
-                    } else {
-                      return Promise.all([
-                        readFile(actualFile),
-                        readFile(expectedFile),
-                      ]).then(([actualContent, expectedContent]: string[]) => {
-                        t.equal(
-                          actualContent,
-                          fixLineEndings(expectedContent),
-                          message
-                        );
-                        return Promise.resolve();
-                      });
-                    }
-                  }
-                );
+            return Promise.all([lstat(actualFile), lstat(expectedFile)]).then(
+              ([actualStats, expectedStats]: Stats[]): Promise<void> => {
+                if (actualStats.isDirectory()) {
+                  t.equal(true, expectedStats.isDirectory(), message);
+                  return Promise.resolve();
+                } else {
+                  return Promise.all([
+                    readFile(actualFile),
+                    readFile(expectedFile),
+                  ]).then(([actualContent, expectedContent]: string[]) => {
+                    t.equal(
+                      actualContent,
+                      fixLineEndings(expectedContent),
+                      message
+                    );
+                    return Promise.resolve();
+                  });
+                }
               }
-            )
-          );
-        }
-      )
+            );
+          })
+        );
+      })
       .then(() => t);
 };

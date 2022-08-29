@@ -18,9 +18,11 @@ const server = new ApolloServer({
 });
 
 const app = express();
-server.applyMiddleware({ app });
-app.use(express.static(__dirname));
-app.listen(3000);
+server.start().then(() => {
+  server.applyMiddleware({ app });
+  app.use(express.static(__dirname));
+  app.listen(3000);
 
-console.log("example    : http://localhost:3000");
-console.log("playground : http://localhost:3000/graphql");
+  console.log("example    : http://localhost:3000");
+  console.log("playground : http://localhost:3000/graphql");
+});

@@ -22,6 +22,6 @@ export const processSchemaString = (schemaString: string): GraphQLSchema => {
   try {
     return buildSchema(schemaString);
   } catch (error) {
-    throw new Error(`processing schema\n${error.toString()}`);
+    throw new Error(`processing schema\n${error}`);
   }
 };

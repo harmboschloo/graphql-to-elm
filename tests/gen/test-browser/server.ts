@@ -1,11 +1,8 @@
 import * as express from "express";
 import * as bodyParser from "body-parser";
 import { GraphQLScalarType } from "graphql";
-import {
-  ApolloServer,
-  makeExecutableSchema,
-  addMockFunctionsToSchema,
-} from "apollo-server-express";
+import { ApolloServer } from "apollo-server-express";
+import { IMocks } from "@graphql-tools/mock";
 import { namedQueries } from "./generated/namedQueries";
 import { schemas } from "./generated/schemas";
 
@@ -14,12 +11,13 @@ const app = express();
 const timeScalar = new GraphQLScalarType({
   name: "Time",
   serialize: (value) => `${value}`,
-  parseValue: (value) => parseInt(value, 10),
+  parseValue: (value) =>
+    typeof value === "string" ? parseInt(value, 10) : null,
   parseLiteral: (ast) =>
     ast.kind == "StringValue" ? parseInt(ast.value, 10) : null,
 });
 
-Object.keys(schemas).forEach((id) => {
+Object.keys(schemas).forEach(async (id) => {
   const setNamedQuery = (payload: any) => {
     if (payload.operationName && !payload.query) {
       payload.query = namedQueries[`${id}/${payload.operationName}`];
@@ -32,25 +30,17 @@ Object.keys(schemas).forEach((id) => {
 
   const typeDefs = schemas[id];
   let resolvers: { [type: string]: any } = {};
-  let mocks: { [type: string]: any } = {};
+  let mocks: IMocks = {};
 
   if (typeDefs.includes("scalar Time")) {
     resolvers["Time"] = timeScalar;
     mocks["Time"] = () => Date.now();
   }
 
-  const schema = makeExecutableSchema({
+  const server = new ApolloServer({
     typeDefs,
     resolvers,
-    resolverValidationOptions: { requireResolversForResolveType: false },
-  });
-
-  addMockFunctionsToSchema({ schema, mocks });
-
-  const server = new ApolloServer({
-    schema,
-    introspection: false,
-    playground: false,
+    mocks,
   });
 
   const endpointURL = `/graphql/${id}`;
@@ -64,6 +54,8 @@ Object.keys(schemas).forEach((id) => {
     }
     next();
   });
+
+  await server.start();
   server.applyMiddleware({ app, path: endpointURL });
 });
 

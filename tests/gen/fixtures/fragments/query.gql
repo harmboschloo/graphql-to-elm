@@ -11,6 +11,17 @@ query Fragments($id: String!) {
   user4: userById(id: $id) {
     ...fields
   }
+  user5: user {
+    email
+    ...userId
+    ...userName
+    ...userAndProfile
+    ...userProfile
+    profile {
+      ...profileName
+    }
+  }
+
   flip {
     ...heads
     ... on Tails {
@@ -23,6 +34,42 @@ fragment fields on User {
   id
   name
   email
+}
+
+fragment userId on User {
+  id
+}
+
+fragment userName on User {
+  name
+}
+
+fragment userAndProfile on User {
+  name
+  email
+  profile {
+    ...profileImage
+  }
+}
+
+fragment userProfile on User {
+  profile {
+    ...profileId
+    name
+    image
+  }
+}
+
+fragment profileId on Profile {
+  id
+}
+
+fragment profileName on Profile {
+  name
+}
+
+fragment profileImage on Profile {
+  image
 }
 
 fragment heads on Heads {

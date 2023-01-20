@@ -22,11 +22,12 @@ import {
   Location,
   TypeInfo,
   Kind,
-  isCompositeType,
   assertCompositeType,
-  isAbstractType,
-  assertType,
   assertInputType,
+  assertType,
+  isCompositeType,
+  isAbstractType,
+  isObjectType,
   getNamedType,
   getNullableType,
   typeFromAST,
@@ -712,6 +713,25 @@ const getFieldsOrFragments = (
 ): { fields: QueryOutputField[] } | { fragments: QueryFragmentOutput[] } => {
   const typeName = type.name;
 
+  if (isObjectType(type)) {
+    inFragments = inFragments.reduce(
+      (
+        collected: QueryCompositeFragmentOutput[],
+        current: QueryCompositeFragmentOutput
+      ) => {
+        if (isObjectFragmentOutput(current)) {
+          fields = [...fields, ...current.fields];
+          return collected;
+        } else {
+          return [...collected, current];
+        }
+      },
+      []
+    );
+
+    fields = mergeDuplicateFields(fields);
+  }
+
   const typenameFields: QueryOutputField[] = fields.filter((field) =>
     isTypenameOutput(field.value)
   );
@@ -811,6 +831,37 @@ const getFieldsOrFragments = (
 
   throw Error("no fields or fragments");
 };
+
+const mergeDuplicateFields = (fields: QueryOutputField[]): QueryOutputField[] =>
+  fields.reduce((collected: QueryOutputField[], current: QueryOutputField) => {
+    const previous = collected.find((field) => field.name === current.name);
+
+    if (!previous) {
+      return [...collected, current];
+    }
+
+    switch (previous.value.kind) {
+      case "object": {
+        if (current.value.kind === "object") {
+          previous.value.fields = mergeDuplicateFields([
+            ...current.value.fields,
+            ...previous.value.fields,
+          ]);
+        }
+        return collected;
+      }
+      case "fragmented":
+      case "fragmented-on":
+        return [...collected, current];
+      case "scalar":
+      case "enum":
+      case "typename":
+        return collected;
+      default:
+        assertNever(previous.value);
+        return [];
+    }
+  }, []);
 
 const getAllIncludedFragmentTypes = (
   fragments: QueryCompositeFragmentOutput[],

@@ -17,6 +17,13 @@ type User {
   id: ID!
   name: String!
   email: String!
+  profile: Profile
+}
+
+type Profile {
+  id: ID!
+  name: String!
+  image: String
 }
 
 union Flip = Heads | Tails

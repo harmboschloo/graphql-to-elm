@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "graphql": "^16.6.0",
-    "mkdirp": "^1.0.4"
+    "mkdirp": "^2.0.0"
   },
   "devDependencies": {
     "@detools/tap-diff": "^0.2.2",
@@ -54,7 +54,7 @@
     "elm": "^0.19.1-5",
     "elm-doc-preview": "^5.0.5",
     "elm-format": "^0.8.5",
-    "elm-test": "^0.19.1-revision9",
+    "elm-test": "^0.19.1-revision11",
     "express": "^4.17.1",
     "phantom": "^6.3.0",
     "prettier": "^2.2.1",

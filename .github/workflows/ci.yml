@@ -13,19 +13,17 @@ jobs:
           # - windows-latest # needs git config core.autocrlf input
 
         node_version:
-          - 10
-          - 12
-          - 14
           - 16
+          - 18
 
     name: Node ${{ matrix.node_version }} - ${{ matrix.os }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node_version }}
 
